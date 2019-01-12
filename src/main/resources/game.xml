@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gameRules>
+    <lengthOfSimpleLengthUnit>20</lengthOfSimpleLengthUnit>
+
+    <modifiers>
+        <modifier>
+            <id>decHealth4-8</id>
+            <title>Понижение здоровья 4-8</title>
+            <attribute>HEALTH</attribute>
+            <minValue>-4</minValue>
+            <maxValue>-8</maxValue>
+            <probability>100</probability>
+            <duration>0</duration>
+            <target>TARGETED</target>
+        </modifier>
+        <modifier>
+            <id>decManna2</id>
+            <title>Понижение магии противника на 2</title>
+            <attribute>MANNA</attribute>
+            <minValue>-2</minValue>
+            <probability>100</probability>
+            <duration>0</duration>
+            <target>ENEMY_PLAYER</target>
+        </modifier>
+        <modifier>
+            <id>incManna2</id>
+            <title>Повышение своей магии на 2</title>
+            <attribute>MANNA</attribute>
+            <minValue>2</minValue>
+            <probability>100</probability>
+            <duration>0</duration>
+            <target>PLAYER</target>
+        </modifier>
+    </modifiers>
+
+    <abilities>
+        <ability>
+            <id>lighting</id>
+            <title>Молния</title>
+            <target>ENEMY</target>
+            <modifiers>
+                <modifier ref="decHealth4-8" />
+            </modifiers>
+        </ability>
+        <ability>
+            <id>mannaStealing</id>
+            <title>кража магии</title>
+            <target>ENEMY_PLAYER</target>
+            <modifiers>
+                <modifier ref="decManna2" />
+                <modifier ref="incManna2" />
+            </modifiers>
+        </ability>
+    </abilities>
+
+
+
+</gameRules>

@@ -1,0 +1,49 @@
+apply plugin: 'java'
+
+project.ext {
+
+
+}
+
+sourceCompatibility = 1.8
+//version = '0.99'
+
+project.ext{
+    springBootVersion = '2.1.0.RELEASE'
+}
+
+configurations {
+    moreLibs
+}
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    provided
+}
+
+dependencies {
+//    compile fileTree(dir: 'providedLibraryes', include: ['*.jar'])
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter', version: project.ext.springBootVersion
+    testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: project.ext.springBootVersion
+}
+
+compileJava.options.encoding = 'UTF-8'
+
+jar {
+    into('lib') {
+        from configurations.compile
+    }
+
+}
+
+jar {
+    from configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    manifest {
+        attributes(
+                'Main-Class': "Main"
+        )
+    }
+}
