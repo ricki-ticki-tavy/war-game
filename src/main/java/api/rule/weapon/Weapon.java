@@ -1,7 +1,6 @@
 package api.rule.weapon;
 
 import api.rule.ability.Modifier;
-import api.rule.attribute.AttackType;
 
 import javax.xml.bind.annotation.*;
 import java.util.List;
@@ -10,7 +9,7 @@ import java.util.List;
         , "costActionPoints", "additionalModifiers"})
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement
-public class BaseWeapon {
+public class Weapon {
 
   @XmlAttribute(name = "ref")
   public String ref = null;

@@ -122,4 +122,22 @@
         </distanceWeapon>
     </weapons>
 
+    <creatureClasses>
+        <creatureClass>
+            <id>Viking-archer</id>
+            <title>Викинг лучник</title>
+            <actionPoints>240</actionPoints>
+            <armorClass>1</armorClass>
+            <costMove>8</costMove>
+            <maxHitPoints>20</maxHitPoints>
+            <maxMannaPoints>0</maxMannaPoints>
+            <weapons>
+                <weapon ref = "bow"/>
+            </weapons>
+            <abilitie>
+                <ability ref = "lighting"/>
+            </abilitie>
+        </creatureClass>
+    </creatureClasses>
+
 </gameRules>

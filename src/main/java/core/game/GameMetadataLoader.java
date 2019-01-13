@@ -1,6 +1,5 @@
 package core.game;
 
-import api.rule.ability.Modifier;
 import api.rule.game.GamePreparedMetadata;
 import api.rule.game.GameRawMetadata;
 import org.slf4j.Logger;
@@ -13,8 +12,6 @@ import org.springframework.util.StringUtils;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -25,50 +22,56 @@ public class GameMetadataLoader {
   private GamePreparedMetadata gamePreparedMetadata = new GamePreparedMetadata();
   private GameRawMetadata gameRawMetadata;
 
-  private void addModifier(Modifier modifier) {
-    Optional.ofNullable(gamePreparedMetadata.modifiers.get(modifier.id))
-            .ifPresent(dupModifier -> {
-              throw new RuntimeException("Modifier with id \"" + dupModifier.id + "\" allredy exists");
-            });
-    gamePreparedMetadata.modifiers.put(modifier.id, modifier);
-  }
-
   /**
    * Перенос модификаторов
    */
   private void copyModofiers() {
-    gameRawMetadata.modifiers.stream().forEach(modifier -> addModifier(modifier));
-    gameRawMetadata.weapons.stream().forEach(weapon -> Optional.ofNullable(weapon.additionalModifiers)
-            .ifPresent(modifiersList -> modifiersList.stream().forEach(modifier -> {
-              if (StringUtils.isEmpty(modifier.ref)) addModifier(modifier);
-            })));
+    // из основного справочника
+    gameRawMetadata.modifiers.stream().forEach(modifier -> gamePreparedMetadata.addModifier(modifier));
+
+    // из способностей
     gameRawMetadata.abilities.stream().forEach(ability -> Optional.ofNullable(ability.abilityModifiers)
             .ifPresent(modifiersList -> modifiersList.stream().forEach(modifier -> {
-              if (StringUtils.isEmpty(modifier.ref)) addModifier(modifier);
+              if (StringUtils.isEmpty(modifier.ref)) gamePreparedMetadata.addModifier(modifier);
             })));
+
+    // из оружия
+    gameRawMetadata.weapons.stream().forEach(weapon -> Optional.ofNullable(weapon.additionalModifiers)
+            .ifPresent(modifiersList -> modifiersList.stream().forEach(modifier -> {
+              if (StringUtils.isEmpty(modifier.ref)) gamePreparedMetadata.addModifier(modifier);
+            })));
+
+    gameRawMetadata.creatureClasses.stream().forEach(creatureClass -> {
+      // из способностей классов созданий
+      Optional.ofNullable(creatureClass.abilities).ifPresent(abilities ->
+              abilities.stream().forEach(ability -> {
+                if (StringUtils.isEmpty(ability.ref)) Optional.ofNullable(ability.abilityModifiers)
+                        .ifPresent(abilityModifiers -> abilityModifiers.stream().forEach(modifier -> {
+                          if (StringUtils.isEmpty(modifier.ref)) gamePreparedMetadata.addModifier(modifier);
+                        }));
+              }));
+      // из оружия классов созданий
+      Optional.ofNullable(creatureClass.weapons).ifPresent(weapons ->
+              weapons.stream().forEach(weapon -> {
+                if (StringUtils.isEmpty(weapon.ref)) Optional.ofNullable(weapon.additionalModifiers)
+                        .ifPresent(weaponModifiers -> weaponModifiers.stream().forEach(modifier -> {
+                          if (StringUtils.isEmpty(modifier.ref)) gamePreparedMetadata.addModifier(modifier);
+                        }));
+              }));
+    });
+
   }
 
   /**
    * Перенос способностей
    */
   private void copyAbilities() {
-    gameRawMetadata.abilities.stream().forEach(ability -> {
-      gamePreparedMetadata.abilities.put(ability.id, ability);
-      List<Modifier> abilityModifiers = new LinkedList<>(ability.abilityModifiers);
-      ability.abilityModifiers.clear();
-
-      abilityModifiers.stream().forEach(modifier -> {
-        if (StringUtils.isEmpty(modifier.ref)) {
-          // это непосредственно модификатор, ане ссылка. Так же надо его прооватьдобавить
-          ability.abilityModifiers.add(gamePreparedMetadata.modifiers.get(modifier.id));
-        } else {
-          // Это ссылка
-          ability.abilityModifiers.add(Optional.ofNullable(gamePreparedMetadata.modifiers.get(modifier.ref))
-                  .orElseThrow(() ->
-                          new RuntimeException("Modifier with id \"" + modifier.ref + "\" not found")
-                  ));
-        }
-      });
+    gameRawMetadata.abilities.stream().forEach(ability -> gamePreparedMetadata.addAbility(ability));
+    gameRawMetadata.creatureClasses.stream().forEach(creatureClass -> {
+      Optional.ofNullable(creatureClass.abilities)
+              .ifPresent(creatureAbilities -> creatureAbilities.stream().forEach(ability -> {
+                if (StringUtils.isEmpty(ability.ref)) gamePreparedMetadata.addAbility(ability);
+              }));
     });
   }
 
@@ -76,26 +79,23 @@ public class GameMetadataLoader {
    * Копирование оружия
    */
   private void copyWeapons() {
-    gameRawMetadata.weapons.stream().forEach(weapon -> {
-      if (weapon.additionalModifiers != null) {
-        List<Modifier> weaponModifiers = new LinkedList<>(weapon.additionalModifiers);
-        weapon.additionalModifiers.clear();
-        weaponModifiers.stream().forEach(modifier -> {
-          if (StringUtils.isEmpty(modifier.ref)) {
-            // это непосредственно модификатор, ане ссылка. Так же надо его прооватьдобавить
-            weapon.additionalModifiers.add(gamePreparedMetadata.modifiers.get(modifier.id));
-          } else {
-            // Это ссылка
-            weapon.additionalModifiers.add(Optional.ofNullable(gamePreparedMetadata.modifiers.get(modifier.ref))
-                    .orElseThrow(() ->
+    // из базового справочника
+    gameRawMetadata.weapons.stream().forEach(weapon -> gamePreparedMetadata.addWeapon(weapon));
 
-                            new RuntimeException("Modifier with id \"" + modifier.ref + "\" not found")
-                    ));
-          }
-        });
-      }
-      gamePreparedMetadata.weapons.put(weapon.id, weapon);
-    });
+    // из классов созданий
+    gameRawMetadata.creatureClasses.stream().forEach(creatureClass ->
+            Optional.ofNullable(creatureClass.weapons)
+                    .ifPresent(creatureWeapons -> creatureWeapons.stream().forEach(weapon -> {
+                      if (StringUtils.isEmpty(weapon.ref)) gamePreparedMetadata.addWeapon(weapon);
+                    })));
+  }
+
+  /**
+   * Копирование классов созданий
+   */
+  private void copyBaseCreatureClasses() {
+    Optional.ofNullable(gameRawMetadata.creatureClasses)
+            .ifPresent(creatureClasses -> creatureClasses.stream().forEach(creatureClass -> gamePreparedMetadata.addCreatureClass(creatureClass)));
   }
 
   public GamePreparedMetadata loadGameMetadata() {
@@ -107,6 +107,7 @@ public class GameMetadataLoader {
       copyModofiers();
       copyAbilities();
       copyWeapons();
+      copyBaseCreatureClasses();
 
       return gamePreparedMetadata;
 

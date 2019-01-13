@@ -1,60 +1,76 @@
 package api.rule.creature;
 
+import api.rule.ability.Ability;
 import api.rule.ability.CreatureAbility;
-import api.rule.weapon.BaseWeapon;
+import api.rule.weapon.Weapon;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.*;
 import java.util.List;
 
 /**
  * Базовый класс воина
  */
-@XmlType(propOrder = {"name", "actionPoints", "armorClass", "costMove", "maxHitPoints"
-        , "maxMannaPoints", "attackMethods", "abilities"})
+@XmlType(propOrder = {"id", "title", "actionPoints", "armorClass", "costMove", "maxHitPoints"
+        , "maxMannaPoints", "weapons", "abilities"})
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name = "BaseCreatureClass")
+@XmlRootElement(name = "creatureClass")
 public class BaseCreatureClass {
+
+  @XmlAttribute(name = "ref")
+  public String ref = null;
+
+  @XmlID
+  @XmlElement(name= "id")
+  public String id;
+
   /**
    * Название класса
    */
-  String name;
+  @XmlElement(name= "title")
+  public String title;
 
   /**
    * Базовое кол-во очков действия
    */
-  int actionPoints;
+  @XmlElement(name= "actionPoints")
+  public int actionPoints;
 
   /**
    * класс брони
    */
-  int armorClass;
+  @XmlElement(name= "armorClass")
+  public int armorClass;
 
   /**
    * цена передвижения
    */
-  int costMove;
+  @XmlElement(name= "costMove")
+  public int costMove;
 
   /**
    * Максимальное кол-во очков жизни
    */
-  int maxHitPoints;
+  @XmlElement(name= "maxHitPoints")
+  public int maxHitPoints;
 
   /**
    * Максимальное кол-во очков магии
    */
-  int maxMannaPoints;
+  @XmlElement(name= "maxMannaPoints")
+  public int maxMannaPoints;
 
   /**
    * Виды атак
    */
-  List<BaseWeapon> attackMethods;
+  @XmlElementWrapper(name = "weapons")
+  @XmlElement(name= "weapon")
+  public List<Weapon> weapons;
 
   /**
    * Способности создания
    */
-  List<CreatureAbility> abilities;
+  @XmlElementWrapper(name = "abilities")
+  @XmlElement(name= "ability")
+  public List<Ability> abilities;
 
 }

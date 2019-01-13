@@ -5,7 +5,7 @@ import javax.xml.bind.annotation.*;
 @XmlType(propOrder = {"minRange", "maxRange", "fadeRangeStart", "fadeDamagePercentPerLength"})
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "distanceWeapon")
-public class DistanceWeapon extends BaseWeapon {
+public class DistanceWeapon extends Weapon {
   /**
    * Минимальный расстояние для атаки
    */

@@ -6,6 +6,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "meleeWeapon")
-public class MeleeWeapon extends BaseWeapon {
+public class MeleeWeapon extends Weapon {
 
 }
