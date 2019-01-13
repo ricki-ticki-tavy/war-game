@@ -57,7 +57,7 @@
             <title>Молния</title>
             <target>ENEMY</target>
             <modifiers>
-                <modifier ref="decHealth4-8" />
+                <modifier ref="decHealth4-8"/>
             </modifiers>
         </ability>
 
@@ -66,10 +66,49 @@
             <title>кража магии</title>
             <target>ENEMY_PLAYER</target>
             <modifiers>
-                <modifier ref="decManna2" />
-                <modifier ref="incManna2" />
+                <modifier ref="decManna2"/>
+                <modifier ref="incManna2"/>
             </modifiers>
         </ability>
+
+        <ability>
+            <id>mightyBow</id>
+            <title>Сильный натяг тетивы</title>
+            <target>THIS</target>
+            <modifiers>
+                <modifier>
+                    <id>incBowMaxRange10</id>
+                    <title>Увеличение дальности стрельбы лука на 10</title>
+                    <attribute>DISTANCE_ATTACK_MAX_ATTACK_RANGE</attribute>
+                    <minValue>10</minValue>
+                    <maxValue>10</maxValue>
+                    <probability>100</probability>
+                    <duration>0</duration>
+                    <target>TARGETED</target>
+                </modifier>
+                <modifier>
+                    <id>incBowMaxFadeRange3</id>
+                    <title>Увеличение дальности ослабления стрельбы лука на 3</title>
+                    <attribute>DISTANCE_ATTACK_MAX_ATTACK_RANGE</attribute>
+                    <minValue>3</minValue>
+                    <maxValue>3</maxValue>
+                    <probability>100</probability>
+                    <duration>0</duration>
+                    <target>TARGETED</target>
+                </modifier>
+                <modifier>
+                    <id>incCostBowShut120</id>
+                    <title>Увеличение стоимости выстела лука на 120</title>
+                    <attribute>DISTANCE_ATTACK_COST</attribute>
+                    <minValue>120</minValue>
+                    <maxValue>120</maxValue>
+                    <probability>100</probability>
+                    <duration>0</duration>
+                    <target>TARGETED</target>
+                </modifier>
+            </modifiers>
+        </ability>
+
     </abilities>
 
     <weapons>
@@ -82,7 +121,7 @@
             <mustAttackAllCreatures>false</mustAttackAllCreatures>
             <costActionPoints>20</costActionPoints>
             <additionalModifiers>
-                <modifier ref = "incHealth1"/>
+                <modifier ref="incHealth1"/>
             </additionalModifiers>
         </meleeWeapon>
 
@@ -132,11 +171,11 @@
             <maxHitPoints>20</maxHitPoints>
             <maxMannaPoints>0</maxMannaPoints>
             <weapons>
-                <weapon ref = "bow"/>
+                <weapon ref="bow"/>
             </weapons>
-            <abilitie>
-                <ability ref = "lighting"/>
-            </abilitie>
+            <abilities>
+                <ability ref = "mightyBow"/>
+            </abilities>
         </creatureClass>
     </creatureClasses>
 

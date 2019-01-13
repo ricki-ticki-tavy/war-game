@@ -6,6 +6,7 @@ public enum CreatureAttribute implements AnAttribute {
   HEALTH("Очки жизни", Integer.class),
   MANNA("Очки магии", Integer.class),
   ARMOR("Уровень брони", Integer.class),
+  DISTANCE_ATTACK_COST("Стоимость дистанционной атаки в очках действия", Integer.class),
   DISTANCE_ATTACK_MIN_ATTACK_RANGE("Минимальная дальность дистанционной атаки", Integer.class),
   DISTANCE_ATTACK_MAX_ATTACK_RANGE("Максимальная дальность дистанционной атаки", Integer.class),
   DISTANCE_ATTACK_MIN_DAMAGE("Минимальный урон дистанционной атаки", Integer.class),
