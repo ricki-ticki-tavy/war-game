@@ -16,8 +16,8 @@ public enum CreatureAttribute implements AnAttribute {
   MELEE_ATTACK_MAX_DAMAGE("Максимальный урон рукопашной атаки", Integer.class),
 
   MOVE_COST_COEF("Коэффициент цены за передвижение", Double.class),
-  ACTION_POINT_QTY("Кол-во очков действия", Integer.class),
-  MAGIC_POINT_QTY("Кол-во очков магии", Integer.class),
+  ACTION_POINT("Кол-во очков действия", Integer.class),
+  MAGIC_POINT("Кол-во очков магии", Integer.class),
   X_COORD("координата X", Integer.class),
   Y_COORD("координата Y", Integer.class),
   CAPTION("Название", String.class)

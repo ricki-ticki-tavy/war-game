@@ -1,7 +1,7 @@
 package api.game;
 
 import api.rule.ability.CreatureAbility;
-import api.rule.attack.BaseAttack;
+import api.rule.weapon.BaseWeapon;
 import api.rule.creature.BaseCreatureClass;
 
 import java.util.List;
@@ -46,7 +46,7 @@ public class Creature {
   /**
    * Допустимые в динном ходе виды атак ЭТОГО создания
    */
-  List<BaseAttack> attackMethods;
+  List<BaseWeapon> attackMethods;
 
   /**
    * Способности ЭТОГО создания

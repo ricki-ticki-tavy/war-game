@@ -4,14 +4,14 @@
 
     <modifiers>
         <modifier>
-            <id>decHealth4-8</id>
-            <title>Понижение здоровья 4-8</title>
+            <id>incHealth1</id>
+            <title>Восстановление здоровья на 1</title>
             <attribute>HEALTH</attribute>
-            <minValue>-4</minValue>
-            <maxValue>-8</maxValue>
+            <minValue>1</minValue>
+            <maxValue>1</maxValue>
             <probability>100</probability>
             <duration>0</duration>
-            <target>TARGETED</target>
+            <target>THIS</target>
         </modifier>
         <modifier>
             <id>decManna2</id>
@@ -35,6 +35,24 @@
 
     <abilities>
         <ability>
+            <id>fire</id>
+            <title>Огонь</title>
+            <target>ENEMY</target>
+            <modifiers>
+                <modifier>
+                    <id>decHealth4-8</id>
+                    <title>Понижение здоровья 4-8</title>
+                    <attribute>HEALTH</attribute>
+                    <minValue>-4</minValue>
+                    <maxValue>-8</maxValue>
+                    <probability>100</probability>
+                    <duration>0</duration>
+                    <target>TARGETED</target>
+                </modifier>
+            </modifiers>
+        </ability>
+
+        <ability>
             <id>lighting</id>
             <title>Молния</title>
             <target>ENEMY</target>
@@ -42,6 +60,7 @@
                 <modifier ref="decHealth4-8" />
             </modifiers>
         </ability>
+
         <ability>
             <id>mannaStealing</id>
             <title>кража магии</title>
@@ -53,6 +72,54 @@
         </ability>
     </abilities>
 
+    <weapons>
+        <meleeWeapon>
+            <id>knifeWithHealthStealing</id>
+            <title>Кинжал, нож с кражей жизни</title>
+            <minDamage>1</minDamage>
+            <maxDamage>4</maxDamage>
+            <damageAngle>0</damageAngle>
+            <mustAttackAllCreatures>false</mustAttackAllCreatures>
+            <costActionPoints>20</costActionPoints>
+            <additionalModifiers>
+                <modifier ref = "incHealth1"/>
+            </additionalModifiers>
+        </meleeWeapon>
 
+        <meleeWeapon>
+            <id>knifeWithActionStealing</id>
+            <title>Кинжал, нож с кражей очков действия</title>
+            <minDamage>1</minDamage>
+            <maxDamage>4</maxDamage>
+            <damageAngle>0</damageAngle>
+            <mustAttackAllCreatures>false</mustAttackAllCreatures>
+            <costActionPoints>20</costActionPoints>
+            <additionalModifiers>
+                <modifier>
+                    <id>decActionPoints2</id>
+                    <title>Понижение очков действия на 2</title>
+                    <attribute>ACTION_POINT</attribute>
+                    <minValue>-2</minValue>
+                    <probability>100</probability>
+                    <duration>0</duration>
+                    <target>ENEMY</target>
+                </modifier>
+            </additionalModifiers>
+        </meleeWeapon>
+
+        <distanceWeapon>
+            <id>bow</id>
+            <title>Простой лук</title>
+            <minDamage>1</minDamage>
+            <maxDamage>8</maxDamage>
+            <damageAngle>0</damageAngle>
+            <mustAttackAllCreatures>false</mustAttackAllCreatures>
+            <costActionPoints>120</costActionPoints>
+            <minRange>2</minRange>
+            <maxRange>40</maxRange>
+            <fadeRangeStart>20</fadeRangeStart>
+            <fadeDamagePercentPerLength>2</fadeDamagePercentPerLength>
+        </distanceWeapon>
+    </weapons>
 
 </gameRules>

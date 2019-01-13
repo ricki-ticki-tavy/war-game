@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Спосоюность. Любая
  */
-@XmlType(propOrder = {"id", "title", "abilityModificators", "target"})
+@XmlType(propOrder = {"id", "title", "abilityModifiers", "target"})
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "ability")
 public class Ability {
@@ -31,7 +31,7 @@ public class Ability {
    */
   @XmlElementWrapper(name = "modifiers")
   @XmlElement(name = "modifier")
-  public List<Modifier> abilityModificators;
+  public List<Modifier> abilityModifiers;
 
   /**
    * На кого применяется способность в целом

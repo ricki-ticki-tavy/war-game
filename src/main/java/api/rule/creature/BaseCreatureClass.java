@@ -1,7 +1,7 @@
 package api.rule.creature;
 
 import api.rule.ability.CreatureAbility;
-import api.rule.attack.BaseAttack;
+import api.rule.weapon.BaseWeapon;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -50,7 +50,7 @@ public class BaseCreatureClass {
   /**
    * Виды атак
    */
-  List<BaseAttack> attackMethods;
+  List<BaseWeapon> attackMethods;
 
   /**
    * Способности создания
