@@ -3,6 +3,7 @@ package api.rule.ability;
 import api.rule.attribute.CreatureTargeter;
 
 import javax.xml.bind.annotation.*;
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -11,7 +12,7 @@ import java.util.List;
 @XmlType(propOrder = {"id", "title", "abilityModifiers", "target"})
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "ability")
-public class Ability {
+public class Ability  implements Serializable {
 
   @XmlAttribute(name = "ref")
   public String ref = null;

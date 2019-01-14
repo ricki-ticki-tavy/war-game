@@ -1,6 +1,6 @@
 package api.structure;
 
-import api.rule.attribute.TriggerTarget;
+import api.rule.attribute.TriggerType;
 
 /**
  * базовая спосоность
@@ -10,6 +10,6 @@ public interface BaseAbility extends NamedObject{
    * Возвращает когда активна способность
    * @return
    */
-  TriggerTarget getTriggerType();
+  TriggerType getTriggerType();
 
 }

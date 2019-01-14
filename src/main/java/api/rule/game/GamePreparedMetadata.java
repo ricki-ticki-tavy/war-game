@@ -2,7 +2,7 @@ package api.rule.game;
 
 import api.rule.ability.Ability;
 import api.rule.ability.Modifier;
-import api.rule.creature.BaseCreatureClass;
+import api.rule.creature.BaseWarriorClass;
 import api.rule.weapon.Weapon;
 import org.springframework.util.StringUtils;
 
@@ -36,7 +36,7 @@ public class GamePreparedMetadata {
   /**
    * базовые типы созданий, их характеристики и способности
    */
-  public Map<String, BaseCreatureClass> baseCreatureClasses = new ConcurrentHashMap<>();
+  public Map<String, BaseWarriorClass> baseCreatureClasses = new ConcurrentHashMap<>();
 
 
   /**
@@ -52,7 +52,8 @@ public class GamePreparedMetadata {
    * @return
    */
   public Modifier findModifier(Modifier modifier) {
-    return Optional.ofNullable(StringUtils.isEmpty(modifier.ref)
+    return (StringUtils.isEmpty(modifier.ref) && StringUtils.isEmpty(modifier.id)) ? modifier
+            : Optional.ofNullable(StringUtils.isEmpty(modifier.ref)
             ? modifiers.get(modifier.id)
             : modifiers.get(modifier.ref))
             .orElseThrow(() -> new RuntimeException("Unknown modifier with id \"" + modifier.ref + "\""));
@@ -65,7 +66,8 @@ public class GamePreparedMetadata {
    * @return
    */
   public Ability findAbility(Ability ability) {
-    return Optional.ofNullable(StringUtils.isEmpty(ability.ref)
+    return (StringUtils.isEmpty(ability.ref) && StringUtils.isEmpty(ability.id)) ? ability
+            : Optional.ofNullable(StringUtils.isEmpty(ability.ref)
             ? abilities.get(ability.id)
             : abilities.get(ability.ref))
             .orElseThrow(() ->
@@ -80,7 +82,8 @@ public class GamePreparedMetadata {
    * @return
    */
   public Weapon findWeapon(Weapon weapon) {
-    return Optional.ofNullable(StringUtils.isEmpty(weapon.ref)
+    return (StringUtils.isEmpty(weapon.ref) && StringUtils.isEmpty(weapon.id)) ? weapon
+            : Optional.ofNullable(StringUtils.isEmpty(weapon.ref)
             ? weapons.get(weapon.id)
             : weapons.get(weapon.ref))
             .orElseThrow(() ->
@@ -94,7 +97,7 @@ public class GamePreparedMetadata {
    * @param baseCreatureClass
    * @return
    */
-  public BaseCreatureClass findBaseCreatureClass(BaseCreatureClass baseCreatureClass) {
+  public BaseWarriorClass findBaseCreatureClass(BaseWarriorClass baseCreatureClass) {
     return Optional.ofNullable(StringUtils.isEmpty(baseCreatureClass.ref)
             ? baseCreatureClasses.get(baseCreatureClass.id)
             : baseCreatureClasses.get(baseCreatureClass.ref))
@@ -111,6 +114,9 @@ public class GamePreparedMetadata {
   public void addModifier(Modifier modifier) {
     if (StringUtils.isEmpty(modifier.ref)) {
       // полноценная запись
+      if (StringUtils.isEmpty(modifier.id)) {
+        return;
+      }
       Optional.ofNullable(modifiers.get(modifier.id))
               .ifPresent(dupModifier -> {
                 throw new RuntimeException("Modifier with id \"" + dupModifier.id + "\" already exists");
@@ -132,6 +138,9 @@ public class GamePreparedMetadata {
   public void addAbility(Ability ability) {
     if (StringUtils.isEmpty(ability.ref)) {
       // новая
+      if (StringUtils.isEmpty(ability.id)) {
+        return;
+      }
       Optional.ofNullable(abilities.get(ability.id))
               .ifPresent(dupAbility -> {
                 throw new RuntimeException("Ability with id \"" + dupAbility.id + "\" already exists");
@@ -158,6 +167,9 @@ public class GamePreparedMetadata {
   public void addWeapon(Weapon weapon) {
     if (StringUtils.isEmpty(weapon.ref)) {
       // полноценная запись для обработки и добавления в словарь
+      if (StringUtils.isEmpty(weapon.id)) {
+        return;
+      }
       if (weapon.additionalModifiers != null) {
         List<Modifier> weaponModifiers = new LinkedList<>(weapon.additionalModifiers);
         weapon.additionalModifiers.clear();
@@ -182,7 +194,7 @@ public class GamePreparedMetadata {
    *
    * @param baseCreatureClass
    */
-  public void addCreatureClass(BaseCreatureClass baseCreatureClass) {
+  public void addCreatureClass(BaseWarriorClass baseCreatureClass) {
     if (StringUtils.isEmpty(baseCreatureClass.ref)) {
       // полноценная запись
       Optional.ofNullable(baseCreatureClasses.get(baseCreatureClass.id))
@@ -192,22 +204,36 @@ public class GamePreparedMetadata {
 
       // подтянем способности
       Optional.ofNullable(baseCreatureClass.abilities)
-              .ifPresent(abilities -> {
-                List<Ability> creatureClassAbilities = new LinkedList<>(abilities);
-                abilities.clear();
-                creatureClassAbilities.stream().forEach(ability ->
-                        abilities.add(findAbility(ability))
+              .ifPresent(creatureAbilities -> {
+                creatureAbilities.stream().forEach(creatureAbility -> {
+                          Optional.ofNullable(creatureAbility.ability).orElseThrow(() -> new RuntimeException("Ability in creaureAbility can't be null in class \"" + baseCreatureClass.id + "\""));
+                          creatureAbility.ability = findAbility(creatureAbility.ability);
+                        }
                 );
               });
+
+//
+//      {
+//        List<Weapon> creatureClassWeapons = new LinkedList<>(weapons);
+//        weapons.clear();
+//        creatureClassWeapons.stream().forEach(weapon ->
+//                weapons.add(findWeapon(weapon))
+//        );
+//      }
+//
+
       // подтянем оружие
-      Optional.ofNullable(baseCreatureClass.weapons)
-              .ifPresent(weapons -> {
-                List<Weapon> creatureClassWeapons = new LinkedList<>(weapons);
-                weapons.clear();
-                creatureClassWeapons.stream().forEach(weapon ->
-                        weapons.add(findWeapon(weapon))
-                );
-              });
+      Optional.ofNullable(baseCreatureClass.hands)
+              .ifPresent(hands -> hands.stream().forEach(hand ->
+                      Optional.ofNullable(hand.weapons)
+                              .ifPresent(weapons -> {
+                                        List<Weapon> creatureClassWeapons = new LinkedList<>(weapons);
+                                        weapons.clear();
+                                        creatureClassWeapons.stream().forEach(weapon ->
+                                                weapons.add(findWeapon(weapon))
+                                        );
+                                      }
+                              )));
       baseCreatureClasses.put(baseCreatureClass.id, baseCreatureClass);
     } else {
       // ссылка

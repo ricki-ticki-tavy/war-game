@@ -1,26 +1,54 @@
 package api.rule.ability;
 
+import api.rule.attribute.TriggerType;
+
+import javax.xml.bind.annotation.*;
+import java.io.Serializable;
+import java.util.List;
+
 /**
  * Способность создания
  */
-public class CreatureAbility {
+@XmlType(propOrder = {"ability", "probability", "costInActionPoints", "restoreInterval", "triggers", "playerAbilityPointCost"})
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlRootElement(name = "creatureAbility")
+public class CreatureAbility  implements Serializable {
   /**
    * Способность
    */
-  Ability ability;
+  @XmlElement(name ="ability")
+  public Ability ability;
 
   /**
    * Вероятность успеха.
    */
-  int probability;
+  @XmlElement(name ="probability")
+  public int probability;
 
   /**
    * цена попытки применения способности
    */
-  int costInActionPoints;
+  @XmlElement(name ="costInActionPoints")
+  public int costInActionPoints;
 
   /**
    * Время восстановления. В игровых кругах. 0 - повторно доступна сразу
    */
-  int restoreInterval;
+  @XmlElement(name ="restoreInterval")
+  public int restoreInterval;
+
+  /**
+   * Когда доступна способность
+   */
+  @XmlElementWrapper(name = "triggers")
+  @XmlElement(name = "trigger", defaultValue = "ALLWAYS")
+  public List<TriggerType> triggers;
+
+  /**
+   * стоимость применения способности в очках способности. Например у игрока или создания
+   */
+  @XmlElement(name = "playerAbilityPointCost", defaultValue = "0")
+  public int playerAbilityPointCost;
+
+
 }

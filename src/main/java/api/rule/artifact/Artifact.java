@@ -6,9 +6,14 @@ package api.rule.artifact;
 public class Artifact {
 
   /**
+   *
+   */
+  String id;
+
+  /**
    * Название
    */
-  String name;
+  String title;
 
   /**
    * Описание артифакта

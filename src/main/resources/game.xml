@@ -10,7 +10,7 @@
             <minValue>1</minValue>
             <maxValue>1</maxValue>
             <probability>100</probability>
-            <duration>0</duration>
+            <duration>-1</duration>
             <target>THIS</target>
         </modifier>
         <modifier>
@@ -19,7 +19,7 @@
             <attribute>MANNA</attribute>
             <minValue>-2</minValue>
             <probability>100</probability>
-            <duration>0</duration>
+            <duration>-1</duration>
             <target>ENEMY_PLAYER</target>
         </modifier>
         <modifier>
@@ -28,8 +28,18 @@
             <attribute>MANNA</attribute>
             <minValue>2</minValue>
             <probability>100</probability>
-            <duration>0</duration>
+            <duration>-1</duration>
             <target>PLAYER</target>
+        </modifier>
+        <modifier>
+            <id>stun40</id>
+            <title>Оглушить на 40 очков</title>
+            <attribute>ACTION_POINT</attribute>
+            <minValue>-40</minValue>
+            <maxValue>-40</maxValue>
+            <probability>75</probability>
+            <duration>-1</duration>
+            <target>TARGETED</target>
         </modifier>
     </modifiers>
 
@@ -46,7 +56,7 @@
                     <minValue>-4</minValue>
                     <maxValue>-8</maxValue>
                     <probability>100</probability>
-                    <duration>0</duration>
+                    <duration>-1</duration>
                     <target>TARGETED</target>
                 </modifier>
             </modifiers>
@@ -135,15 +145,25 @@
             <costActionPoints>20</costActionPoints>
             <additionalModifiers>
                 <modifier>
-                    <id>decActionPoints2</id>
+                    <!--<id>decActionPoints2</id>-->
                     <title>Понижение очков действия на 2</title>
                     <attribute>ACTION_POINT</attribute>
                     <minValue>-2</minValue>
                     <probability>100</probability>
-                    <duration>0</duration>
-                    <target>ENEMY</target>
+                    <duration>1</duration>
+                    <target>TARGETED</target>
                 </modifier>
             </additionalModifiers>
+        </meleeWeapon>
+
+        <meleeWeapon>
+            <id>shortSword</id>
+            <title>Короткий меч</title>
+            <minDamage>1</minDamage>
+            <maxDamage>6</maxDamage>
+            <damageAngle>0</damageAngle>
+            <mustAttackAllCreatures>false</mustAttackAllCreatures>
+            <costActionPoints>30</costActionPoints>
         </meleeWeapon>
 
         <distanceWeapon>
@@ -159,10 +179,26 @@
             <fadeRangeStart>20</fadeRangeStart>
             <fadeDamagePercentPerLength>2</fadeDamagePercentPerLength>
         </distanceWeapon>
+
+        <shield>
+            <id>smallShield</id>
+            <title>Малый щит</title>
+            <minDamage>0</minDamage>
+            <maxDamage>0</maxDamage>
+            <damageAngle>0</damageAngle>
+            <mustAttackAllCreatures>false</mustAttackAllCreatures>
+            <costActionPoints>20</costActionPoints>
+            <armorClass>0</armorClass>
+            <probabilityToRejectMeleeAttack>30</probabilityToRejectMeleeAttack>
+            <probabilityToRejectDistanceAttack>5</probabilityToRejectDistanceAttack>
+            <additionalModifiers>
+                <modifier ref = "stun40"/>
+            </additionalModifiers>
+        </shield>
     </weapons>
 
-    <creatureClasses>
-        <creatureClass>
+    <baseWarriorClasses>
+        <baseWarriorClass>
             <id>Viking-archer</id>
             <title>Викинг лучник</title>
             <actionPoints>240</actionPoints>
@@ -170,13 +206,44 @@
             <costMove>8</costMove>
             <maxHitPoints>20</maxHitPoints>
             <maxMannaPoints>0</maxMannaPoints>
-            <weapons>
-                <weapon ref="bow"/>
-            </weapons>
+            <hands>
+                <hand>
+                    <weapon ref="bow"/>
+                </hand>
+            </hands>
             <abilities>
-                <ability ref = "mightyBow"/>
+                <creatureAbility>
+                    <ability ref="mightyBow"/>
+                    <probability>100</probability>
+                    <costInActionPoints>0</costInActionPoints>
+                    <restoreInterval>1</restoreInterval>
+                    <triggers>
+                        <trigger>ON_PLAYER_ROUND</trigger>
+                    </triggers>
+                </creatureAbility>
             </abilities>
-        </creatureClass>
-    </creatureClasses>
+        </baseWarriorClass>
+
+        <baseWarriorClass>
+            <id>Viking-Swordman-SmallShield</id>
+            <title>Викинг мечник скруглым щитом</title>
+            <actionPoints>240</actionPoints>
+            <armorClass>1</armorClass>
+            <costMove>8</costMove>
+            <maxHitPoints>20</maxHitPoints>
+            <maxMannaPoints>0</maxMannaPoints>
+            <hands>
+                <hand>
+                    <weapon ref="shortSword"/>
+                </hand>
+                <hand>
+                    <weapon ref="smallShield"/>
+                </hand>
+            </hands>
+            <abilities>
+            </abilities>
+        </baseWarriorClass>
+
+    </baseWarriorClasses>
 
 </gameRules>

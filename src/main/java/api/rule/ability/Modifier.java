@@ -4,6 +4,7 @@ import api.rule.attribute.CreatureAttribute;
 import api.rule.attribute.CreatureTargeter;
 
 import javax.xml.bind.annotation.*;
+import java.io.Serializable;
 
 /**
  * Изменение какого-либо параметра
@@ -12,7 +13,7 @@ import javax.xml.bind.annotation.*;
         , "probability", "duration", "target"})
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "modifier")
-public class Modifier {
+public class Modifier implements Serializable{
 
   /**
    * для ссылки
@@ -58,8 +59,9 @@ public class Modifier {
   public int probability;
 
   /**
-   * длительность оказанного влияния в полных игровых кругах. Если ноль, то влияние выполнено разово и не его последствия
-   * не должны в альнейшем компенсироваться
+   * длительность оказанного влияния в полных игровых кругах. -1, то влияние выполнено разово и его последствия
+   * не должны в альнейшем компенсироваться, 0 - параметр восстановить в конце хода. далее - кол-во кругов, начиная с текущего
+   * хода игрока
    */
   @XmlElement(name = "duration", defaultValue = "0")
   public int duration;

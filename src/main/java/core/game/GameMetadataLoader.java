@@ -41,21 +41,29 @@ public class GameMetadataLoader {
               if (StringUtils.isEmpty(modifier.ref)) gamePreparedMetadata.addModifier(modifier);
             })));
 
-    gameRawMetadata.creatureClasses.stream().forEach(creatureClass -> {
+    gameRawMetadata.baseWarriorClasses.stream().forEach(baseCreatureClass -> {
       // из способностей классов созданий
-      Optional.ofNullable(creatureClass.abilities).ifPresent(abilities ->
-              abilities.stream().forEach(ability -> {
-                if (StringUtils.isEmpty(ability.ref)) Optional.ofNullable(ability.abilityModifiers)
-                        .ifPresent(abilityModifiers -> abilityModifiers.stream().forEach(modifier -> {
-                          if (StringUtils.isEmpty(modifier.ref)) gamePreparedMetadata.addModifier(modifier);
-                        }));
+      Optional.ofNullable(baseCreatureClass.abilities).ifPresent(creatureAbilities ->
+              creatureAbilities.stream().forEach(creatureAbility -> {
+                Optional.ofNullable(creatureAbility.ability).orElseThrow(() -> new RuntimeException("Ability in creaureAbility can't be null in class \"" + baseCreatureClass.id + "\""));
+                if (StringUtils.isEmpty(creatureAbility.ability.ref)) {
+                  Optional.ofNullable(creatureAbility.ability.abilityModifiers)
+                          .ifPresent(abilityModifiers -> abilityModifiers.stream().forEach(modifier -> {
+                            if (StringUtils.isEmpty(modifier.ref)) gamePreparedMetadata.addModifier(modifier);
+                          }));
+                }
               }));
       // из оружия классов созданий
-      Optional.ofNullable(creatureClass.weapons).ifPresent(weapons ->
-              weapons.stream().forEach(weapon -> {
-                if (StringUtils.isEmpty(weapon.ref)) Optional.ofNullable(weapon.additionalModifiers)
-                        .ifPresent(weaponModifiers -> weaponModifiers.stream().forEach(modifier -> {
-                          if (StringUtils.isEmpty(modifier.ref)) gamePreparedMetadata.addModifier(modifier);
+      Optional.ofNullable(baseCreatureClass.hands).ifPresent(hands ->
+              hands.stream().forEach(hand -> {
+                Optional.ofNullable(hand.weapons).ifPresent(weapons ->
+                        weapons.stream().forEach(weapon -> {
+                          if (StringUtils.isEmpty(weapon.ref)) {
+                            Optional.ofNullable(weapon.additionalModifiers)
+                                    .ifPresent(weaponModifiers -> weaponModifiers.stream().forEach(modifier -> {
+                                      if (StringUtils.isEmpty(modifier.ref)) gamePreparedMetadata.addModifier(modifier);
+                                    }));
+                          }
                         }));
               }));
     });
@@ -67,10 +75,12 @@ public class GameMetadataLoader {
    */
   private void copyAbilities() {
     gameRawMetadata.abilities.stream().forEach(ability -> gamePreparedMetadata.addAbility(ability));
-    gameRawMetadata.creatureClasses.stream().forEach(creatureClass -> {
-      Optional.ofNullable(creatureClass.abilities)
-              .ifPresent(creatureAbilities -> creatureAbilities.stream().forEach(ability -> {
-                if (StringUtils.isEmpty(ability.ref)) gamePreparedMetadata.addAbility(ability);
+    gameRawMetadata.baseWarriorClasses.stream().forEach(baseCreatureClass -> {
+      Optional.ofNullable(baseCreatureClass.abilities)
+              .ifPresent(creatureAbilities -> creatureAbilities.stream().forEach(creatureAbility -> {
+                Optional.ofNullable(creatureAbility.ability).orElseThrow(() -> new RuntimeException("Ability in creaureAbility can't be null in class \"" + baseCreatureClass.id + "\""));
+                if (StringUtils.isEmpty(creatureAbility.ability.ref))
+                  gamePreparedMetadata.addAbility(creatureAbility.ability);
               }));
     });
   }
@@ -83,18 +93,22 @@ public class GameMetadataLoader {
     gameRawMetadata.weapons.stream().forEach(weapon -> gamePreparedMetadata.addWeapon(weapon));
 
     // из классов созданий
-    gameRawMetadata.creatureClasses.stream().forEach(creatureClass ->
-            Optional.ofNullable(creatureClass.weapons)
-                    .ifPresent(creatureWeapons -> creatureWeapons.stream().forEach(weapon -> {
-                      if (StringUtils.isEmpty(weapon.ref)) gamePreparedMetadata.addWeapon(weapon);
-                    })));
+    gameRawMetadata.baseWarriorClasses.stream().forEach(creatureClass ->
+            Optional.ofNullable(creatureClass.hands)
+                    .ifPresent(hands -> hands.stream().forEach(hand -> Optional.ofNullable(hand.weapons)
+                            .ifPresent(weapons -> weapons.stream().forEach(weapon -> {
+                                      if (StringUtils.isEmpty(weapon.ref)) gamePreparedMetadata.addWeapon(weapon);
+                                    }
+
+                            ))))
+    );
   }
 
   /**
    * Копирование классов созданий
    */
   private void copyBaseCreatureClasses() {
-    Optional.ofNullable(gameRawMetadata.creatureClasses)
+    Optional.ofNullable(gameRawMetadata.baseWarriorClasses)
             .ifPresent(creatureClasses -> creatureClasses.stream().forEach(creatureClass -> gamePreparedMetadata.addCreatureClass(creatureClass)));
   }
 

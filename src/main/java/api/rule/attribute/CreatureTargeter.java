@@ -20,7 +20,7 @@ public enum CreatureTargeter implements NamedObject{
   }
 
   @Override
-  public String getCption() {
+  public String getTitle() {
     return caption;
   }
 }

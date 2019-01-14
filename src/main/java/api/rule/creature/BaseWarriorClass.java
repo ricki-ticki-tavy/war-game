@@ -1,8 +1,6 @@
 package api.rule.creature;
 
-import api.rule.ability.Ability;
 import api.rule.ability.CreatureAbility;
-import api.rule.weapon.Weapon;
 
 import javax.xml.bind.annotation.*;
 import java.util.List;
@@ -11,10 +9,10 @@ import java.util.List;
  * Базовый класс воина
  */
 @XmlType(propOrder = {"id", "title", "actionPoints", "armorClass", "costMove", "maxHitPoints"
-        , "maxMannaPoints", "weapons", "abilities"})
+        , "maxMannaPoints", "hands", "abilityActionPoints", "abilities"})
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name = "creatureClass")
-public class BaseCreatureClass {
+@XmlRootElement(name = "warriorClass")
+public class BaseWarriorClass {
 
   @XmlAttribute(name = "ref")
   public String ref = null;
@@ -60,17 +58,23 @@ public class BaseCreatureClass {
   public int maxMannaPoints;
 
   /**
-   * Виды атак
+   * руки воина
    */
-  @XmlElementWrapper(name = "weapons")
-  @XmlElement(name= "weapon")
-  public List<Weapon> weapons;
+  @XmlElementWrapper(name = "hands")
+  @XmlElement(name= "hand")
+  public List<Hand> hands;
+
+  /**
+   * Кол-во очков применения способностей за ход
+   */
+  @XmlElement(name= "abilityActionPoints", defaultValue = "1")
+  public int abilityActionPoints;
 
   /**
    * Способности создания
    */
   @XmlElementWrapper(name = "abilities")
-  @XmlElement(name= "ability")
-  public List<Ability> abilities;
+  @XmlElement(name= "creatureAbility")
+  public List<CreatureAbility> abilities;
 
 }

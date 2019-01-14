@@ -2,7 +2,7 @@ package api.game;
 
 import api.rule.ability.CreatureAbility;
 import api.rule.weapon.Weapon;
-import api.rule.creature.BaseCreatureClass;
+import api.rule.creature.BaseWarriorClass;
 
 import java.util.List;
 
@@ -11,7 +11,7 @@ public class Creature {
   /**
    * Базовый класс воина
    */
-  BaseCreatureClass parentCreatureClass;
+  BaseWarriorClass parentCreatureClass;
 
   /**
    * Имя персонажа

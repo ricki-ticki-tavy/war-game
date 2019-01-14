@@ -6,7 +6,7 @@ import javax.xml.bind.annotation.*;
 import java.util.List;
 
 @XmlType(propOrder = {"id", "title", "minDamage", "maxDamage", "damageAngle", "mustAttackAllCreatures"
-        , "costActionPoints", "additionalModifiers"})
+        , "costActionPoints", "additionalModifiers", "unrejectable"})
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement
 public class Weapon {
@@ -51,17 +51,18 @@ public class Weapon {
   @XmlElement(name = "costActionPoints")
   public int costActionPoints;
 
-//  /**
-//   * Тип атаки
-//   */
-//  @XmlElement(name = "attackType")
-//  public AttackType attackType;
-//
   /**
    * Дополнительные влияния
    */
   @XmlElementWrapper(name = "additionalModifiers")
   @XmlElement(name = "modifier")
   public List<Modifier> additionalModifiers;
+
+
+  /**
+   * Невозможность отразить удар
+   */
+  @XmlElement(name = "unrejectable", defaultValue = "false")
+  public boolean unrejectable;
 
 }
