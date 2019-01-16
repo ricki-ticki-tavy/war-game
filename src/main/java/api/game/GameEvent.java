@@ -106,7 +106,7 @@ public class GameEvent {
    * @return
    */
   GameEvent fire(){
-    context.getCore().fireGameEvent(this);
+    context.fireGameEvent(this);
     return this;
   }
 

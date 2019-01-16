@@ -26,9 +26,9 @@ public interface Player extends BaseEntityHeader{
 
   /**
    * Задать зону выставления воинов
-   * @param rectangle
+   * @param startZone
    */
-  void setStartZone(Rectangle rectangle);
+  void setStartZone(Rectangle startZone);
 
 
   /**

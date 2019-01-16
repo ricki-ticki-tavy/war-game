@@ -2,6 +2,7 @@ package api.core;
 
 import api.game.GameEvent;
 import api.game.map.LevelMap;
+import api.game.map.Player;
 
 import java.io.InputStream;
 
@@ -9,6 +10,12 @@ import java.io.InputStream;
  * Контекст игровой
  */
 public interface Context {
+
+  /**
+   * UUID контекста (сессии)
+   * @return
+   */
+  String getContextId();
 
   /**
    * Возвращает игровой движок
@@ -35,5 +42,12 @@ public interface Context {
    * @return
    */
   void loadMap(InputStream xmlMapMetadata);
+
+  /**
+   * Создать и подключить к игре игрока.
+   * @param playerSessionId
+   * @return
+   */
+  Player connectPlayer(String playerSessionId);
 
 }

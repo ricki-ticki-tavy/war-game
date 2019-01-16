@@ -1,5 +1,6 @@
 package api.game.map;
 
+import api.core.Context;
 import api.entity.warrior.Warrior;
 import api.game.Coords;
 import api.game.Rectangle;
@@ -67,7 +68,7 @@ public interface LevelMap {
    * Добавить игрока в игру
    * @return
    */
-  Player addPlayer(Player player);
+  Player connectPlayer(String playerSessionId);
 
   /**
    * Вернуть список игроков
@@ -90,6 +91,6 @@ public interface LevelMap {
   /**
    * Инициализация карты
    */
-  void init(LevelMapMetaData levelMapMetaData);
+  void init(Context gameContext, LevelMapMetaData levelMapMetaData);
 
 }

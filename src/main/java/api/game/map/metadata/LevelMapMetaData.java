@@ -26,8 +26,8 @@ public class LevelMapMetaData {
   @XmlElement(name = "maxPlayersCount", required = true, defaultValue = "2")
   public int maxPlayersCount;
 
-  @XmlElement(name = "playerStartZones", required = true)
-  @XmlElementWrapper(name = "startZones")
+  @XmlElementWrapper(name = "playerStartZones")
+  @XmlElement(name = "startZone", required = true)
   public List<XmlRectangle> playerStartZones;
 
 }
