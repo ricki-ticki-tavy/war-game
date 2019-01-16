@@ -11,14 +11,15 @@ import api.rule.weapon.MeleeWeapon;
 import javax.xml.bind.annotation.*;
 import java.util.List;
 
-@XmlType(propOrder = {"lengthOfSimpleLengthUnit", "modifiers", "abilities", "weapons", "baseWarriorClasses"})
+@XmlType(propOrder = {"systemRules", "modifiers", "abilities", "weapons", "baseWarriorClasses"})
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "gameRules")
 public class GameRawMetadata {
   /**
    * длина единичного отрезка длины в точках карты.
    */
-  public int lengthOfSimpleLengthUnit;
+  @XmlElement(name = "systemRules")
+  public SystemRules systemRules;
 
   /**
    * Все возможные модификаторы

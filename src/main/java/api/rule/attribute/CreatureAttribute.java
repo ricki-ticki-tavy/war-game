@@ -21,6 +21,7 @@ public enum CreatureAttribute implements AnAttribute {
   MAGIC_POINT("Кол-во очков магии", Integer.class),
   X_COORD("координата X", Integer.class),
   Y_COORD("координата Y", Integer.class),
+  LUCK("Удача", String.class),
   CAPTION("Название", String.class)
 //  ,
 //  ("", Integer.class),
