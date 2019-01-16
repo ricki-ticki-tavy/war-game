@@ -1,8 +1,8 @@
 package core.entity.modifiers;
 
-import api.base.i.core.Context;
-import api.base.i.enums.AttributeEnum;
-import api.base.i.enums.TargetTypeEnum;
+import api.core.Context;
+import api.enums.AttributeEnum;
+import api.enums.TargetTypeEnum;
 import core.entity.base.AbstractModifier;
 
 

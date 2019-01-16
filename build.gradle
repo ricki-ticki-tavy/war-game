@@ -9,6 +9,8 @@ sourceCompatibility = 1.8
 //version = '0.99'
 
 project.ext{
+    springVersion = "5.0.6.RELEASE"
+    springSecurityVersion = "5.0.3.RELEASE"
     springBootVersion = '2.1.0.RELEASE'
 }
 
@@ -27,6 +29,13 @@ configurations {
 dependencies {
 //    compile fileTree(dir: 'providedLibraryes', include: ['*.jar'])
     compile group: 'org.springframework.boot', name: 'spring-boot-starter', version: project.ext.springBootVersion
+    compile(group: 'org.springframework', name: 'spring-context', version: project.ext.springVersion) {
+        exclude group: 'commons-logging', module: 'commons-logging'
+    }
+    compile group: 'org.springframework', name: 'spring-webmvc', version: project.ext.springVersion
+    compile group: 'org.springframework', name: 'spring-core', version: project.ext.springVersion
+    compile group: 'org.springframework', name: 'spring-web', version: project.ext.springVersion
+    compile group: 'org.springframework', name: 'spring-aspects', version: project.ext.springVersion
     testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: project.ext.springBootVersion
 }
 

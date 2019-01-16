@@ -1,9 +1,9 @@
 package core.entity.base;
 
-import api.base.i.core.Context;
-import api.base.i.entity.ability.Modifier;
-import api.base.i.enums.AttributeEnum;
-import api.base.i.enums.TargetTypeEnum;
+import api.core.Context;
+import api.entity.ability.Modifier;
+import api.enums.AttributeEnum;
+import api.enums.TargetTypeEnum;
 
 public abstract class AbstractModifier implements Modifier {
 
