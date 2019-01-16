@@ -1,5 +1,6 @@
 package core.game;
 
+import api.base.i.core.Core;
 import api.rule.game.GamePreparedMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,7 +10,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 
 @Component
-public class Game {
+public class Game implements Core{
 
   private static final Logger logger = LoggerFactory.getLogger(Game.class);
 
@@ -22,7 +23,11 @@ public class Game {
   public void init(){
     gameMetadata = gameMetadataLoader.loadGameMetadata();
 
+  }
 
-
+  @Override
+  //TODO
+  public int getRandom(int min, int max) {
+    return 0;
   }
 }

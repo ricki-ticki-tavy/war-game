@@ -1,11 +1,9 @@
-package api.rule.attribute;
-
-import api.structure.NamedObject;
+package api.base.i.enums;
 
 /**
  * Тип срабатывания триггера
  */
-public enum TriggerType implements NamedObject {
+public enum EventEnum {
   ON_PLAYER_ROUND("При ходе игрока"),
   ALLWAYS("Всегда"),
   ROUND_FULL("игровой круг"),
@@ -22,12 +20,11 @@ public enum TriggerType implements NamedObject {
 
   private String caption;
 
-  @Override
   public String getTitle() {
     return caption;
   }
 
-  TriggerType(String caption){
+  EventEnum(String caption){
     this.caption = caption;
   }
 }

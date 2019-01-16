@@ -1,6 +1,6 @@
 package api.rule.ability;
 
-import api.rule.attribute.TriggerType;
+import api.base.i.enums.EventEnum;
 
 import javax.xml.bind.annotation.*;
 import java.io.Serializable;
@@ -42,7 +42,7 @@ public class CreatureAbility  implements Serializable {
    */
   @XmlElementWrapper(name = "triggers")
   @XmlElement(name = "trigger", defaultValue = "ALLWAYS")
-  public List<TriggerType> triggers;
+  public List<EventEnum> triggers;
 
   /**
    * стоимость применения способности в очках способности. Например у игрока или создания

@@ -1,8 +1,6 @@
-package api.rule.attribute;
+package api.base.i.enums;
 
-import api.structure.AnAttribute;
-
-public enum CreatureAttribute implements AnAttribute {
+public enum AttributeEnum{
   HEALTH("Очки жизни", Integer.class),
   MANNA("Очки магии", Integer.class),
   ARMOR("Уровень брони", Integer.class),
@@ -37,19 +35,15 @@ public enum CreatureAttribute implements AnAttribute {
   private String caption;
   private Class type;
 
-  private CreatureAttribute(String caption, Class type){
+  private AttributeEnum(String caption, Class type){
     this.caption = caption;
     this.type = type;
   }
 
-
-
-  @Override
   public String getCaption() {
     return caption;
   }
 
-  @Override
   public Class getType() {
     return type;
   }

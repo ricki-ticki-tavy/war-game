@@ -1,12 +1,12 @@
 package api.structure;
 
-import api.rule.attribute.TriggerType;
+import api.base.i.enums.EventEnum;
 
 /**
  * триггер, срабатывающий при определенном условии
  */
 public interface Trigger {
-  TriggerType getTrigerType();
+  EventEnum getTrigerType();
 
   /**
    * срабатывание тригера

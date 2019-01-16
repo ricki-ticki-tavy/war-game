@@ -1,6 +1,6 @@
 package api.rule.ability;
 
-import api.rule.attribute.CreatureAttribute;
+import api.base.i.enums.AttributeEnum;
 import api.rule.attribute.CreatureTargeter;
 
 import javax.xml.bind.annotation.*;
@@ -38,7 +38,7 @@ public class Modifier implements Serializable{
    * Атрибут, на который влияет модификатор
    */
   @XmlElement(name = "attribute", required = true)
-  public CreatureAttribute attribute;
+  public AttributeEnum attribute;
 
   /**
    * минимальное значение
