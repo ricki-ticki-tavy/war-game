@@ -9,20 +9,20 @@ import java.util.List;
 /**
  * Игрок
  */
-public interface Player extends BaseEntityHeader{
+public interface Player<T> extends BaseEntityHeader{
 
   /**
    * Добавить в коллекцию воина
    * @param warrior
    * @return
    */
-  Warrior addWarrior(Warrior warrior);
+  T addWarrior(T warrior);
 
   /**
    *  Вернуть всех воинов
    * @return
    */
-  List<Warrior> getWarriors();
+  List<T> getWarriors();
 
   /**
    * Задать зону выставления воинов

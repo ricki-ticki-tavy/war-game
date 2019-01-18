@@ -7,6 +7,7 @@ import api.game.Rectangle;
 import api.game.map.LevelMap;
 import api.game.map.Player;
 import api.game.map.metadata.LevelMapMetaData;
+import core.system.error.GameErrors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanFactory;
@@ -100,15 +101,21 @@ public class LevelMapImpl implements LevelMap {
   }
 
   @Override
-  public Warrior addWarrior(Coords coords, Warrior warrior) {
-    return null;
+  public Warrior addWarrior(String playerId, Coords coords, Warrior warrior) {
+    return Optional.ofNullable(getPlayer(playerId))
+            .map(player -> {
+              if (player.getWarriors().size() >= context.getGameRules().getMaxStartCreaturePerPlayer()) {
+                GameErrors.GAME_ERROR_TOO_MANY_UNITS_FOR_PLAYER.error(playerId, String.valueOf(context.getGameRules().getMaxStartCreaturePerPlayer()));
+              }
+              return player.addWarrior(warrior);
+            }).orElseThrow(() -> GameErrors.GAME_ERROR_UNKNOWN_USER_UID.getError(playerId));
   }
 
-  private Player createNewPlayer(String playerSessionId){
+  private Player createNewPlayer(String playerSessionId) {
     Player player = players.get(playerSessionId);
-    if (player == null){
+    if (player == null) {
       logger.info(String.format("creating new player %s in context %s", playerSessionId, context.getContextId()));
-      if (players.size() < maxPlayersCount){
+      if (players.size() < maxPlayersCount) {
         player = beanFactory.getBean(Player.class, playerSessionId);
         player.setStartZone(playerStartZones.get(players.size()));
         players.put(playerSessionId, player);

@@ -1,5 +1,7 @@
 package api;
 
+import api.enums.ArmorClassEnum;
+
 /**
  * Базовые атрибуты воина
  */
@@ -11,8 +13,8 @@ public class WarriorSBaseAttributes {
   int manna;
   int maxManna;
 
-  int armorClass;
-  int costMove;
+  ArmorClassEnum armorClass;
+  Integer deltaCostMove;
 
   int abilityActionPoints;
   int maxAbilityActionPoints;
@@ -43,8 +45,9 @@ public class WarriorSBaseAttributes {
     return health = Math.min(Math.max(0, health + deltaHealth), maxHealth);
   }
 
-  public void setMaxHealth(int maxHealth) {
+  public WarriorSBaseAttributes setMaxHealth(int maxHealth) {
     this.maxHealth = maxHealth;
+    return this;
   }
 
   public int getManna() {
@@ -61,30 +64,33 @@ public class WarriorSBaseAttributes {
     return manna = Math.min(Math.max(0, manna + deltaManna), maxManna);
   }
 
-  public void setMaxManna(int maxManna) {
+  public WarriorSBaseAttributes setMaxManna(int maxManna) {
     this.maxManna = maxManna;
+    return this;
   }
 
   /**
    * класс брони
    */
-  public int getArmorClass() {
+  public ArmorClassEnum getArmorClass() {
     return armorClass;
   }
 
-  public void setArmorClass(int armorClass) {
+  public WarriorSBaseAttributes setArmorClass(ArmorClassEnum armorClass) {
     this.armorClass = armorClass;
+    return this;
   }
 
   /**
-   * цена передвижения
+   * Дельта к цене передвижения, определяемому по классу брони
    */
-  public int getCostMove() {
-    return costMove;
+  public Integer getDeltaCostMove() {
+    return deltaCostMove;
   }
 
-  public void setCostMove(int costMove) {
-    this.costMove = costMove;
+  public WarriorSBaseAttributes setDeltaCostMove(int deltaCostMove) {
+    this.deltaCostMove = deltaCostMove;
+    return this;
   }
 
   /**
@@ -94,8 +100,9 @@ public class WarriorSBaseAttributes {
     return abilityActionPoints;
   }
 
-  public void setAbilityActionPoints(int abilityActionPoints) {
+  public WarriorSBaseAttributes setAbilityActionPoints(int abilityActionPoints) {
     this.abilityActionPoints = abilityActionPoints;
+    return this;
   }
 
   /**
@@ -105,16 +112,18 @@ public class WarriorSBaseAttributes {
     return maxAbilityActionPoints;
   }
 
-  public void setMaxAbilityActionPoints(int maxAbilityActionPoints) {
+  public WarriorSBaseAttributes setMaxAbilityActionPoints(int maxAbilityActionPoints) {
     this.maxAbilityActionPoints = maxAbilityActionPoints;
+    return this;
   }
 
   public int getActionPoints() {
     return actionPoints;
   }
 
-  public void setActionPoints(int actionPoints) {
+  public WarriorSBaseAttributes setActionPoints(int actionPoints) {
     this.actionPoints = actionPoints;
+    return this;
   }
 
   public int addActionPoints(int deltaActionPoints) {
@@ -125,18 +134,23 @@ public class WarriorSBaseAttributes {
     return maxActionPoints;
   }
 
-  public void setMaxActionPoints(int maxActionPoints) {
+  public WarriorSBaseAttributes setMaxActionPoints(int maxActionPoints) {
     this.maxActionPoints = maxActionPoints;
+    return this;
   }
 
   public WarriorSBaseAttributes() {
-
+    health = 0;
+    manna = 0;
+    deltaCostMove = 0;
+    abilityActionPoints = 0;
+    actionPoints = 0;
   }
 
   public WarriorSBaseAttributes(
           int maxHealth, int health
           , int maxManna, int manna
-          , int armorClass, int costMove
+          , ArmorClassEnum armorClass, int deltaCostMove
           , int maxAbilityActionPoints, int abilityActionPoints
           , int maxActionPoints, int actionPoints) {
     this.health = health;
@@ -144,11 +158,31 @@ public class WarriorSBaseAttributes {
     this.maxManna = maxManna;
     this.manna = manna;
     this.armorClass = armorClass;
-    this.costMove = costMove;
+    this.deltaCostMove = deltaCostMove;
     this.maxAbilityActionPoints = maxAbilityActionPoints;
     this.abilityActionPoints = abilityActionPoints;
     this.maxActionPoints = maxActionPoints;
     this.actionPoints = actionPoints;
+  }
+
+  public WarriorSBaseAttributes(
+          int health
+          , int manna
+          , int abilityActionPoints
+          , int actionPoints) {
+    this.health = health;
+    this.manna = manna;
+    this.abilityActionPoints = abilityActionPoints;
+    this.actionPoints = actionPoints;
+  }
+
+  @Override
+  public WarriorSBaseAttributes clone() {
+    return new WarriorSBaseAttributes(maxHealth, health
+            , maxManna, manna
+            , armorClass, deltaCostMove,
+            maxAbilityActionPoints, abilityActionPoints,
+            maxActionPoints, actionPoints);
   }
 
 }

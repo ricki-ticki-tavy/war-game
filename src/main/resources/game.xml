@@ -203,7 +203,7 @@
             <title>Викинг лучник</title>
             <actionPoints>240</actionPoints>
             <armorClass>1</armorClass>
-            <costMove>8</costMove>
+            <deltaCostMove>8</deltaCostMove>
             <maxHitPoints>20</maxHitPoints>
             <maxMannaPoints>0</maxMannaPoints>
             <hands>
@@ -229,7 +229,7 @@
             <title>Викинг мечник скруглым щитом</title>
             <actionPoints>240</actionPoints>
             <armorClass>1</armorClass>
-            <costMove>8</costMove>
+            <deltaCostMove>8</deltaCostMove>
             <maxHitPoints>20</maxHitPoints>
             <maxMannaPoints>0</maxMannaPoints>
             <hands>

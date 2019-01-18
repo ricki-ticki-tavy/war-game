@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * Игровая карта c игроками и воинами
  */
-public interface LevelMap {
+public interface LevelMap<W extends Warrior> {
   /**
    * Название карты
    * @return
@@ -54,15 +54,16 @@ public interface LevelMap {
    * @param radius радиус окружности. 0 - все воины
    * @return
    */
-  List<Warrior> getWarriors(Coords center, int radius);
+  List<W> getWarriors(Coords center, int radius);
 
   /**
-   * Добавить воина в заданные координаты
+   * Добавить воина в заданные координаты заданному игроку
+   * @param playerId
    * @param coords
    * @param warrior
    * @return
    */
-  Warrior addWarrior(Coords coords, Warrior warrior);
+  W addWarrior(String playerId, Coords coords, W warrior);
 
   /**
    * Добавить игрока в игру

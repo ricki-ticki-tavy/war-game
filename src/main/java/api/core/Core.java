@@ -1,8 +1,8 @@
 package api.core;
 
-import api.enums.MapTypeEnum;
-import api.game.map.LevelMap;
-import api.game.GameEvent;
+import api.game.map.metadata.GameRules;
+
+import java.io.InputStream;
 
 /**
  * взаимодействие с игрой.
@@ -11,9 +11,11 @@ public interface Core {
   int getRandom(int min, int max);
 
   /**
-   * Создать
-   * @param mapType
+   * Создать  игру
+   * @param userGameCreator
+   * @param gameRules
+   * @param map
    * @return
    */
-  Context createGame(MapTypeEnum mapType);
+  Context createGame(String userGameCreator, GameRules gameRules, InputStream map);
 }

@@ -8,27 +8,36 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static java.util.Collections.EMPTY_LIST;
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class PlayerImpl implements Player{
+public class PlayerImpl<T extends Warrior> implements Player<T>{
 
   private String playerSessionId;
   private Rectangle startZone;
+  private Map<String, T> warriors = new ConcurrentHashMap();
 
   public PlayerImpl(@Autowired String playerSessionId){
     this.playerSessionId = playerSessionId;
   }
 
   @Override
-  public Warrior addWarrior(Warrior warrior) {
-    return null;
+  public T addWarrior(T warrior) {
+    warriors.put(warrior.getId(), warrior);
+    return warrior;
   }
 
   @Override
-  public List<Warrior> getWarriors() {
-    return null;
+  public List<T> getWarriors() {
+    List<T> warriorsList = Collections.EMPTY_LIST;
+    warriorsList.addAll(warriors.values());
+    return warriorsList;
   }
 
   @Override

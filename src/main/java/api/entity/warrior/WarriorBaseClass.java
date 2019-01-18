@@ -2,6 +2,7 @@ package api.entity.warrior;
 
 import api.WarriorSBaseAttributes;
 import api.core.Context;
+import api.entity.weapon.Weapon;
 import api.game.GameEvent;
 import api.entity.ability.Ability;
 import api.entity.base.BaseEntityHeader;
@@ -20,7 +21,7 @@ public interface WarriorBaseClass extends BaseEntityHeader {
   List<WarriorSHand> getHands();
 
   /**
-   * Возвращает значениепараметроввоина
+   * Возвращает значение параметроввоина
    * @return
    */
   WarriorSBaseAttributes getBaseAttributes();
@@ -62,4 +63,23 @@ public interface WarriorBaseClass extends BaseEntityHeader {
    * @return
    */
   void fireEvent(GameEvent event);
+
+  /**
+   * Задать поддерживаемое вооружение
+   * @param supportedWeaponClasses
+   * @return
+   */
+  void setSupportedWeaponClasses(List<Class<? extends Weapon>> supportedWeaponClasses);
+
+  /**
+   * Поддерживаемые классы вооружения
+   * @return
+   */
+  List<Class<? extends Weapon>> getSupportedWeaponClasses();
+
+  /**
+   * Установить наборбазавых атрибутов
+   * @param warriorSBaseAttributes
+   */
+  void setWarriorSBaseAttributes(WarriorSBaseAttributes warriorSBaseAttributes);
 }

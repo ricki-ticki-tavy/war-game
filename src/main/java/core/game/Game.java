@@ -2,8 +2,8 @@ package core.game;
 
 import api.core.Context;
 import api.core.Core;
-import api.enums.MapTypeEnum;
 import api.game.map.Player;
+import api.game.map.metadata.GameRules;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -16,8 +16,10 @@ public class Game {
 
   @PostConstruct
   public void testGame(){
-    Context context = core.createGame(MapTypeEnum.TWO_PLAYERS);
-    Player player = context.connectPlayer("1234");
+    Context context = core.createGame("test"
+            , new GameRules(9, 2, 50, 200, 2, 600)
+            , this.getClass().getClassLoader().getResourceAsStream("level2.xml"));
+    Player player = context.connectPlayer("test");
     if (player != null){
 
     }

@@ -2,6 +2,7 @@ package api.entity.ability;
 
 import api.core.Context;
 import api.entity.base.BaseEntityHeader;
+import api.entity.warrior.WarriorBaseClass;
 import api.enums.EventType;
 
 import java.util.List;
@@ -47,5 +48,10 @@ public interface Ability extends BaseEntityHeader {
    * @return
    */
   int getTotalUseCount();
+
+  /**
+   * Базовые классы, к которым способность не применима
+   */
+  List<WarriorBaseClass> getNotSupportedWarriorBaseClasses();
 
 }

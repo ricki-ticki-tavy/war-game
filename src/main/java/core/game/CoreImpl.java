@@ -3,6 +3,7 @@ package core.game;
 import api.core.Context;
 import api.core.Core;
 import api.enums.MapTypeEnum;
+import api.game.map.metadata.GameRules;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanFactory;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.io.InputStream;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -27,9 +29,9 @@ public class CoreImpl implements Core{
   BeanFactory beanFactory;
 
   @Override
-  public Context createGame(MapTypeEnum mapType) {
+  public Context createGame(String userGameCreator, GameRules gameRules, InputStream map) {
     GameContext context = beanFactory.getBean(GameContext.class);
-    context.loadMap(this.getClass().getClassLoader().getResourceAsStream(mapType.getMapName()));
+    context.loadMap(userGameCreator, gameRules, map);
     contextMap.put(context.getContextId(), context);
     return context;
   }
