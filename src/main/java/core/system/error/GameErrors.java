@@ -2,6 +2,7 @@ package core.system.error;
 
 public enum GameErrors {
   GAME_ERROR_BASE_WARRIOR_S_ATTRS_IS_FINAL("F-1", "Воину уже назначены базовыеатрибуты. Переопределение не возможно")
+  , GAME_ERROR_WARRIOR_S_COORDS_IS_FINAL("F-2", "Воину %s уже назначены стартовые координаты. Переопределение не возможно")
   , GAME_ERROR_UNKNOWN_USER_UID("U-1", "Пользователь с UID %s не найден.")
   , GAME_ERROR_TOO_MANY_UNITS_FOR_PLAYER("O-1", "Пользователь с UID %s уже имеет максимальное кол-во воинов %s.")
   ;

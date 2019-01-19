@@ -16,12 +16,21 @@ public enum EventType {
   ATACK_AFTER_EVERY_BIT("После каждого удара при атаке"),
   ATACK_BEFORE_EVERY_BIT("Перед каждым ударом при атаке"),
   DEFENCE_AFTER("Перед защитой"),
-  DEFENCE_BEFORE("После защиты");
+  DEFENCE_BEFORE("После защиты")
+
+  ,WARRIOR_ADDED("В игре %s (контекст %s) игроком %s добавлен воин %s")
+  ,WARRIOR_SUMMONED("В игре %s (контекст %s) игроком %s призван воин %s с %s очками жизни")
+  ,PLAYER_REMOVED("Игрок %s покинул игру %s  (контекст %s)")
+  ;
 
   private String caption;
 
   public String getTitle() {
     return caption;
+  }
+
+  public String getFormattedMessage(String... args) {
+    return String.format(getTitle(), args);
   }
 
   EventType(String caption){

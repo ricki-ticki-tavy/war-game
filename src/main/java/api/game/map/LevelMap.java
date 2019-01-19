@@ -1,6 +1,6 @@
 package api.game.map;
 
-import api.core.Context;
+import api.core.GameContext;
 import api.entity.warrior.Warrior;
 import api.game.Coords;
 import api.game.Rectangle;
@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * Игровая карта c игроками и воинами
  */
-public interface LevelMap<W extends Warrior> {
+public interface LevelMap {
   /**
    * Название карты
    * @return
@@ -54,7 +54,7 @@ public interface LevelMap<W extends Warrior> {
    * @param radius радиус окружности. 0 - все воины
    * @return
    */
-  List<W> getWarriors(Coords center, int radius);
+  List<Warrior> getWarriors(Coords center, int radius);
 
   /**
    * Добавить воина в заданные координаты заданному игроку
@@ -63,13 +63,13 @@ public interface LevelMap<W extends Warrior> {
    * @param warrior
    * @return
    */
-  W addWarrior(String playerId, Coords coords, W warrior);
+  Warrior addWarrior(String playerId, Coords coords, Warrior warrior);
 
   /**
    * Добавить игрока в игру
    * @return
    */
-  Player connectPlayer(String playerSessionId);
+  Player connectPlayer(String playerName, String playerSessionId);
 
   /**
    * Вернуть список игроков
@@ -92,6 +92,17 @@ public interface LevelMap<W extends Warrior> {
   /**
    * Инициализация карты
    */
-  void init(Context gameContext, LevelMapMetaData levelMapMetaData);
+  void init(GameContext gameContext, LevelMapMetaData levelMapMetaData);
 
+  /**
+   * Признак успешно липодготовлена карта
+   * @return
+   */
+  boolean isLoaded();
+
+  /**
+   * Готова ликарта к игре. То естьвсе игроки есть и все фигуры
+   * @return
+   */
+  boolean isReady();
 }

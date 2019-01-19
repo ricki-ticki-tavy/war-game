@@ -1,13 +1,13 @@
 package core.entity.base;
 
-import api.core.Context;
+import api.core.GameContext;
 import api.entity.ability.Modifier;
 import api.enums.AttributeEnum;
 import api.enums.TargetTypeEnum;
 
 public abstract class AbstractModifier implements Modifier {
 
-  protected Context context;
+  protected GameContext context;
 
   protected TargetTypeEnum target;
   protected String title;
@@ -62,7 +62,7 @@ public abstract class AbstractModifier implements Modifier {
     return maxValue;
   }
 
-  public AbstractModifier(Context context
+  public AbstractModifier(GameContext context
           , String title, String description, TargetTypeEnum target
           , AttributeEnum attribute, int minValue, int maxValue
           , int probability) {

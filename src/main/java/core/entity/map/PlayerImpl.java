@@ -1,43 +1,48 @@
 package core.entity.map;
 
-import api.game.Rectangle;
-import api.game.map.*;
+import api.core.GameContext;
 import api.entity.warrior.Warrior;
-import org.springframework.beans.factory.annotation.Autowired;
+import api.game.Rectangle;
+import api.game.map.Player;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static java.util.Collections.EMPTY_LIST;
+import static api.enums.EventParamNames.WARRIOR_PARAM;
+import static api.enums.EventType.WARRIOR_ADDED;
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class PlayerImpl<T extends Warrior> implements Player<T>{
+public class PlayerImpl implements Player{
 
+  private GameContext context;
   private String playerSessionId;
+  private String playerName;
   private Rectangle startZone;
-  private Map<String, T> warriors = new ConcurrentHashMap();
+  private Map<String, Warrior> warriors = new ConcurrentHashMap();
 
-  public PlayerImpl(@Autowired String playerSessionId){
+  public PlayerImpl(GameContext context, String playerName, String playerSessionId){
+    this.context = context;
     this.playerSessionId = playerSessionId;
+    this.playerName = playerName;
   }
 
   @Override
-  public T addWarrior(T warrior) {
+  public Warrior addWarrior(Warrior warrior) {
     warriors.put(warrior.getId(), warrior);
+    context.fireGameEvent(null, WARRIOR_ADDED, this, Collections.singletonMap(WARRIOR_PARAM, warrior));
     return warrior;
   }
 
   @Override
-  public List<T> getWarriors() {
-    List<T> warriorsList = Collections.EMPTY_LIST;
-    warriorsList.addAll(warriors.values());
-    return warriorsList;
+  public List<Warrior> getWarriors() {
+    return new ArrayList(warriors.values());
   }
 
   @Override
@@ -47,12 +52,12 @@ public class PlayerImpl<T extends Warrior> implements Player<T>{
 
   @Override
   public String getTitle() {
-    return null;
+    return playerName;
   }
 
   @Override
   public String getDescription() {
-    return null;
+    return "";
   }
 
   @Override

@@ -1,8 +1,10 @@
 package core.entity.map;
 
-import api.core.Context;
+import api.core.GameContext;
 import api.entity.warrior.Warrior;
+import api.enums.EventType;
 import api.game.Coords;
+import api.game.GameEvent;
 import api.game.Rectangle;
 import api.game.map.LevelMap;
 import api.game.map.Player;
@@ -21,6 +23,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static api.enums.EventParamNames.WARRIOR_PARAM;
+import static api.enums.TargetTypeEnum.WARRIOR;
 
 /**
  * Игровая карта
@@ -39,7 +47,9 @@ public class LevelMapImpl implements LevelMap {
   private int maxPlayersCount;
   private List<Rectangle> playerStartZones;
   private Map<String, Player> players;
-  private Context context;
+  private GameContext context;
+  private boolean loaded = false;
+  private volatile AtomicBoolean ready = new AtomicBoolean(false);
 
   @Autowired
   BeanFactory beanFactory;
@@ -55,7 +65,7 @@ public class LevelMapImpl implements LevelMap {
   }
 
   @Override
-  public void init(Context gameContext, LevelMapMetaData levelMapMetaData) {
+  public void init(GameContext gameContext, LevelMapMetaData levelMapMetaData) {
     logger.info("map initializing started \"" + levelMapMetaData.name + "\" in context " + gameContext.getContextId());
     this.context = gameContext;
     this.name = levelMapMetaData.name;
@@ -72,6 +82,11 @@ public class LevelMapImpl implements LevelMap {
     );
 
     players = new ConcurrentHashMap<>(maxPlayersCount);
+
+    context.subscribeEvent(Stream.of(
+            EventType.WARRIOR_ADDED, EventType.PLAYER_REMOVED).collect(Collectors.toList()), this::checkForReady);
+
+    loaded = true;
     logger.info("map initializing succeed \"" + levelMapMetaData.name + "\" in context " + gameContext.getContextId());
   }
 
@@ -107,22 +122,23 @@ public class LevelMapImpl implements LevelMap {
               if (player.getWarriors().size() >= context.getGameRules().getMaxStartCreaturePerPlayer()) {
                 GameErrors.GAME_ERROR_TOO_MANY_UNITS_FOR_PLAYER.error(playerId, String.valueOf(context.getGameRules().getMaxStartCreaturePerPlayer()));
               }
+              warrior.initCoords(coords);
               return player.addWarrior(warrior);
             }).orElseThrow(() -> GameErrors.GAME_ERROR_UNKNOWN_USER_UID.getError(playerId));
   }
 
-  private Player createNewPlayer(String playerSessionId) {
+  private Player createNewPlayer(String playerName, String playerSessionId) {
     Player player = players.get(playerSessionId);
     if (player == null) {
       logger.info(String.format("creating new player %s in context %s", playerSessionId, context.getContextId()));
       if (players.size() < maxPlayersCount) {
-        player = beanFactory.getBean(Player.class, playerSessionId);
+        player = beanFactory.getBean(Player.class, context, playerName, playerSessionId);
         player.setStartZone(playerStartZones.get(players.size()));
         players.put(playerSessionId, player);
-        logger.info(String.format("New player %s was created in context %s. Context now contains %s player(s)"
+        logger.info(String.format("New player %s was created in context %s. GameContext now contains %s player(s)"
                 , playerSessionId, context.getContextId(), players.size()));
       } else {
-        logger.info(String.format("player %s can't be created due all player slots in context %s are busy"
+        logger.info(String.format("player %s can't be created because all player's slots in context %s are busy"
                 , playerSessionId, context.getContextId()));
       }
     } else {
@@ -132,9 +148,9 @@ public class LevelMapImpl implements LevelMap {
   }
 
   @Override
-  public Player connectPlayer(String playerSessionId) {
-    logger.info(String.format("connecting player %s to context %s", playerSessionId, context.getContextId()));
-    return Optional.ofNullable(players.get(playerSessionId)).orElse(createNewPlayer(playerSessionId));
+  public Player connectPlayer(String playerName, String playerSessionId) {
+    logger.info(String.format("connecting player %s with sessionId %s to context %s", playerName, playerSessionId, context.getContextId()));
+    return createNewPlayer(playerName, playerSessionId);
   }
 
   @Override
@@ -150,5 +166,35 @@ public class LevelMapImpl implements LevelMap {
   @Override
   public Player getPlayer(String playerId) {
     return players.get(playerId);
+  }
+
+  @Override
+  public boolean isLoaded() {
+    return loaded;
+  }
+
+  @Override
+  public boolean isReady() {
+    return ready.get();
+  }
+
+  private void checkForReady(GameEvent event){
+    switch (event.getEventType())
+    {
+      case WARRIOR_ADDED : {
+        logger.info(event.getEventType().getFormattedMessage(context.getGameName(), context.getContextId()
+        , event.getSource().getTitle(), ((Warrior)event.getParams().get(WARRIOR_PARAM)).getWarriorBaseClass().getTitle() ));
+
+        break;
+      }
+      case PLAYER_REMOVED: {
+        logger.info(event.getEventType().getFormattedMessage(event.getSource().getTitle(), context.getGameName(), context.getContextId()));
+        break;
+      }
+    }
+    ready.set(players.size() == maxPlayersCount
+            && players.values().stream()
+            .reduce(true, (rd, player) ->  rd &= player.getWarriors().size() == context.getGameRules().getMaxStartCreaturePerPlayer()
+            , (rd2, rd3) -> rd2));
   }
 }

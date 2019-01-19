@@ -1,6 +1,6 @@
 package api.entity.ability;
 
-import api.core.Context;
+import api.core.GameContext;
 import api.entity.base.BaseEntityHeader;
 import api.entity.warrior.WarriorBaseClass;
 import api.enums.EventType;
@@ -15,14 +15,14 @@ public interface Ability extends BaseEntityHeader {
    * применить способность
    * @return
    */
-  boolean applay(Context context);
+  boolean applay(GameContext context);
 
   /**
    * Отменить действие способности
    * @param context
    * @return
    */
-  boolean rollback(Context context);
+  boolean rollback(GameContext context);
 
   /**
    * Доступна ли способность в данном собитии

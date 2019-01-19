@@ -2,7 +2,7 @@ package core.entity.warrior;
 
 
 import api.WarriorSBaseAttributes;
-import api.core.Context;
+import api.core.GameContext;
 import api.entity.ability.Ability;
 import api.entity.warrior.WarriorBaseClass;
 import api.entity.warrior.WarriorSHand;
@@ -23,7 +23,6 @@ public abstract class AbstractBaseWarriorClass implements WarriorBaseClass {
   protected String id = UUID.randomUUID().toString();
   protected String title;
   protected String description;
-  protected Map<Integer, WarriorSHand> hands = new ConcurrentHashMap(2);
   protected WarriorSBaseAttributes warriorSBaseAttributes;
   protected List<Class<? extends Weapon>> supportedWeapons;
 
@@ -36,7 +35,7 @@ public abstract class AbstractBaseWarriorClass implements WarriorBaseClass {
 
   @Override
   public void setWarriorSBaseAttributes(WarriorSBaseAttributes warriorSBaseAttributes) {
-    if (warriorSBaseAttributes != null) {
+    if (this.warriorSBaseAttributes != null) {
       GAME_ERROR_BASE_WARRIOR_S_ATTRS_IS_FINAL.error();
     } else {
       this.warriorSBaseAttributes =  warriorSBaseAttributes;
@@ -60,11 +59,6 @@ public abstract class AbstractBaseWarriorClass implements WarriorBaseClass {
   }
 
   @Override
-  public List<WarriorSHand> getHands() {
-    return new LinkedList(hands.values());
-  }
-
-  @Override
   public WarriorSBaseAttributes getBaseAttributes() {
     return null;
   }
@@ -75,12 +69,12 @@ public abstract class AbstractBaseWarriorClass implements WarriorBaseClass {
   }
 
   @Override
-  public boolean finishRound(Context context) {
+  public boolean finishRound(GameContext context) {
     return false;
   }
 
   @Override
-  public boolean startRound(Context context) {
+  public boolean startRound(GameContext context) {
     return false;
   }
 

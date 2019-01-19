@@ -1,7 +1,7 @@
 package api.entity.warrior;
 
 import api.WarriorSBaseAttributes;
-import api.core.Context;
+import api.core.GameContext;
 import api.entity.weapon.Weapon;
 import api.game.GameEvent;
 import api.entity.ability.Ability;
@@ -14,12 +14,6 @@ import java.util.List;
  * Базовый класс воина
  */
 public interface WarriorBaseClass extends BaseEntityHeader {
-  /**
-   * Возвращает руки воина со всем снаряжением в них
-   * @return
-   */
-  List<WarriorSHand> getHands();
-
   /**
    * Возвращает значение параметроввоина
    * @return
@@ -37,14 +31,14 @@ public interface WarriorBaseClass extends BaseEntityHeader {
    * @param context
    * @return
    */
-  boolean finishRound(Context context);
+  boolean finishRound(GameContext context);
 
   /**
    * начать раунд игрока
    * @param context
    * @return
    */
-  boolean startRound(Context context);
+  boolean startRound(GameContext context);
 
   /**
    * Использовался ли юнит в этом ходе

@@ -1,28 +1,26 @@
 package api.game;
 
-import api.core.Context;
+import api.core.GameContext;
 import api.entity.base.BaseEntityHeader;
 import api.enums.EventType;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+
+import java.util.Map;
 
 public class GameEvent {
-  @Autowired
-  protected Context context;
 
+  protected GameContext sourceContext;
   protected EventType eventType;
   protected GameEvent causeEvent;
   protected BaseEntityHeader source;
-  protected BaseEntityHeader tool;
   protected Object error;
-
+  protected Map<String, Object> params;
   /**
    * Получить контекст
    *
    * @return
    */
-  public Context getContext() {
-    return context;
+  public GameContext getSourceContext() {
+    return sourceContext;
   }
 
   /**
@@ -53,15 +51,6 @@ public class GameEvent {
   }
 
   /**
-   * Посредством чего происходит влияние. Оружие, способность,заклинание
-   *
-   * @return
-   */
-  public BaseEntityHeader getTool() {
-    return tool;
-  }
-
-  /**
    * Ошибка, если была
    *
    * @return
@@ -79,52 +68,44 @@ public class GameEvent {
     error = errorObject;
   }
 
-  public GameEvent() {
-  }
-
   /**
-   * инициализация переменных собятия
-   * @param eventType
-   * @param causeEvent
-   * @param source
-   * @param tool
+   * Получить набор параметров события.
    * @return
    */
-  public GameEvent init(EventType eventType,
-                        GameEvent causeEvent,
-                        BaseEntityHeader source,
-                        BaseEntityHeader tool) {
+  public Map<String, Object> getParams(){
+    return params;
+  }
+
+
+  /**
+   *
+   * @param sourceContext
+   * @param causeEvent
+   * @param eventType
+   * @param source
+   * @param params
+   */
+  public GameEvent(
+          GameContext sourceContext
+          , GameEvent causeEvent
+          , EventType eventType
+          , BaseEntityHeader source
+          , Map<String, Object> params) {
+    this.sourceContext = sourceContext;
     this.eventType = eventType;
     this.source = source;
     this.causeEvent = causeEvent;
-    this.tool = tool;
-    return this;
+    this.causeEvent = causeEvent;
+    this.params = params;
   }
 
   /**
    * инициировать обработку события
+   *
    * @return
    */
-  GameEvent fire(){
-    context.fireGameEvent(this);
+  GameEvent fire() {
+    sourceContext.fireGameEvent(this);
     return this;
   }
-
-  /**
-   * Новая инстанция события
-   * @return
-   */
-  public static GameEvent newInstance(){
-    GameEvent event = new GameEvent();
-    SpringBeanAutowiringSupport.processInjectionBasedOnCurrentContext(event);
-    return event;
-  }
-
-  public static GameEvent newInstance(EventType eventType,
-                                      GameEvent causeEvent,
-                                      BaseEntityHeader source,
-                                      BaseEntityHeader tool){
-    return newInstance().init(eventType, causeEvent, source, tool);
-  }
-
 }
