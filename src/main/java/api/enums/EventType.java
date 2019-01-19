@@ -18,9 +18,10 @@ public enum EventType {
   DEFENCE_AFTER("Перед защитой"),
   DEFENCE_BEFORE("После защиты")
 
-  ,WARRIOR_ADDED("В игре %s (контекст %s) игроком %s добавлен воин %s")
-  ,WARRIOR_SUMMONED("В игре %s (контекст %s) игроком %s призван воин %s с %s очками жизни")
-  ,PLAYER_REMOVED("Игрок %s покинул игру %s  (контекст %s)")
+  ,WARRIOR_ADDED("В игре '%s' (контекст '%s') игроком '%s' добавлен воин '%s'")
+  ,WARRIOR_SUMMONED("В игре '%s' (контекст '%s') игроком '%s' призван воин '%s' с '%s' очками жизни")
+  ,PLAYER_REMOVED("Игрок '%s' покинул игру '%s'  (контекст '%s')")
+  , WARRIOR_MOVED("В игре '%s' игрок '%s' переместил юнит '%s' на координаты '%s'")
   ;
 
   private String caption;

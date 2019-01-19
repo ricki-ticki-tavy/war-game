@@ -119,7 +119,7 @@ public class GameContextImpl implements GameContext {
   public Warrior createWarrior(String playerId, Class<? extends WarriorBaseClass> baseWarriorClass) {
     return Optional.ofNullable(levelMap.getPlayer(playerId))
             .map(player -> {
-              Warrior warrior = beanFactory.getBean(Warrior.class, beanFactory.getBean(baseWarriorClass), "", false);
+              Warrior warrior = beanFactory.getBean(Warrior.class, this, player, beanFactory.getBean(baseWarriorClass), "", false);
               levelMap.addWarrior(playerId, player.getStartZone().getTopLeftConner(), warrior);
               return warrior;
             })
@@ -135,7 +135,7 @@ public class GameContextImpl implements GameContext {
   }
 
   @Override
-  public String subscribeEvent(List<EventType> eventTypes, Consumer<GameEvent> consumer) {
-    return core.subscribeEvent(this, eventTypes, consumer);
+  public String subscribeEvent(Consumer<GameEvent> consumer, EventType... eventTypes) {
+    return core.subscribeEvent(this, consumer, eventTypes);
   }
 }

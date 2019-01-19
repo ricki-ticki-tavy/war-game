@@ -46,6 +46,8 @@ public class Game {
     Assert.notNull(player, "Игрок не создан");
     Assert.isTrue(context.getLevelMap().getPlayers().size() == 2, "Игрок был создан На месте первого");
 
+    core.removeGameContext(context);
+    Assert.isTrue(core.findGameContextByUID(context.getContextId()) == null, "Контекст не удален");
     return true;
   }
 

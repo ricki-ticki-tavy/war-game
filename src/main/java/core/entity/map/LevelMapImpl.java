@@ -83,8 +83,7 @@ public class LevelMapImpl implements LevelMap {
 
     players = new ConcurrentHashMap<>(maxPlayersCount);
 
-    context.subscribeEvent(Stream.of(
-            EventType.WARRIOR_ADDED, EventType.PLAYER_REMOVED).collect(Collectors.toList()), this::checkForReady);
+    context.subscribeEvent(this::checkForReady, EventType.WARRIOR_ADDED, EventType.PLAYER_REMOVED);
 
     loaded = true;
     logger.info("map initializing succeed \"" + levelMapMetaData.name + "\" in context " + gameContext.getContextId());
@@ -122,8 +121,9 @@ public class LevelMapImpl implements LevelMap {
               if (player.getWarriors().size() >= context.getGameRules().getMaxStartCreaturePerPlayer()) {
                 GameErrors.GAME_ERROR_TOO_MANY_UNITS_FOR_PLAYER.error(playerId, String.valueOf(context.getGameRules().getMaxStartCreaturePerPlayer()));
               }
-              warrior.initCoords(coords);
-              return player.addWarrior(warrior);
+              player.addWarrior(warrior);
+              warrior.moveTo(coords);
+              return warrior;
             }).orElseThrow(() -> GameErrors.GAME_ERROR_UNKNOWN_USER_UID.getError(playerId));
   }
 
@@ -179,19 +179,6 @@ public class LevelMapImpl implements LevelMap {
   }
 
   private void checkForReady(GameEvent event){
-    switch (event.getEventType())
-    {
-      case WARRIOR_ADDED : {
-        logger.info(event.getEventType().getFormattedMessage(context.getGameName(), context.getContextId()
-        , event.getSource().getTitle(), ((Warrior)event.getParams().get(WARRIOR_PARAM)).getWarriorBaseClass().getTitle() ));
-
-        break;
-      }
-      case PLAYER_REMOVED: {
-        logger.info(event.getEventType().getFormattedMessage(event.getSource().getTitle(), context.getGameName(), context.getContextId()));
-        break;
-      }
-    }
     ready.set(players.size() == maxPlayersCount
             && players.values().stream()
             .reduce(true, (rd, player) ->  rd &= player.getWarriors().size() == context.getGameRules().getMaxStartCreaturePerPlayer()

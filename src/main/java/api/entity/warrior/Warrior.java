@@ -2,6 +2,7 @@ package api.entity.warrior;
 
 import api.entity.base.BaseEntityHeader;
 import api.game.Coords;
+import api.game.map.Player;
 
 import java.util.List;
 
@@ -28,9 +29,20 @@ public interface Warrior extends BaseEntityHeader{
   List<WarriorSHand> getHands();
 
   /**
-   * Задать начальные координаты
+   * Перемещает юнит в заданные координаты
    * @param coords
    */
-  void initCoords(Coords coords);
+  Warrior moveTo(Coords coords);
 
+  /**
+   * Получить игрока - владельца юнита
+   * @return
+   */
+  Player getOwner();
+
+  /**
+   * Получить координаты юнита
+   * @return
+   */
+  Coords getCoords();
 }

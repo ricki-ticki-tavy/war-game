@@ -26,6 +26,19 @@ public interface Core {
   GameContext createGameContext(String userGameCreator, GameRules gameRules, InputStream map, String gameName, boolean hidden);
 
   /**
+   * Найти контекст по его UID
+   * @param contextId
+   * @return
+   */
+  GameContext findGameContextByUID(String contextId);
+
+  /**
+   * Удалить игру и ее контекст с сервера
+   * @param context
+   */
+  void removeGameContext(GameContext context);
+
+  /**
    * Отправить сообщение о событии
    *
    * @param event
@@ -37,11 +50,11 @@ public interface Core {
    * Подписаться на событие
    *
    * @param context    контекст, в рамках которого интересует данное событие. Если null, то по всем контекстам
-   * @param eventTypes
    * @param consumer
+   * @param eventTypes
    * @return
    */
-  String subscribeEvent(GameContext context, List<EventType> eventTypes, Consumer<GameEvent> consumer);
+  String subscribeEvent(GameContext context, Consumer<GameEvent> consumer,  EventType... eventTypes);
 
 //  void unsubscribeEvent(GameContext context, Consumer<GameEvent> consumer);
 }

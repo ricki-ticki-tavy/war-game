@@ -13,13 +13,14 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.io.InputStream;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
+import static api.enums.EventType.PLAYER_REMOVED;
+import static api.enums.EventType.WARRIOR_ADDED;
+import static api.enums.EventType.WARRIOR_MOVED;
 import static core.game.GameContextImpl.NULL_GAME_CONTEXT;
 
 /**
@@ -42,6 +43,9 @@ public class CoreImpl implements Core {
   @Autowired
   BeanFactory beanFactory;
 
+  @Autowired
+  GameEventLogger gameEventLogger;
+
   @Override
   public GameContext createGameContext(String userGameCreator, GameRules gameRules
           , InputStream map, String gameName, boolean hidden) {
@@ -51,8 +55,23 @@ public class CoreImpl implements Core {
     return context;
   }
 
+  @Override
+  public GameContext findGameContextByUID(String contextId) {
+    return contextMap.get(contextId);
+  }
+
+  @Override
+  public void removeGameContext(GameContext context) {
+    Optional.ofNullable(contextMap.get(context.getContextId()))
+            .ifPresent(foundContext -> {
+              contextMap.remove(foundContext.getContextId());
+              eventConsumers.remove(foundContext);
+            });
+  }
+
   @PostConstruct
   public void init() {
+    subscribeEvent(null, this::eventLogger, WARRIOR_MOVED, PLAYER_REMOVED, WARRIOR_ADDED);
   }
 
   @Override
@@ -87,7 +106,7 @@ public class CoreImpl implements Core {
   }
 
   @Override
-  public String subscribeEvent(GameContext context, List<EventType> eventTypes, Consumer<GameEvent> consumer) {
+  public String subscribeEvent(GameContext context, Consumer<GameEvent> consumer,  EventType... eventTypes) {
     if (context == null) {
       context = NULL_GAME_CONTEXT;
     }
@@ -97,12 +116,16 @@ public class CoreImpl implements Core {
     Map<EventType, Map<String, Consumer<GameEvent>>> contextConsumers = eventConsumers
             .computeIfAbsent(context, keyContext -> new ConcurrentHashMap<>(EventType.values().length));
 
-    eventTypes.stream().forEach(eventType -> {
+    Stream.of(eventTypes).forEach(eventType -> {
       contextConsumers
               .computeIfAbsent(eventType, keyEventType -> new ConcurrentHashMap<>(20))
               .put(consumerUID, consumer);
     });
     return consumerUID;
+  }
+
+  private void eventLogger(GameEvent event){
+    gameEventLogger.logGameEvent(event);
   }
 
 }

@@ -124,6 +124,6 @@ public interface GameContext {
    * @param consumer
    * @return
    */
-  String subscribeEvent(List<EventType> eventTypes, Consumer<GameEvent> consumer);
+  String subscribeEvent(Consumer<GameEvent> consumer, EventType... eventTypes);
 
 }

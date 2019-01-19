@@ -1,5 +1,7 @@
 package api.game;
 
+import org.apache.logging.log4j.util.Strings;
+
 /**
  * Координаты
  */
@@ -22,5 +24,15 @@ public class Coords {
 
   public int getY() {
     return y;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return obj instanceof Coords && this.x == ((Coords)obj).x && this.y == ((Coords)obj).y;
+  }
+
+  @Override
+  public String toString() {
+    return x + ":" + y;
   }
 }
