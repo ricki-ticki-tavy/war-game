@@ -71,7 +71,7 @@ public class Game {
     Assert.isTrue(warrior.getWeapons().size() == 0, "У воина присутствует удаленное второе оружие");
 
     Result resultBow = warrior.takeWeapon(Bow.class);
-    Assert.isTrue(result.isSuccess(), "Ошибка добавления лука (единственного оружия)");
+    Assert.isTrue(resultBow.isSuccess(), "Ошибка добавления лука (единственного оружия)");
     Assert.isTrue(warrior.getWeapons().size() == 1, "У воина отсутствует лук");
 
     resultW2 = warrior.takeWeapon(Sword.class);
