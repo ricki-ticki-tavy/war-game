@@ -69,6 +69,16 @@ public class EventLogger {
                 , event.getSource(Result.class).toString()));
         break;
       }
+      case WEAPON_TRY_TO_DROP: {
+        // "В игре '%s' игрок '%s' попытался убрать у юнита '%s' (id '%s') оружие id '%s'. %s"
+        logger.info(event.getEventType().getFormattedMessage(event.getSourceContext().getGameName()
+                , event.getSource(Warrior.class).getOwner().getTitle()
+                , event.getSource(Warrior.class).getWarriorBaseClass().getTitle()
+                , event.getSource(Warrior.class).getWarriorBaseClass().getId()
+                , event.getSource(String.class)
+                , event.getSource(Result.class).toString()));
+        break;
+      }
       case WEAPON_DROPED: {
         // "В игре '%s' игрок '%s' убрал у юнита '%s' (id '%s') оружие '%s' (id '%s'). %s"
         logger.info(event.getEventType().getFormattedMessage(event.getSourceContext().getGameName()

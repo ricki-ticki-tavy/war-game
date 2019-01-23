@@ -26,7 +26,14 @@ public interface WarriorSHand {
    * @param weaponInstanceId
    * @return
    */
-  boolean removeWeapon(String weaponInstanceId);
+  Weapon removeWeapon(String weaponInstanceId);
+
+  /**
+   * Проверить наличия у юнита оружия с заданным id
+   * @param weaponInstanceId
+   * @return
+   */
+  boolean hasWeapon(String weaponInstanceId);
 
   /**
    * Признак, что рука своодна

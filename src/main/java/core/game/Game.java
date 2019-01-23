@@ -4,9 +4,11 @@ import api.core.Context;
 import api.core.Core;
 import api.core.Result;
 import api.entity.warrior.Warrior;
+import api.entity.weapon.Weapon;
 import api.game.map.Player;
 import api.game.map.metadata.GameRules;
 import core.entity.warrior.Viking;
+import core.entity.weapon.Bow;
 import core.entity.weapon.ShortSword;
 import core.entity.weapon.Sword;
 import org.slf4j.Logger;
@@ -40,17 +42,41 @@ public class Game {
     Assert.notNull(warrior, "Воин не создан");
     Assert.isTrue(warrior == player.getWarriors().get(0), "Созданный воин и воин на карте не равны");
 
-    Result result = warrior.takeWeapon(ShortSword.class);
-    Assert.isTrue(result.isSuccess(), "Ошибка добавления короткого меча (первого оружия)");
+    Result resultW1 = warrior.takeWeapon(ShortSword.class);
+    Assert.isTrue(resultW1.isSuccess(), "Ошибка добавления короткого меча (первого оружия)");
     Assert.isTrue(warrior.getWeapons().size() == 1, "У воина отсутствует добавленное оружие");
 
-    result = warrior.takeWeapon(Sword.class);
-    Assert.isTrue(result.isSuccess(), "Ошибка добавления меча (второго оружия)");
+    Result resultW2 = warrior.takeWeapon(Sword.class);
+    Assert.isTrue(resultW2.isSuccess(), "Ошибка добавления меча (второго оружия)");
     Assert.isTrue(warrior.getWeapons().size() == 2, "У воина отсутствует второе добавленное оружие");
 
-    result = warrior.takeWeapon(Sword.class);
+    Result result = warrior.takeWeapon(Sword.class);
     Assert.isTrue(result.isFail(), "Ошибка добавления меча (третьего оружия). Оружие не должно быть добавлено ");
     Assert.isTrue(warrior.getWeapons().size() == 2, "У воина присутствует третье добавленное оружие");
+
+    result = warrior.dropWeapon(((Weapon)resultW1.getResult()).getId());
+    Assert.isTrue(result.isSuccess(), "Ошибка удаления короткого меча (первого оружия)");
+    Assert.isTrue(warrior.getWeapons().size() == 1, "У воина присутствует удаленное первое оружие");
+
+    result = warrior.dropWeapon(((Weapon)resultW1.getResult()).getId());
+    Assert.isTrue(result.isFail(), "Ошибка повторного удаления ранее удаленного оружия (короткого меча (первого оружия))");
+    Assert.isTrue(warrior.getWeapons().size() == 1, "У воина неверное кол-во оружияпосле удаления первое оружие");
+
+    result = warrior.takeWeapon(Bow.class);
+    Assert.isTrue(result.isFail(), "Ошибка добавления лука (третьего оружия). Оружие не должно быть добавлено ");
+    Assert.isTrue(warrior.getWeapons().size() == 1, "У воина присутствует лук. третье добавленное оружие");
+
+    result = warrior.dropWeapon(((Weapon)resultW2.getResult()).getId());
+    Assert.isTrue(result.isSuccess(), "Ошибка удаления меча (второго оружия)");
+    Assert.isTrue(warrior.getWeapons().size() == 0, "У воина присутствует удаленное второе оружие");
+
+    Result resultBow = warrior.takeWeapon(Bow.class);
+    Assert.isTrue(result.isSuccess(), "Ошибка добавления лука (единственного оружия)");
+    Assert.isTrue(warrior.getWeapons().size() == 1, "У воина отсутствует лук");
+
+    resultW2 = warrior.takeWeapon(Sword.class);
+    Assert.isTrue(resultW2.isFail(), "Ошибка добавления меча (третьего оружия). Оружие не должно быть добавлено ");
+    Assert.isTrue(warrior.getWeapons().size() == 1, "У воина присутствует не добавленное оружие");
 
     player = context.connectPlayer("test", "testSession1");
     Assert.notNull(player, "Игрок не переподключен");

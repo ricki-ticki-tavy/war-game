@@ -53,12 +53,12 @@ public class ResultImpl implements Result {
     return  success;
   }
 
-  public Optional<GameError> getError(){
-    return Optional.ofNullable(error);
+  public GameError getError(){
+    return error;
   }
 
-  public Optional<Object> getResult(){
-    return Optional.ofNullable(result);
+  public Object getResult(){
+    return result;
   }
 
   @Override

@@ -9,9 +9,7 @@ import api.entity.weapon.Weapon;
 import api.game.Coords;
 import api.game.EventDataContainer;
 import api.game.map.Player;
-import core.entity.warrior.base.WarriorSHandImpl;
 import core.system.ResultImpl;
-import core.system.error.GameErrors;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -22,8 +20,9 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static api.enums.EventType.WARRIOR_MOVED;
-import static api.enums.EventType.WEAPON_TAKEN;
+import static api.enums.EventType.*;
+import static core.system.error.GameErrors.ALL_WARRIOR_S_HANDS_ARE_BUSY;
+import static core.system.error.GameErrors.WARRIOR_HAS_NOT_WEAPON;
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -49,7 +48,7 @@ public class WarriorImpl implements Warrior {
     this.player = player;
     int handsCount = warriorBaseClass.getHandsCount();
     hands = new ConcurrentHashMap(2);
-    while (handsCount-- > 0){
+    while (handsCount-- > 0) {
       hands.put(hands.size(), new WarriorSHandImpl());
     }
   }
@@ -71,11 +70,11 @@ public class WarriorImpl implements Warrior {
 
   @Override
   public List<Weapon> getWeapons() {
-    List<Weapon> weaponList = new ArrayList<>(5);
+    Set<Weapon> weaponSet = new HashSet<>(5);
     hands.values().stream().forEach(hand ->
-    hand.getWeapons().stream().forEach(weapon -> weaponList.add(weapon)));
+            hand.getWeapons().stream().forEach(weapon -> weaponSet.add(weapon)));
 
-    return weaponList;
+    return new ArrayList<>(weaponSet);
   }
 
   @Override
@@ -118,7 +117,7 @@ public class WarriorImpl implements Warrior {
       if (weapon.getNeededHandsCountToTakeWeapon() > 0) {
         int freePoints = 2 - hands.values().stream().map(hand -> hand.isFree() ? 0 : 1).reduce(0, (acc, chg) -> acc += chg);
         if (freePoints < weapon.getNeededHandsCountToTakeWeapon()) {
-          result = ResultImpl.fail(GameErrors.ALL_WARRIOR_S_HANDS_ARE_BUSY.getError(String.valueOf(freePoints)
+          result = ResultImpl.fail(ALL_WARRIOR_S_HANDS_ARE_BUSY.getError(String.valueOf(freePoints)
                   , weapon.getTitle()
                   , String.valueOf(weapon.getNeededHandsCountToTakeWeapon())));
           return result;
@@ -133,7 +132,7 @@ public class WarriorImpl implements Warrior {
                 points.decrementAndGet();
                 hand.addWeapon(weapon);
               });
-      result = ResultImpl.success(true);
+      result = ResultImpl.success(weapon);
       return result;
     } finally {
       gameContext.fireGameEvent(null, WEAPON_TAKEN, new EventDataContainer(this, weapon, result), null);
@@ -142,6 +141,15 @@ public class WarriorImpl implements Warrior {
 
   @Override
   public Result dropWeapon(String weaponInstanceId) {
-    return null;
+    Result result = hands.values().stream().filter(hand -> hand.hasWeapon(weaponInstanceId)).findFirst()
+            .map(warriorSHand -> ResultImpl.success(warriorSHand.removeWeapon(weaponInstanceId)))
+            .orElse(ResultImpl.fail(WARRIOR_HAS_NOT_WEAPON.getError(weaponInstanceId)));
+
+    gameContext.fireGameEvent(null
+            , result.isSuccess() ? WEAPON_DROPED : WEAPON_TRY_TO_DROP
+            , new EventDataContainer(this, result.isSuccess() ? result.getResult() : weaponInstanceId, result)
+            , null);
+
+    return result;
   }
 }

@@ -48,7 +48,7 @@ public class Event {
    *
    * @return
    */
-  public <T extends BaseEntityHeader> T  getSource(Class<T> clazz) {
+  public <T extends Object> T  getSource(Class<T> clazz) {
     return source.get(clazz);
   }
 
@@ -57,7 +57,7 @@ public class Event {
    *
    * @return
    */
-  public <T extends BaseEntityHeader> T  getTarget(Class<T> clazz) {
+  public <T extends Object> T  getTarget(Class<T> clazz) {
     return target.get(clazz);
   }
 

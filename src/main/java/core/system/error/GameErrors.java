@@ -6,6 +6,7 @@ public enum GameErrors {
   , UNKNOWN_EVENT_FOR_LOGGER("U-2", "Неизвестный для логирования тип события %s")
   , TOO_MANY_UNITS_FOR_PLAYER("O-1", "Пользователь с UID %s уже имеет максимальное кол-во воинов %s.")
   , ALL_WARRIOR_S_HANDS_ARE_BUSY("I-1", "Руки воина имеют свободных %s мест, а оружие '%s' требует %s места")
+  , WARRIOR_HAS_NOT_WEAPON("U-3", "Воин не имеет оружия с id '%s'")
   ;
 
   private GameError error;

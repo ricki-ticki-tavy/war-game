@@ -4,6 +4,8 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 /**
  * Короткий меч
  */
@@ -11,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ShortSword extends AbstractWeapon{
 
-  private static final String OUID = "WepShSwd_001";
+  private static final String OUID = "WepShSwd_" + UUID.randomUUID().toString();
 
   public ShortSword(){
     super();

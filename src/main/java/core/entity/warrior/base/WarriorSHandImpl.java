@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Рука воина. Вернее то, что в ней содержится
  */
 public class WarriorSHandImpl implements WarriorSHand{
-  private Map<Integer, Weapon> weapons = new ConcurrentHashMap<>(3);
+  private Map<String, Weapon> weapons = new ConcurrentHashMap<>(3);
 
   @Override
   public List<Weapon> getWeapons() {
@@ -29,11 +29,16 @@ public class WarriorSHandImpl implements WarriorSHand{
 
   @Override
   public void addWeapon(Weapon weapon) {
-    weapons.put(weapons.size(), weapon);
+    weapons.put(weapon.getId(), weapon);
   }
 
   @Override
-  public boolean removeWeapon(String weaponInstanceId) {
-    return false;
+  public boolean hasWeapon(String weaponInstanceId) {
+    return weapons.containsKey(weaponInstanceId);
+  }
+
+  @Override
+  public Weapon removeWeapon(String weaponInstanceId) {
+    return weapons.remove(weaponInstanceId);
   }
 }

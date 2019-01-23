@@ -14,7 +14,7 @@ public interface Result extends BaseEntityHeader{
 
   boolean isSuccess();
 
-  Optional<GameError> getError();
+  GameError getError();
 
-  Optional<Object> getResult();
+  Object getResult();
 }

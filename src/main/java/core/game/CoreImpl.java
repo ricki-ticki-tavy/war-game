@@ -70,7 +70,7 @@ public class CoreImpl implements Core {
   @PostConstruct
   public void init() {
     subscribeEvent(null, this::eventLogger, PLAYER_ADDED, PLAYER_REMOVED, WARRIOR_MOVED, PLAYER_REMOVED
-            , WARRIOR_ADDED, WEAPON_TAKEN, WEAPON_DROPED);
+            , WARRIOR_ADDED, WEAPON_TAKEN, WEAPON_TRY_TO_DROP, WEAPON_DROPED);
   }
 
   @Override
