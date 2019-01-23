@@ -1,9 +1,9 @@
 package core.game;
 
 import api.core.Core;
-import api.core.GameContext;
+import api.core.Context;
 import api.enums.EventType;
-import api.game.GameEvent;
+import api.game.Event;
 import api.game.map.metadata.GameRules;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,10 +18,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import static api.enums.EventType.PLAYER_REMOVED;
-import static api.enums.EventType.WARRIOR_ADDED;
-import static api.enums.EventType.WARRIOR_MOVED;
-import static core.game.GameContextImpl.NULL_GAME_CONTEXT;
+import static api.enums.EventType.*;
+import static core.game.ContextImpl.NULL_GAME_CONTEXT;
 
 /**
  * Игровой движок. Все операции выполняютсяв рамках динамического игрового контекста
@@ -31,37 +29,37 @@ public class CoreImpl implements Core {
 
   private static final Logger logger = LoggerFactory.getLogger(CoreImpl.class);
 
-  private Map<String, GameContext> contextMap = new ConcurrentHashMap<>(10);
+  private Map<String, Context> contextMap = new ConcurrentHashMap<>(10);
 
   /**
    * групировка по контекстам, далее внутри групировка по типам событий. Один и тот же потребитель может
    * быть в разных группах одновременно. Последний мэп - UID потребителя для возможности отписки даже лямды
    */
-  private Map<GameContext, Map<EventType, Map<String, Consumer<GameEvent>>>> eventConsumers =
+  private Map<Context, Map<EventType, Map<String, Consumer<Event>>>> eventConsumers =
           new ConcurrentHashMap<>(10);
 
   @Autowired
   BeanFactory beanFactory;
 
   @Autowired
-  GameEventLogger gameEventLogger;
+  EventLogger gameEventLogger;
 
   @Override
-  public GameContext createGameContext(String userGameCreator, GameRules gameRules
+  public Context createGameContext(String userGameCreator, GameRules gameRules
           , InputStream map, String gameName, boolean hidden) {
-    GameContext context = beanFactory.getBean(GameContext.class);
+    Context context = beanFactory.getBean(Context.class);
     context.loadMap(userGameCreator, gameRules, map, gameName, hidden);
     contextMap.put(context.getContextId(), context);
     return context;
   }
 
   @Override
-  public GameContext findGameContextByUID(String contextId) {
+  public Context findGameContextByUID(String contextId) {
     return contextMap.get(contextId);
   }
 
   @Override
-  public void removeGameContext(GameContext context) {
+  public void removeGameContext(Context context) {
     Optional.ofNullable(contextMap.get(context.getContextId()))
             .ifPresent(foundContext -> {
               contextMap.remove(foundContext.getContextId());
@@ -71,7 +69,8 @@ public class CoreImpl implements Core {
 
   @PostConstruct
   public void init() {
-    subscribeEvent(null, this::eventLogger, WARRIOR_MOVED, PLAYER_REMOVED, WARRIOR_ADDED);
+    subscribeEvent(null, this::eventLogger, PLAYER_ADDED, PLAYER_REMOVED, WARRIOR_MOVED, PLAYER_REMOVED
+            , WARRIOR_ADDED, WEAPON_TAKEN, WEAPON_DROPED);
   }
 
   @Override
@@ -85,7 +84,7 @@ public class CoreImpl implements Core {
    *
    * @param event
    */
-  private void fireEventInContext(GameContext fireInContext, GameEvent event) {
+  private void fireEventInContext(Context fireInContext, Event event) {
     Optional.ofNullable(eventConsumers.get(fireInContext))
             .ifPresent(consumerMap -> Optional.ofNullable(consumerMap.get(event.getEventType()))
                     .ifPresent(uidToConsumerMap -> uidToConsumerMap.values().stream()
@@ -99,21 +98,21 @@ public class CoreImpl implements Core {
    * @return
    */
   @Override
-  public GameEvent fireEvent(GameEvent event) {
+  public Event fireEvent(Event event) {
     fireEventInContext(event.getSourceContext(), event);
     fireEventInContext(NULL_GAME_CONTEXT, event);
     return event;
   }
 
   @Override
-  public String subscribeEvent(GameContext context, Consumer<GameEvent> consumer,  EventType... eventTypes) {
+  public String subscribeEvent(Context context, Consumer<Event> consumer, EventType... eventTypes) {
     if (context == null) {
       context = NULL_GAME_CONTEXT;
     }
 
     String consumerUID = UUID.randomUUID().toString();
 
-    Map<EventType, Map<String, Consumer<GameEvent>>> contextConsumers = eventConsumers
+    Map<EventType, Map<String, Consumer<Event>>> contextConsumers = eventConsumers
             .computeIfAbsent(context, keyContext -> new ConcurrentHashMap<>(EventType.values().length));
 
     Stream.of(eventTypes).forEach(eventType -> {
@@ -124,7 +123,7 @@ public class CoreImpl implements Core {
     return consumerUID;
   }
 
-  private void eventLogger(GameEvent event){
+  private void eventLogger(Event event){
     gameEventLogger.logGameEvent(event);
   }
 

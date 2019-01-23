@@ -1,6 +1,6 @@
 package api.game.map;
 
-import api.core.GameContext;
+import api.core.Context;
 import api.entity.warrior.Warrior;
 import api.game.Coords;
 import api.game.Rectangle;
@@ -92,7 +92,7 @@ public interface LevelMap {
   /**
    * Инициализация карты
    */
-  void init(GameContext gameContext, LevelMapMetaData levelMapMetaData);
+  void init(Context gameContext, LevelMapMetaData levelMapMetaData);
 
   /**
    * Признак успешно липодготовлена карта

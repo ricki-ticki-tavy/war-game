@@ -1,8 +1,9 @@
 package core.entity.warrior;
 
-import api.WarriorSBaseAttributes;
 import api.enums.ArmorClassEnum;
-import core.entity.weapon.LongSword;
+import core.entity.warrior.base.AbstractBaseWarriorClass;
+import core.entity.warrior.base.WarriorSBaseAttributesImpl;
+import core.entity.weapon.Sword;
 import core.entity.weapon.ShortSword;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -13,11 +14,11 @@ import java.util.stream.Stream;
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class VikingArcher extends AbstractBaseWarriorClass {
+public class Viking extends AbstractBaseWarriorClass {
 
-  public VikingArcher() {
-    super("Викинг лучник", "Лучик с легкой броней");
-    setWarriorSBaseAttributes(new WarriorSBaseAttributes(20, 0, 1, 240)
+  public Viking() {
+    super("Викинг", "Воин с легкой броней");
+    setWarriorSBaseAttributes(new WarriorSBaseAttributesImpl(20, 0, 1, 240, 2)
             .setMaxHealth(20)
             .setMaxManna(0)
             .setMaxActionPoints(240)
@@ -28,7 +29,7 @@ public class VikingArcher extends AbstractBaseWarriorClass {
 
     setSupportedWeaponClasses(Stream.of(
             ShortSword.class
-            , LongSword.class
+            , Sword.class
     ).collect(Collectors.toList()));
   }
 

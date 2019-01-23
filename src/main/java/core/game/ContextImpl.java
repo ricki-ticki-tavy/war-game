@@ -1,12 +1,12 @@
 package core.game;
 
-import api.core.GameContext;
+import api.core.Context;
 import api.core.Core;
-import api.entity.base.BaseEntityHeader;
 import api.entity.warrior.Warrior;
 import api.entity.warrior.WarriorBaseClass;
 import api.enums.EventType;
-import api.game.GameEvent;
+import api.game.Event;
+import api.game.EventDataContainer;
 import api.game.map.LevelMap;
 import api.game.map.Player;
 import api.game.map.metadata.GameRules;
@@ -24,7 +24,6 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.InputStream;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -32,11 +31,11 @@ import java.util.function.Consumer;
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class GameContextImpl implements GameContext {
+public class ContextImpl implements Context {
 
-  public static GameContext NULL_GAME_CONTEXT = new GameContextImpl();
+  public static Context NULL_GAME_CONTEXT = new ContextImpl();
 
-  private static final Logger logger = LoggerFactory.getLogger(GameContext.class);
+  private static final Logger logger = LoggerFactory.getLogger(Context.class);
   private String contextId = UUID.randomUUID().toString();
 
   @Autowired
@@ -74,13 +73,13 @@ public class GameContextImpl implements GameContext {
   }
 
   @Override
-  public void fireGameEvent(GameEvent gameEvent) {
+  public void fireGameEvent(Event gameEvent) {
     core.fireEvent(gameEvent);
   }
 
   @Override
-  public void fireGameEvent(GameEvent causeEvent, EventType eventType, BaseEntityHeader source, Map<String, Object> params) {
-    fireGameEvent(new GameEvent(this, causeEvent, eventType, source, params));
+  public void fireGameEvent(Event causeEvent, EventType eventType, EventDataContainer source, Map<String, Object> params) {
+    fireGameEvent(new Event(this, causeEvent, eventType, source, params));
   }
 
 
@@ -123,7 +122,7 @@ public class GameContextImpl implements GameContext {
               levelMap.addWarrior(playerId, player.getStartZone().getTopLeftConner(), warrior);
               return warrior;
             })
-            .orElseThrow(() -> GameErrors.GAME_ERROR_UNKNOWN_USER_UID.getError(playerId));
+            .orElseThrow(() -> GameErrors.UNKNOWN_USER_UID.getError(playerId));
   }
 
   public String getUserGameCreator() {
@@ -135,7 +134,7 @@ public class GameContextImpl implements GameContext {
   }
 
   @Override
-  public String subscribeEvent(Consumer<GameEvent> consumer, EventType... eventTypes) {
+  public String subscribeEvent(Consumer<Event> consumer, EventType... eventTypes) {
     return core.subscribeEvent(this, consumer, eventTypes);
   }
 }

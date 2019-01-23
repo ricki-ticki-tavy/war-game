@@ -1,12 +1,10 @@
 package api.core;
 
 import api.enums.EventType;
-import api.game.GameEvent;
-import api.game.map.Player;
+import api.game.Event;
 import api.game.map.metadata.GameRules;
 
 import java.io.InputStream;
-import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -23,20 +21,20 @@ public interface Core {
    * @param map
    * @return
    */
-  GameContext createGameContext(String userGameCreator, GameRules gameRules, InputStream map, String gameName, boolean hidden);
+  Context createGameContext(String userGameCreator, GameRules gameRules, InputStream map, String gameName, boolean hidden);
 
   /**
    * Найти контекст по его UID
    * @param contextId
    * @return
    */
-  GameContext findGameContextByUID(String contextId);
+  Context findGameContextByUID(String contextId);
 
   /**
    * Удалить игру и ее контекст с сервера
    * @param context
    */
-  void removeGameContext(GameContext context);
+  void removeGameContext(Context context);
 
   /**
    * Отправить сообщение о событии
@@ -44,7 +42,7 @@ public interface Core {
    * @param event
    * @return
    */
-  GameEvent fireEvent(GameEvent event);
+  Event fireEvent(Event event);
 
   /**
    * Подписаться на событие
@@ -54,7 +52,7 @@ public interface Core {
    * @param eventTypes
    * @return
    */
-  String subscribeEvent(GameContext context, Consumer<GameEvent> consumer,  EventType... eventTypes);
+  String subscribeEvent(Context context, Consumer<Event> consumer, EventType... eventTypes);
 
-//  void unsubscribeEvent(GameContext context, Consumer<GameEvent> consumer);
+//  void unsubscribeEvent(Context context, Consumer<Event> consumer);
 }

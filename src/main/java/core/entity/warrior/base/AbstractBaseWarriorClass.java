@@ -1,31 +1,25 @@
-package core.entity.warrior;
+package core.entity.warrior.base;
 
 
-import api.WarriorSBaseAttributes;
-import api.core.GameContext;
+import api.core.Context;
 import api.entity.ability.Ability;
 import api.entity.warrior.WarriorBaseClass;
-import api.entity.warrior.WarriorSHand;
 import api.entity.weapon.Weapon;
 import api.enums.EventType;
-import api.game.GameEvent;
+import api.game.Event;
 
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
-import static core.system.error.GameErrors.GAME_ERROR_BASE_WARRIOR_S_ATTRS_IS_FINAL;
+import static core.system.error.GameErrors.BASE_WARRIOR_S_ATTRS_IS_FINAL;
 
 public abstract class AbstractBaseWarriorClass implements WarriorBaseClass {
 
   protected String id = UUID.randomUUID().toString();
   protected String title;
   protected String description;
-  protected WarriorSBaseAttributes warriorSBaseAttributes;
+  protected WarriorSBaseAttributesImpl warriorSBaseAttributes;
   protected List<Class<? extends Weapon>> supportedWeapons;
-
 
   public AbstractBaseWarriorClass(String title, String description) {
     this.title = title;
@@ -34,9 +28,9 @@ public abstract class AbstractBaseWarriorClass implements WarriorBaseClass {
   }
 
   @Override
-  public void setWarriorSBaseAttributes(WarriorSBaseAttributes warriorSBaseAttributes) {
+  public void setWarriorSBaseAttributes(WarriorSBaseAttributesImpl warriorSBaseAttributes) {
     if (this.warriorSBaseAttributes != null) {
-      GAME_ERROR_BASE_WARRIOR_S_ATTRS_IS_FINAL.error();
+      BASE_WARRIOR_S_ATTRS_IS_FINAL.error();
     } else {
       this.warriorSBaseAttributes =  warriorSBaseAttributes;
     }
@@ -59,7 +53,7 @@ public abstract class AbstractBaseWarriorClass implements WarriorBaseClass {
   }
 
   @Override
-  public WarriorSBaseAttributes getBaseAttributes() {
+  public WarriorSBaseAttributesImpl getBaseAttributes() {
     return null;
   }
 
@@ -69,12 +63,12 @@ public abstract class AbstractBaseWarriorClass implements WarriorBaseClass {
   }
 
   @Override
-  public boolean finishRound(GameContext context) {
+  public boolean finishRound(Context context) {
     return false;
   }
 
   @Override
-  public boolean startRound(GameContext context) {
+  public boolean startRound(Context context) {
     return false;
   }
 
@@ -89,7 +83,7 @@ public abstract class AbstractBaseWarriorClass implements WarriorBaseClass {
   }
 
   @Override
-  public void fireEvent(GameEvent event) {
+  public void fireEvent(Event event) {
 
   }
 
@@ -101,5 +95,10 @@ public abstract class AbstractBaseWarriorClass implements WarriorBaseClass {
   @Override
   public void setSupportedWeaponClasses(List<Class<? extends Weapon>> supportedWeaponClasses) {
     this.supportedWeapons = supportedWeaponClasses;
+  }
+
+  @Override
+  public int getHandsCount() {
+    return warriorSBaseAttributes.getHandsCount();
   }
 }

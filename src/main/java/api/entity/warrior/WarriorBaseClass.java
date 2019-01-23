@@ -1,9 +1,9 @@
 package api.entity.warrior;
 
-import api.WarriorSBaseAttributes;
-import api.core.GameContext;
+import core.entity.warrior.base.WarriorSBaseAttributesImpl;
+import api.core.Context;
 import api.entity.weapon.Weapon;
-import api.game.GameEvent;
+import api.game.Event;
 import api.entity.ability.Ability;
 import api.entity.base.BaseEntityHeader;
 import api.enums.EventType;
@@ -18,7 +18,7 @@ public interface WarriorBaseClass extends BaseEntityHeader {
    * Возвращает значение параметроввоина
    * @return
    */
-  WarriorSBaseAttributes getBaseAttributes();
+  WarriorSBaseAttributesImpl getBaseAttributes();
 
   /**
    * ВОзвращает способности воина
@@ -31,14 +31,14 @@ public interface WarriorBaseClass extends BaseEntityHeader {
    * @param context
    * @return
    */
-  boolean finishRound(GameContext context);
+  boolean finishRound(Context context);
 
   /**
    * начать раунд игрока
    * @param context
    * @return
    */
-  boolean startRound(GameContext context);
+  boolean startRound(Context context);
 
   /**
    * Использовался ли юнит в этом ходе
@@ -56,7 +56,7 @@ public interface WarriorBaseClass extends BaseEntityHeader {
    * @param event
    * @return
    */
-  void fireEvent(GameEvent event);
+  void fireEvent(Event event);
 
   /**
    * Задать поддерживаемое вооружение
@@ -75,5 +75,11 @@ public interface WarriorBaseClass extends BaseEntityHeader {
    * Установить наборбазавых атрибутов
    * @param warriorSBaseAttributes
    */
-  void setWarriorSBaseAttributes(WarriorSBaseAttributes warriorSBaseAttributes);
+  void setWarriorSBaseAttributes(WarriorSBaseAttributesImpl warriorSBaseAttributes);
+
+  /**
+   * Возвращает количество рук воина
+   * @return
+   */
+  int getHandsCount();
 }

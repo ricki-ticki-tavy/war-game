@@ -1,24 +1,22 @@
 package api.core;
 
-import api.entity.base.BaseEntityHeader;
 import api.entity.warrior.Warrior;
 import api.entity.warrior.WarriorBaseClass;
 import api.enums.EventType;
-import api.game.GameEvent;
+import api.game.Event;
+import api.game.EventDataContainer;
 import api.game.map.LevelMap;
 import api.game.map.Player;
 import api.game.map.metadata.GameRules;
-import core.entity.warrior.AbstractBaseWarriorClass;
 
 import java.io.InputStream;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
 /**
  * Контекст игровой
  */
-public interface GameContext {
+public interface Context {
 
   /**
    * UUID контекста (сессии)
@@ -55,7 +53,7 @@ public interface GameContext {
    * @param gameEvent
    * @return
    */
-  void fireGameEvent(GameEvent gameEvent);
+  void fireGameEvent(Event gameEvent);
 
   /**
    * Инициировать срабатывание события
@@ -63,9 +61,9 @@ public interface GameContext {
    * @return
    */
   void fireGameEvent(
-          GameEvent causeEvent
+          Event causeEvent
           , EventType eventType
-          , BaseEntityHeader source
+          , EventDataContainer source
           , Map<String, Object> params);
 
   /**
@@ -124,6 +122,6 @@ public interface GameContext {
    * @param consumer
    * @return
    */
-  String subscribeEvent(Consumer<GameEvent> consumer, EventType... eventTypes);
+  String subscribeEvent(Consumer<Event> consumer, EventType... eventTypes);
 
 }

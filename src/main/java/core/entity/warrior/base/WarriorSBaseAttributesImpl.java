@@ -1,11 +1,12 @@
-package api;
+package core.entity.warrior.base;
 
+import api.entity.warrior.WarriorSBaseAttributes;
 import api.enums.ArmorClassEnum;
 
 /**
  * Базовые атрибуты воина
  */
-public class WarriorSBaseAttributes {
+public class WarriorSBaseAttributesImpl implements WarriorSBaseAttributes {
 
   int health;
   int maxHealth;
@@ -21,6 +22,8 @@ public class WarriorSBaseAttributes {
 
   int actionPoints;
   int maxActionPoints;
+
+  int handsCount;
 
   int luckMeleeAtack;
   int luckRangeAtack;
@@ -45,7 +48,7 @@ public class WarriorSBaseAttributes {
     return health = Math.min(Math.max(0, health + deltaHealth), maxHealth);
   }
 
-  public WarriorSBaseAttributes setMaxHealth(int maxHealth) {
+  public WarriorSBaseAttributesImpl setMaxHealth(int maxHealth) {
     this.maxHealth = maxHealth;
     return this;
   }
@@ -64,7 +67,7 @@ public class WarriorSBaseAttributes {
     return manna = Math.min(Math.max(0, manna + deltaManna), maxManna);
   }
 
-  public WarriorSBaseAttributes setMaxManna(int maxManna) {
+  public WarriorSBaseAttributesImpl setMaxManna(int maxManna) {
     this.maxManna = maxManna;
     return this;
   }
@@ -76,7 +79,7 @@ public class WarriorSBaseAttributes {
     return armorClass;
   }
 
-  public WarriorSBaseAttributes setArmorClass(ArmorClassEnum armorClass) {
+  public WarriorSBaseAttributesImpl setArmorClass(ArmorClassEnum armorClass) {
     this.armorClass = armorClass;
     return this;
   }
@@ -88,7 +91,7 @@ public class WarriorSBaseAttributes {
     return deltaCostMove;
   }
 
-  public WarriorSBaseAttributes setDeltaCostMove(int deltaCostMove) {
+  public WarriorSBaseAttributesImpl setDeltaCostMove(int deltaCostMove) {
     this.deltaCostMove = deltaCostMove;
     return this;
   }
@@ -100,7 +103,7 @@ public class WarriorSBaseAttributes {
     return abilityActionPoints;
   }
 
-  public WarriorSBaseAttributes setAbilityActionPoints(int abilityActionPoints) {
+  public WarriorSBaseAttributesImpl setAbilityActionPoints(int abilityActionPoints) {
     this.abilityActionPoints = abilityActionPoints;
     return this;
   }
@@ -112,7 +115,7 @@ public class WarriorSBaseAttributes {
     return maxAbilityActionPoints;
   }
 
-  public WarriorSBaseAttributes setMaxAbilityActionPoints(int maxAbilityActionPoints) {
+  public WarriorSBaseAttributesImpl setMaxAbilityActionPoints(int maxAbilityActionPoints) {
     this.maxAbilityActionPoints = maxAbilityActionPoints;
     return this;
   }
@@ -121,7 +124,7 @@ public class WarriorSBaseAttributes {
     return actionPoints;
   }
 
-  public WarriorSBaseAttributes setActionPoints(int actionPoints) {
+  public WarriorSBaseAttributesImpl setActionPoints(int actionPoints) {
     this.actionPoints = actionPoints;
     return this;
   }
@@ -134,12 +137,12 @@ public class WarriorSBaseAttributes {
     return maxActionPoints;
   }
 
-  public WarriorSBaseAttributes setMaxActionPoints(int maxActionPoints) {
+  public WarriorSBaseAttributesImpl setMaxActionPoints(int maxActionPoints) {
     this.maxActionPoints = maxActionPoints;
     return this;
   }
 
-  public WarriorSBaseAttributes() {
+  public WarriorSBaseAttributesImpl() {
     health = 0;
     manna = 0;
     deltaCostMove = 0;
@@ -147,12 +150,13 @@ public class WarriorSBaseAttributes {
     actionPoints = 0;
   }
 
-  public WarriorSBaseAttributes(
+  public WarriorSBaseAttributesImpl(
           int maxHealth, int health
           , int maxManna, int manna
           , ArmorClassEnum armorClass, int deltaCostMove
           , int maxAbilityActionPoints, int abilityActionPoints
-          , int maxActionPoints, int actionPoints) {
+          , int maxActionPoints, int actionPoints,
+          int handsCount) {
     this.health = health;
     this.maxHealth = maxHealth;
     this.maxManna = maxManna;
@@ -163,26 +167,33 @@ public class WarriorSBaseAttributes {
     this.abilityActionPoints = abilityActionPoints;
     this.maxActionPoints = maxActionPoints;
     this.actionPoints = actionPoints;
+    this.handsCount = handsCount;
   }
 
-  public WarriorSBaseAttributes(
+  public WarriorSBaseAttributesImpl(
           int health
           , int manna
           , int abilityActionPoints
-          , int actionPoints) {
+          , int actionPoints
+          , int handsCount) {
     this.health = health;
     this.manna = manna;
     this.abilityActionPoints = abilityActionPoints;
     this.actionPoints = actionPoints;
+    this.handsCount = handsCount;
   }
 
   @Override
-  public WarriorSBaseAttributes clone() {
-    return new WarriorSBaseAttributes(maxHealth, health
+  public WarriorSBaseAttributesImpl clone() {
+    return new WarriorSBaseAttributesImpl(maxHealth, health
             , maxManna, manna
             , armorClass, deltaCostMove,
             maxAbilityActionPoints, abilityActionPoints,
-            maxActionPoints, actionPoints);
+            maxActionPoints, actionPoints, handsCount);
   }
 
+  @Override
+  public int getHandsCount() {
+    return handsCount;
+  }
 }

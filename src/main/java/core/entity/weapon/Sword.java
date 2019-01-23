@@ -5,24 +5,24 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /**
- * Короткий меч
+ * Обычный меч
  */
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class ShortSword extends AbstractWeapon{
+public class Sword extends AbstractWeapon {
 
-  private static final String OUID = "WepShSwd_001";
+  private static final String OUID = "WepSwd_002";
 
-  public ShortSword(){
+  public Sword() {
     super();
     this.id = OUID;
-    this.title = "Короткий меч";
-    this.description = "Короткий меч. Ближний бой ";
+    this.title = "Простой меч";
+    this.description = "Простой меч. Ближний бой ";
     this.meleeMinDamage = 1;
-    this.meleeMaxDamage = 4;
+    this.meleeMaxDamage = 5;
     this.rangedMinDamage = 0;
     this.rangedMaxDamage = 0;
-    this.bitCost = 30;
+    this.bitCost = 40;
     this.additionalModifiers = null;
     this.unrejectable = false;
     this.useCountPerRound = 0;
@@ -34,4 +34,5 @@ public class ShortSword extends AbstractWeapon{
     this.fadeDamagePercentPerLength = 0;
     this.neededHandsCountToTakeWeapon = 1;
   }
+
 }

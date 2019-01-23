@@ -10,19 +10,29 @@ import java.util.List;
  */
 public interface Weapon extends BaseEntityHeader{
   /**
-   * минимальный урон
+   * минимальный урон рукопашной атаки
    */
-  int getMinDamage();
+  int getMeleeMinDamage();
 
   /**
-   * Максимальный урон
+   * минимальный урон дистанционной атаки
    */
-  int getMaxDamage();
+  int getRangedMinDamage();
+
+  /**
+   * Максимальный урон рукопашной атаки
+   */
+  int getMeleeMaxDamage();
+
+  /**
+   * Максимальный урон дистанционной атаки
+   */
+  int getRangedMaxDamage();
 
   /**
    * Стоимость атаки в единицах действия
    */
-  int getCost();
+  int getBitCost();
 
   /**
    * Дополнительные влияния
@@ -38,12 +48,50 @@ public interface Weapon extends BaseEntityHeader{
    * Допустимое кол-во применений за ход. 0 - бесконечность
    * @return
    */
-  int getUseCoountPerRound();
+  int getUseCountPerRound();
 
   /**
-   * Максимальное кол-во использований за игру. 0 - бесконечность
+   * Максимальное кол-во использований дистанционного за игру. 0 - бесконечность
    * @return
    */
-  int getTotalUseCount();
+  int getRangedTotalUseCount();
+
+  /**
+   * Минимальный расстояние для атаки
+   */
+  int getMinRange();
+
+  /**
+   * Максимальное расстояние для атаки
+   */
+  int getMaxRange();
+
+  /**
+   * Дальность начала спадания поражения
+   */
+  int getFadeRangeStart();
+
+  /**
+   * процент спадания урона на единицу длины
+   */
+  int getFadeDamagePercentPerLength();
+
+  /**
+   * Может ли применять дистанционную атаку
+   * @return
+   */
+  boolean isCanDealRangedDamage();
+
+  /**
+   * Может ли наносить атаку в ближнем бою
+   * @return
+   */
+  boolean canDealMelleDamage();
+
+  /**
+   * Возвращает сколько рук нужно для данного оружия
+   * @return
+   */
+  int getNeededHandsCountToTakeWeapon();
 
 }

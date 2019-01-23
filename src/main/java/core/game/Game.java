@@ -1,11 +1,14 @@
 package core.game;
 
-import api.core.GameContext;
+import api.core.Context;
 import api.core.Core;
+import api.core.Result;
 import api.entity.warrior.Warrior;
 import api.game.map.Player;
 import api.game.map.metadata.GameRules;
-import core.entity.warrior.VikingArcher;
+import core.entity.warrior.Viking;
+import core.entity.weapon.ShortSword;
+import core.entity.weapon.Sword;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +27,7 @@ public class Game {
 
   private boolean innerTest(){
     logger.info("Создание тестового контекста...");
-    GameContext context = core.createGameContext("test"
+    Context context = core.createGameContext("test"
             , new GameRules(9, 2, 50, 200, 2, 600)
             , this.getClass().getClassLoader().getResourceAsStream("level2.xml")
     , "test-game", false);
@@ -33,9 +36,21 @@ public class Game {
     Player player = context.connectPlayer("test", "testSession1");
     Assert.notNull(player, "Игрок не создан");
 
-    Warrior warrior = context.createWarrior("testSession1", VikingArcher.class);
+    Warrior warrior = context.createWarrior("testSession1", Viking.class);
     Assert.notNull(warrior, "Воин не создан");
     Assert.isTrue(warrior == player.getWarriors().get(0), "Созданный воин и воин на карте не равны");
+
+    Result result = warrior.takeWeapon(ShortSword.class);
+    Assert.isTrue(result.isSuccess(), "Ошибка добавления короткого меча (первого оружия)");
+    Assert.isTrue(warrior.getWeapons().size() == 1, "У воина отсутствует добавленное оружие");
+
+    result = warrior.takeWeapon(Sword.class);
+    Assert.isTrue(result.isSuccess(), "Ошибка добавления меча (второго оружия)");
+    Assert.isTrue(warrior.getWeapons().size() == 2, "У воина отсутствует второе добавленное оружие");
+
+    result = warrior.takeWeapon(Sword.class);
+    Assert.isTrue(result.isFail(), "Ошибка добавления меча (третьего оружия). Оружие не должно быть добавлено ");
+    Assert.isTrue(warrior.getWeapons().size() == 2, "У воина присутствует третье добавленное оружие");
 
     player = context.connectPlayer("test", "testSession1");
     Assert.notNull(player, "Игрок не переподключен");
