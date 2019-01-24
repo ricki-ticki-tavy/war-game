@@ -70,7 +70,7 @@ public interface LevelMap {
    * Добавить игрока в игру
    * @return
    */
-  Result connectPlayer(Player player, String sessionId);
+  Result connectPlayer(Player player);
 
   /**
    * Отключить пользователя от игры.

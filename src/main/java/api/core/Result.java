@@ -8,7 +8,7 @@ import java.util.Optional;
 /**
  * Класс результата действия
  */
-public interface Result extends BaseEntityHeader{
+public interface Result<T> extends BaseEntityHeader{
 
   boolean isFail();
 
@@ -16,5 +16,5 @@ public interface Result extends BaseEntityHeader{
 
   GameError getError();
 
-  Object getResult();
+  T getResult();
 }

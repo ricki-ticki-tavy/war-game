@@ -16,6 +16,9 @@ public enum GameErrors {
   , USER_CONNECT_TO_CONTEXT_TOO_MANY_USERS("U-1", "Не удалось подключить пользователя к игре. Все слоты заняты")
   , USER_CONNECT_TO_CONTEXT_GAME_RUNNING("U-2", "Не удалось подключить пользователя к игре. Игра уже идет")
   , USER_DISCONNECT_NOT_CONNECTED("U-3", "Не удалось отключить пользователя от игры так как он не был подключен.")
+  , USER_NOT_LOGGED_IN("U-4", "Пользователь %s не авторизован")
+
+  , CONTEXT_REMOVE_NOT_FOUND("C-1", "Удаляемый контекст не существует или не активен")
 
   ;
 

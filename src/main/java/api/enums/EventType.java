@@ -33,9 +33,10 @@ public enum EventType {
   , WEAPON_TRY_TO_DROP("В игре '%s' игрок '%s' попытался убрать у юнита '%s' (id '%s') оружие id '%s'. %s")
   , WEAPON_DROPED("В игре '%s' игрок '%s' убрал у юнита '%s' (id '%s') оружие '%s' (id '%s'). %s")
 
-  , GAME_CONTEXT_CREATE("Создание контекста '%s'. %s")
-  , GAME_CONTEXT_CREATED("Создание контекста '%s', инициированное игроком '%s'. %s")
+  , GAME_CONTEXT_CREATE("Создание контекста игры '%s' игроком '%s'. %s")
+  , GAME_CONTEXT_CREATED("Создание контекста игры '%s' игроком '%s'. %s")
   , GAME_CONTEXT_LOAD_MAP("игра '%s' Контекст %s : загрузка карты '%s' игроком '%s'. тип игры %s.  %s")
+  , GAME_CONTEXT_REMOVED("Удаление контекста игры '%s' (владелец '%s'). %s")
 
   ;
 

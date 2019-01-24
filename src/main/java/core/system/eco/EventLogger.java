@@ -1,5 +1,6 @@
 package core.system.eco;
 
+import api.core.Context;
 import api.core.Result;
 import api.entity.warrior.Warrior;
 import api.entity.weapon.Weapon;
@@ -27,11 +28,12 @@ public class EventLogger {
         break;
       }
       case PLAYER_CONNECTED: {
-        // ("Игрок '%s' присоединился к игре (контекст '%s'). Теперь в игре %s игроков из %s");
+        // "Игрок '%s' присоединился к игре (контекст '%s'). Теперь в игре %s игроков из %s. %s"
         logger.info(event.getEventType().getFormattedMessage(event.getSource(Player.class).getTitle()
                 , event.getSourceContext().getContextId()
                 , String.valueOf(event.getSourceContext().getLevelMap().getPlayers().size())
-                , String.valueOf(event.getSourceContext().getLevelMap().getMaxPlayerCount())));
+                , String.valueOf(event.getSourceContext().getLevelMap().getMaxPlayerCount())
+                , event.getSource(Result.class).toString()));
         break;
       }
       case PLAYER_RECONNECTED: {
@@ -101,9 +103,24 @@ public class EventLogger {
                 , event.getSource(Result.class).toString()));
         break;
       }
-      case GAME_CONTEXT_CREATE: {
+      case GAME_CONTEXT_CREATED: {
         //   "Создание контекста '%s'. %s"
-        logger.info(event.getEventType().getFormattedMessage(event.getSourceContext().getGameName()
+        logger.info(event.getEventType().getFormattedMessage(event.getSourceContext().getContextId()
+                , event.getSource(Player.class).getTitle()
+                , event.getSource(Result.class).toString()));
+        break;
+      }
+      case GAME_CONTEXT_CREATE: {
+        //  "Создание контекста игры '%s' игроком '%'. %s"
+        logger.info(event.getEventType().getFormattedMessage(event.getSource(String[].class)[0]
+                , event.getSource(String[].class)[1]
+                , event.getSource(Result.class).toString()));
+        break;
+      }
+      case GAME_CONTEXT_REMOVED: {
+        //  "Удаление контекста игры '%s' (владелец '%s'). %s"
+        logger.info(event.getEventType().getFormattedMessage(event.getSource(Context.class).getContextId()
+                , event.getSource(Context.class).getContextOwner().getTitle()
                 , event.getSource(Result.class).toString()));
         break;
       }

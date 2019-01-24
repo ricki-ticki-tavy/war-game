@@ -129,23 +129,18 @@ public class LevelMapImpl implements LevelMap {
   }
 
   @Override
-  public Result connectPlayer(Player player, String sessionId) {
+  public Result connectPlayer(Player player) {
     Result result = null;
-    if (!players.containsValue(player)) {
-      // плэер есть. Перепакуем с, возможно, новым sessionId
-      Map<String, Player> tempPlayerMap = new HashMap<>(players.size());
-      players.forEach((sessId, foundPlayer) -> {
-        tempPlayerMap.put(foundPlayer.getId().equals(player.getId())
-                ? sessionId : sessId, foundPlayer);
-      });
-      players.clear();
-      players.putAll(tempPlayerMap);
+    if (players.containsKey(player.getId())) {
+      // плэер есть.
       result = ResultImpl.success(player);
       context.fireGameEvent(null, PLAYER_RECONNECTED, new EventDataContainer(player, result), null);
     } else {
-      if (maxPlayersCount < players.size()) {
-        players.put(sessionId, player);
-        result = ResultImpl.success(player);
+      if (maxPlayersCount >= players.size()) {
+        if ((result = player.replaceContext(context)).isSuccess()) {
+          players.put(player.getId(), player);
+          result = ResultImpl.success(player);
+        }
       } else {
         result = ResultImpl.fail(USER_CONNECT_TO_CONTEXT_TOO_MANY_USERS.getError());
       }
@@ -157,15 +152,15 @@ public class LevelMapImpl implements LevelMap {
 
   @Override
   public Result disconnectPlayer(Player player) {
-    Result result = null;
-    if (players.containsKey(player.getId())){
+    Result result;
+    if (players.containsKey(player.getId())) {
       players.remove(player.getId());
       player.replaceContextSilent(null);
       result = ResultImpl.success(player);
       context.fireGameEvent(null, PLAYER_DISCONNECTED, new EventDataContainer(player, result), null);
 
       // если это создатель игры, то
-      if (context.getUserGameCreator().equals(player)){
+      if (context.getContextOwner().equals(player)) {
         // выкидываем всех игроков
         players.values().stream().forEach(this::disconnectPlayer);
         // Удаляем контекст

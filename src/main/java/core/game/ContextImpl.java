@@ -33,7 +33,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-import static api.enums.EventType.GAME_CONTEXT_CREATE;
+import static api.enums.EventType.GAME_CONTEXT_CREATED;
 import static api.enums.EventType.GAME_CONTEXT_LOAD_MAP;
 import static core.system.error.GameErrors.MAP_IS_NOT_LOADED;
 import static core.system.error.GameErrors.MAP_LOAD_ERROR;
@@ -42,7 +42,7 @@ import static core.system.error.GameErrors.MAP_LOAD_ERROR;
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ContextImpl implements Context {
 
-  public static Context NULL_GAME_CONTEXT = new ContextImpl();
+  public static Context NULL_GAME_CONTEXT = new ContextImpl(null);
 
   private static final Logger logger = LoggerFactory.getLogger(Context.class);
   private String contextId = UUID.randomUUID().toString();
@@ -56,10 +56,14 @@ public class ContextImpl implements Context {
   @Autowired
   private BeanFactory beanFactory;
 
-  private Player userGameCreator;
+  private Player contextOwner;
   private GameRules gameRules;
   private String gameName;
   private boolean hidden;
+
+  public ContextImpl(Player owner){
+    this.contextOwner = owner;
+  }
 
   @Override
   public String getGameName() {
@@ -98,7 +102,7 @@ public class ContextImpl implements Context {
   }
 
   @Override
-  public Result loadMap(Player gameCreator, GameRules gameRules, InputStream map, String gameName, boolean hidden) {
+  public Result loadMap(GameRules gameRules, InputStream map, String gameName, boolean hidden) {
     Result result = null;
     LevelMapMetaDataXml mapMetadata = null;
     try {
@@ -111,22 +115,21 @@ public class ContextImpl implements Context {
 
       levelMap.init(this, mapMetadata);
 
-      this.userGameCreator = gameCreator;
       this.gameRules = gameRules;
       result = ResultImpl.success(this);
     } catch (JAXBException e) {
       result = ResultImpl.fail(MAP_LOAD_ERROR.getError(e.getMessage() == null ? "NPE" : e.getMessage()));
     }
     fireGameEvent(null, GAME_CONTEXT_LOAD_MAP
-            , new EventDataContainer(result, gameCreator, mapMetadata == null ? gameName : mapMetadata.name, hidden)
+            , new EventDataContainer(result, contextOwner, mapMetadata == null ? gameName : mapMetadata.name, hidden)
             , null);
     return result;
   }
 
   @Override
-  public Result connectPlayer(Player player, String playerSessionId) {
+  public Result connectPlayer(Player player) {
     if (levelMap != null) {
-      return levelMap.connectPlayer(player, playerSessionId);
+      return levelMap.connectPlayer(player);
     } else {
       return ResultImpl.fail(MAP_IS_NOT_LOADED.getError());
     }
@@ -153,8 +156,8 @@ public class ContextImpl implements Context {
             .orElseThrow(() -> GameErrors.UNKNOWN_USER_UID.getError(playerId));
   }
 
-  public Player getUserGameCreator() {
-    return userGameCreator;
+  public Player getContextOwner() {
+    return contextOwner;
   }
 
   public GameRules getGameRules() {
@@ -168,6 +171,6 @@ public class ContextImpl implements Context {
 
   @PostConstruct
   public void firstCry() {
-    fireGameEvent(null, GAME_CONTEXT_CREATE, new EventDataContainer(), null);
+    fireGameEvent(null, GAME_CONTEXT_CREATED, new EventDataContainer(ResultImpl.success(this), getContextOwner()), null);
   }
 }

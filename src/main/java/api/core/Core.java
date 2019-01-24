@@ -6,6 +6,7 @@ import api.game.map.Player;
 import api.game.map.metadata.GameRules;
 
 import java.io.InputStream;
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -22,7 +23,7 @@ public interface Core {
    * @param map
    * @return
    */
-  Context createGameContext(Player userGameCreator, GameRules gameRules, InputStream map, String gameName, boolean hidden);
+  Result<Context> createGameContext(Player userGameCreator, GameRules gameRules, InputStream map, String gameName, boolean hidden);
 
   /**
    * Найти контекст по его UID
@@ -63,7 +64,17 @@ public interface Core {
    */
   Result loginPlayer(String playerName);
 
+  /**
+   * Вернуть пользователя из списка вошедших в игру
+   * @param playerName
+   * @return
+   */
+  Player findPlayer(String playerName);
 
-
+  /**
+   * Получить список активных контекстов
+   * @return
+   */
+  List<Context> getContextList();
 //  void unsubscribeEvent(Context context, Consumer<EventImpl> consumer);
 }

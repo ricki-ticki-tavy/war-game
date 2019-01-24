@@ -76,21 +76,19 @@ public interface Context {
   /**
    * Загрузить карту
    *
-   * @param userGameCreator
    * @param gameRules
    * @param map
    * @return
    */
-  Result loadMap(Player userGameCreator, GameRules gameRules, InputStream map, String gameName, boolean hidden);
+  Result loadMap(GameRules gameRules, InputStream map, String gameName, boolean hidden);
 
   /**
    * Создать и подключить к игре игрока.
    *
    * @param player
-   * @param playerSessionId
    * @return
    */
-  Result connectPlayer(Player player, String playerSessionId);
+  Result connectPlayer(Player player);
 
   /**
    * Отключить пользователя от игры.
@@ -114,7 +112,7 @@ public interface Context {
    *
    * @return
    */
-  Player getUserGameCreator();
+  Player getContextOwner();
 
   /**
    * Получить параметры игры

@@ -22,11 +22,13 @@ import javax.annotation.PostConstruct;
 import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static api.enums.EventType.*;
 import static core.game.ContextImpl.NULL_GAME_CONTEXT;
+import static core.system.error.GameErrors.CONTEXT_REMOVE_NOT_FOUND;
 
 /**
  * Игровой движок. Все операции выполняютсяв рамках динамического игрового контекста
@@ -53,12 +55,27 @@ public class CoreImpl implements Core {
   EventLogger gameEventLogger;
 
   @Override
-  public Context createGameContext(Player gameCreator, GameRules gameRules
+  public Result<Context> createGameContext(Player gameCreator, GameRules gameRules
           , InputStream map, String gameName, boolean hidden) {
-    Context context = beanFactory.getBean(Context.class);
-    context.loadMap(gameCreator, gameRules, map, gameName, hidden);
-    contextMap.put(context.getContextId(), context);
-    return context;
+    Result<Context> result;
+
+    // Если у пользователя была привязка к другим контекстам - надо разорвать ее
+    if ((result = gameCreator.replaceContext(null)).isSuccess()) {
+      // Создадим контекст новой игры
+      Context context = beanFactory.getBean(Context.class, gameCreator);
+
+      // Загрузим карту
+      if ((result = context.loadMap(gameRules, map, gameName, hidden)).isSuccess()) {
+        contextMap.put(context.getContextId(), context);
+
+        // сделаем вход пользователем в эту карту
+        if ((result = context.connectPlayer(gameCreator)).isSuccess()) {
+          result = ResultImpl.success(context);
+        }
+      }
+    }
+
+    return result;
   }
 
   @Override
@@ -68,18 +85,25 @@ public class CoreImpl implements Core {
 
   @Override
   public void removeGameContext(Context context) {
+    AtomicBoolean found = new AtomicBoolean(false);
     Optional.ofNullable(contextMap.get(context.getContextId()))
             .ifPresent(foundContext -> {
               contextMap.remove(foundContext.getContextId());
               eventConsumers.remove(foundContext);
+              found.set(true);
             });
+    context.fireGameEvent(null, GAME_CONTEXT_REMOVED
+            , new EventDataContainer(context, found.get()
+                    ? ResultImpl.success(context)
+                    : ResultImpl.fail(CONTEXT_REMOVE_NOT_FOUND.getError()))
+            , null);
   }
 
   @PostConstruct
   public void init() {
     subscribeEvent(null, this::eventLogger, WARRIOR_MOVED, PLAYER_DISCONNECTED
             , WARRIOR_ADDED, WEAPON_TAKEN, WEAPON_TRY_TO_DROP, WEAPON_DROPED
-            , GAME_CONTEXT_CREATED, GAME_CONTEXT_CREATE, GAME_CONTEXT_LOAD_MAP
+            , GAME_CONTEXT_CREATED, GAME_CONTEXT_CREATE, GAME_CONTEXT_LOAD_MAP, GAME_CONTEXT_REMOVED
             , PLAYER_LOGGED_IN, PLAYER_CONNECTED, PLAYER_DISCONNECTED, PLAYER_RECONNECTED);
   }
 
@@ -95,10 +119,11 @@ public class CoreImpl implements Core {
    * @param event
    */
   private void fireEventInContext(Context fireInContext, Event event) {
-    Optional.ofNullable(eventConsumers.get(fireInContext))
-            .ifPresent(consumerMap -> Optional.ofNullable(consumerMap.get(event.getEventType()))
-                    .ifPresent(uidToConsumerMap -> uidToConsumerMap.values().stream()
-                            .forEach(gameEventConsumer -> gameEventConsumer.accept(event))));
+    Optional.ofNullable(fireInContext)
+            .ifPresent(firedContext -> Optional.ofNullable(eventConsumers.get(firedContext))
+                    .ifPresent(consumerMap -> Optional.ofNullable(consumerMap.get(event.getEventType()))
+                            .ifPresent(uidToConsumerMap -> uidToConsumerMap.values().stream()
+                                    .forEach(gameEventConsumer -> gameEventConsumer.accept(event)))));
   }
 
   /**
@@ -141,7 +166,17 @@ public class CoreImpl implements Core {
   public Result loginPlayer(String playerName) {
     Player player = players.computeIfAbsent(playerName, playerNameKey -> beanFactory.getBean(Player.class, playerNameKey));
     Result result = ResultImpl.success(player);
-    fireEvent(new EventImpl(null, null, PLAYER_LOGGED_IN, new EventDataContainer(player), null));
+    fireEvent(new EventImpl(null, null, PLAYER_LOGGED_IN, new EventDataContainer(player, result), null));
     return result;
+  }
+
+  @Override
+  public Player findPlayer(String playerName) {
+    return players.get(playerName);
+  }
+
+  @Override
+  public List<Context> getContextList() {
+    return new ArrayList(contextMap.values());
   }
 }
