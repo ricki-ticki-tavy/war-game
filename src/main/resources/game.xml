@@ -2,16 +2,16 @@
 <gameRules>
     <lengthOfSimpleLengthUnit>20</lengthOfSimpleLengthUnit>
 
-    <modifiers>
+    shareshareshare<modifiers>
         <modifier>
-            <id>decHealth4-8</id>
-            <title>Понижение здоровья 4-8</title>
+            <id>incHealth1</id>
+            <title>Восстановление здоровья на 1</title>
             <attribute>HEALTH</attribute>
-            <minValue>-4</minValue>
-            <maxValue>-8</maxValue>
+            <minValue>1</minValue>
+            <maxValue>1</maxValue>
             <probability>100</probability>
-            <duration>0</duration>
-            <target>TARGETED</target>
+            <duration>-1</duration>
+            <target>THIS</target>
         </modifier>
         <modifier>
             <id>decManna2</id>
@@ -19,7 +19,7 @@
             <attribute>MANNA</attribute>
             <minValue>-2</minValue>
             <probability>100</probability>
-            <duration>0</duration>
+            <duration>-1</duration>
             <target>ENEMY_PLAYER</target>
         </modifier>
         <modifier>
@@ -28,31 +28,222 @@
             <attribute>MANNA</attribute>
             <minValue>2</minValue>
             <probability>100</probability>
-            <duration>0</duration>
+            <duration>-1</duration>
             <target>PLAYER</target>
+        </modifier>
+        <modifier>
+            <id>stun40</id>
+            <title>Оглушить на 40 очков</title>
+            <attribute>ACTION_POINT</attribute>
+            <minValue>-40</minValue>
+            <maxValue>-40</maxValue>
+            <probability>75</probability>
+            <duration>-1</duration>
+            <target>TARGETED</target>
         </modifier>
     </modifiers>
 
     <abilities>
         <ability>
+            <id>fire</id>
+            <title>Огонь</title>
+            <target>ENEMY</target>
+            <modifiers>
+                <modifier>
+                    <id>decHealth4-8</id>
+                    <title>Понижение здоровья 4-8</title>
+                    <attribute>HEALTH</attribute>
+                    <minValue>-4</minValue>
+                    <maxValue>-8</maxValue>
+                    <probability>100</probability>
+                    <duration>-1</duration>
+                    <target>TARGETED</target>
+                </modifier>
+            </modifiers>
+        </ability>
+
+        <ability>
             <id>lighting</id>
             <title>Молния</title>
             <target>ENEMY</target>
             <modifiers>
-                <modifier ref="decHealth4-8" />
+                <modifier ref="decHealth4-8"/>
             </modifiers>
         </ability>
+
         <ability>
             <id>mannaStealing</id>
             <title>кража магии</title>
             <target>ENEMY_PLAYER</target>
             <modifiers>
-                <modifier ref="decManna2" />
-                <modifier ref="incManna2" />
+                <modifier ref="decManna2"/>
+                <modifier ref="incManna2"/>
             </modifiers>
         </ability>
+
+        <ability>
+            <id>mightyBow</id>
+            <title>Сильный натяг тетивы</title>
+            <target>THIS</target>
+            <modifiers>
+                <modifier>
+                    <id>incBowMaxRange10</id>
+                    <title>Увеличение дальности стрельбы лука на 10</title>
+                    <attribute>DISTANCE_ATTACK_MAX_ATTACK_RANGE</attribute>
+                    <minValue>10</minValue>
+                    <maxValue>10</maxValue>
+                    <probability>100</probability>
+                    <duration>0</duration>
+                    <target>TARGETED</target>
+                </modifier>
+                <modifier>
+                    <id>incBowMaxFadeRange3</id>
+                    <title>Увеличение дальности ослабления стрельбы лука на 3</title>
+                    <attribute>DISTANCE_ATTACK_MAX_ATTACK_RANGE</attribute>
+                    <minValue>3</minValue>
+                    <maxValue>3</maxValue>
+                    <probability>100</probability>
+                    <duration>0</duration>
+                    <target>TARGETED</target>
+                </modifier>
+                <modifier>
+                    <id>incCostBowShut120</id>
+                    <title>Увеличение стоимости выстела лука на 120</title>
+                    <attribute>DISTANCE_ATTACK_COST</attribute>
+                    <minValue>120</minValue>
+                    <maxValue>120</maxValue>
+                    <probability>100</probability>
+                    <duration>0</duration>
+                    <target>TARGETED</target>
+                </modifier>
+            </modifiers>
+        </ability>
+
     </abilities>
 
+    <weapons>
+        <meleeWeapon>
+            <id>knifeWithHealthStealing</id>
+            <title>Кинжал, нож с кражей жизни</title>
+            <minDamage>1</minDamage>
+            <maxDamage>4</maxDamage>
+            <damageAngle>0</damageAngle>
+            <mustAttackAllCreatures>false</mustAttackAllCreatures>
+            <costActionPoints>20</costActionPoints>
+            <additionalModifiers>
+                <modifier ref="incHealth1"/>
+            </additionalModifiers>
+        </meleeWeapon>
 
+        <meleeWeapon>
+            <id>knifeWithActionStealing</id>
+            <title>Кинжал, нож с кражей очков действия</title>
+            <minDamage>1</minDamage>
+            <maxDamage>4</maxDamage>
+            <damageAngle>0</damageAngle>
+            <mustAttackAllCreatures>false</mustAttackAllCreatures>
+            <costActionPoints>20</costActionPoints>
+            <additionalModifiers>
+                <modifier>
+                    <!--<id>decActionPoints2</id>-->
+                    <title>Понижение очков действия на 2</title>
+                    <attribute>ACTION_POINT</attribute>
+                    <minValue>-2</minValue>
+                    <probability>100</probability>
+                    <duration>1</duration>
+                    <target>TARGETED</target>
+                </modifier>
+            </additionalModifiers>
+        </meleeWeapon>
+
+        <meleeWeapon>
+            <id>shortSword</id>
+            <title>Короткий меч</title>
+            <minDamage>1</minDamage>
+            <maxDamage>6</maxDamage>
+            <damageAngle>0</damageAngle>
+            <mustAttackAllCreatures>false</mustAttackAllCreatures>
+            <costActionPoints>30</costActionPoints>
+        </meleeWeapon>
+
+        <distanceWeapon>
+            <id>bow</id>
+            <title>Простой лук</title>
+            <minDamage>1</minDamage>
+            <maxDamage>8</maxDamage>
+            <damageAngle>0</damageAngle>
+            <mustAttackAllCreatures>false</mustAttackAllCreatures>
+            <costActionPoints>120</costActionPoints>
+            <minRange>2</minRange>
+            <maxRange>40</maxRange>
+            <fadeRangeStart>20</fadeRangeStart>
+            <fadeDamagePercentPerLength>2</fadeDamagePercentPerLength>
+        </distanceWeapon>
+
+        <shield>
+            <id>smallShield</id>
+            <title>Малый щит</title>
+            <minDamage>0</minDamage>
+            <maxDamage>0</maxDamage>
+            <damageAngle>0</damageAngle>
+            <mustAttackAllCreatures>false</mustAttackAllCreatures>
+            <costActionPoints>20</costActionPoints>
+            <armorClass>0</armorClass>
+            <probabilityToRejectMeleeAttack>30</probabilityToRejectMeleeAttack>
+            <probabilityToRejectDistanceAttack>5</probabilityToRejectDistanceAttack>
+            <additionalModifiers>
+                <modifier ref = "stun40"/>
+            </additionalModifiers>
+        </shield>
+    </weapons>
+
+    <baseWarriorClasses>
+        <baseWarriorClass>
+            <id>Viking-archer</id>
+            <title>Викинг лучник</title>
+            <actionPoints>240</actionPoints>
+            <armorClass>1</armorClass>
+            <deltaCostMove>8</deltaCostMove>
+            <maxHitPoints>20</maxHitPoints>
+            <maxMannaPoints>0</maxMannaPoints>
+            <hands>
+                <hand>
+                    <weapon ref="bow"/>
+                </hand>
+            </hands>
+            <abilities>
+                <creatureAbility>
+                    <ability ref="mightyBow"/>
+                    <probability>100</probability>
+                    <costInActionPoints>0</costInActionPoints>
+                    <restoreInterval>1</restoreInterval>
+                    <triggers>
+                        <trigger>ON_PLAYER_ROUND</trigger>
+                    </triggers>
+                </creatureAbility>
+            </abilities>
+        </baseWarriorClass>
+
+        <baseWarriorClass>
+            <id>Viking-Swordman-SmallShield</id>
+            <title>Викинг мечник скруглым щитом</title>
+            <actionPoints>240</actionPoints>
+            <armorClass>1</armorClass>
+            <deltaCostMove>8</deltaCostMove>
+            <maxHitPoints>20</maxHitPoints>
+            <maxMannaPoints>0</maxMannaPoints>
+            <hands>
+                <hand>
+                    <weapon ref="shortSword"/>
+                </hand>
+                <hand>
+                    <weapon ref="smallShield"/>
+                </hand>
+            </hands>
+            <abilities>
+            </abilities>
+        </baseWarriorClass>
+
+    </baseWarriorClasses>
 
 </gameRules>
