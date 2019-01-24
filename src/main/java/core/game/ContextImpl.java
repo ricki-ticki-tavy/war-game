@@ -6,6 +6,7 @@ import api.core.Result;
 import api.entity.warrior.Warrior;
 import api.entity.warrior.WarriorBaseClass;
 import api.enums.EventType;
+import api.game.Coords;
 import api.game.Event;
 import api.game.EventDataContainer;
 import api.game.map.LevelMap;
@@ -61,7 +62,7 @@ public class ContextImpl implements Context {
   private String gameName;
   private boolean hidden;
 
-  public ContextImpl(Player owner){
+  public ContextImpl(Player owner) {
     this.contextOwner = owner;
   }
 
@@ -146,14 +147,9 @@ public class ContextImpl implements Context {
 
 
   @Override
-  public Warrior createWarrior(String playerId, Class<? extends WarriorBaseClass> baseWarriorClass) {
-    return Optional.ofNullable(levelMap.getPlayer(playerId))
-            .map(player -> {
-              Warrior warrior = beanFactory.getBean(Warrior.class, this, player, beanFactory.getBean(baseWarriorClass), "", false);
-              levelMap.addWarrior(playerId, player.getStartZone().getTopLeftConner(), warrior);
-              return warrior;
-            })
-            .orElseThrow(() -> GameErrors.UNKNOWN_USER_UID.getError(playerId));
+  public Result<Warrior> createWarrior(Player player, Class<? extends WarriorBaseClass> baseWarriorClass, Coords coords) {
+    Warrior warrior = beanFactory.getBean(Warrior.class, this, player, beanFactory.getBean(baseWarriorClass), "", false);
+    return levelMap.addWarrior(player, coords, warrior);
   }
 
   public Player getContextOwner() {

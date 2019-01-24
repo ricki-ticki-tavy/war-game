@@ -3,6 +3,7 @@ package api.core;
 import api.entity.warrior.Warrior;
 import api.entity.warrior.WarriorBaseClass;
 import api.enums.EventType;
+import api.game.Coords;
 import api.game.Event;
 import api.game.EventDataContainer;
 import api.game.map.LevelMap;
@@ -104,7 +105,7 @@ public interface Context {
    * @param baseWarriorClass
    * @return
    */
-  Warrior createWarrior(String playerId, Class<? extends WarriorBaseClass> baseWarriorClass);
+  Result<Warrior> createWarrior(Player player, Class<? extends WarriorBaseClass> baseWarriorClass, Coords coords);
 
 
   /**

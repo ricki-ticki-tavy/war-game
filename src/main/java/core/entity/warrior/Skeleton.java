@@ -3,9 +3,8 @@ package core.entity.warrior;
 import api.enums.ArmorClassEnum;
 import core.entity.warrior.base.AbstractBaseWarriorClass;
 import core.entity.warrior.base.WarriorSBaseAttributesImpl;
-import core.entity.weapon.Sword;
 import core.entity.weapon.ShortSword;
-import core.game.CoreImpl;
+import core.entity.weapon.Sword;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -15,12 +14,12 @@ import java.util.stream.Stream;
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class Viking extends AbstractBaseWarriorClass {
+public class Skeleton extends AbstractBaseWarriorClass {
 
-  public static final String CLASS_NAME = "Викинг";
+  public static final String CLASS_NAME = "Скелет";
 
-  public Viking() {
-    super(CLASS_NAME, "Воин с легкой броней");
+  public Skeleton() {
+    super(CLASS_NAME, "Воин-скелет с легкой броней");
     setWarriorSBaseAttributes(new WarriorSBaseAttributesImpl(20, 0, 1, 240, 2)
             .setMaxHealth(20)
             .setMaxManna(0)

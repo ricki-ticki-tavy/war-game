@@ -1,5 +1,7 @@
 package api.core;
 
+import api.entity.warrior.WarriorBaseClass;
+import api.entity.weapon.Weapon;
 import api.enums.EventType;
 import api.game.Event;
 import api.game.map.Player;
@@ -69,12 +71,37 @@ public interface Core {
    * @param playerName
    * @return
    */
-  Player findPlayer(String playerName);
+  Result<Player> findPlayer(String playerName);
 
   /**
    * Получить список активных контекстов
    * @return
    */
   List<Context> getContextList();
-//  void unsubscribeEvent(Context context, Consumer<EventImpl> consumer);
+
+  /**
+   * Возвращает имена базовых классов воинов
+   * @return
+   */
+  Result<List<String>> getBaseWarriorClasses();
+
+  /**
+   * Возвращает имена базовых классов вооружения
+   * @return
+   */
+  Result<List<String>> getWeaponClasses();
+
+  /**
+   * Ищет базовый класс воина по его названию
+   * @param className
+   * @return
+   */
+  Result<Class<? extends WarriorBaseClass>> findWarriorBaseClassByName(String className);
+
+  /**
+   * Ищет базовый класс воина по его названию
+   * @param weaponClassName
+   * @return
+   */
+  Result<Class<? extends Weapon>> findWeaponByName(String weaponClassName);
 }

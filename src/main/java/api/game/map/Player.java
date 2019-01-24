@@ -18,7 +18,7 @@ public interface Player extends BaseEntityHeader{
    * @param warrior
    * @return
    */
-  Warrior addWarrior(Warrior warrior);
+  Result<Warrior> addWarrior(Warrior warrior);
 
   /**
    *  Вернуть всех воинов
@@ -58,5 +58,12 @@ public interface Player extends BaseEntityHeader{
    * @return
    */
   Context getContext();
+
+  /**
+   * Найти воина по его коду
+   * @param warriorId
+   * @return
+   */
+  Result<Warrior> findWarriorById(String warriorId);
 
 }

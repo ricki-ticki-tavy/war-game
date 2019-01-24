@@ -4,6 +4,7 @@ import api.core.Result;
 import core.system.error.GameError;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * Класс результата действия
@@ -59,6 +60,15 @@ public class ResultImpl implements Result {
 
   public Object getResult(){
     return result;
+  }
+
+  @Override
+  public Result onSuccess(Function consumer) {
+    if (success){
+      return (Result)consumer.apply(result);
+    } else {
+      return this;
+    }
   }
 
   @Override

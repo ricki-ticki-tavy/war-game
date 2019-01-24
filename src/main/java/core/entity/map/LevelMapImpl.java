@@ -116,29 +116,27 @@ public class LevelMapImpl implements LevelMap {
   }
 
   @Override
-  public Warrior addWarrior(String playerId, Coords coords, Warrior warrior) {
-    return Optional.ofNullable(getPlayer(playerId))
-            .map(player -> {
-              if (player.getWarriors().size() >= context.getGameRules().getMaxStartCreaturePerPlayer()) {
-                GameErrors.TOO_MANY_UNITS_FOR_PLAYER.error(playerId, String.valueOf(context.getGameRules().getMaxStartCreaturePerPlayer()));
-              }
-              player.addWarrior(warrior);
-              warrior.moveTo(coords);
-              return warrior;
-            }).orElseThrow(() -> GameErrors.UNKNOWN_USER_UID.getError(playerId));
+  public Result<Warrior> addWarrior(Player player, Coords coords, Warrior warrior) {
+    if (player.getWarriors().size() >= context.getGameRules().getMaxStartCreaturePerPlayer()) {
+      return ResultImpl.fail(GameErrors.PLAYER_UNITS_LIMIT_EXCEEDED.getError(player.getTitle()
+              , String.valueOf(context.getGameRules().getMaxStartCreaturePerPlayer())));
+    }
+    return player.addWarrior(warrior)
+            .onSuccess(addedWarrior -> addedWarrior.moveTo(coords));
   }
 
   @Override
   public Result connectPlayer(Player player) {
     Result result = null;
     if (players.containsKey(player.getId())) {
-      // плэер есть.
+      // игрок есть.
       result = ResultImpl.success(player);
       context.fireGameEvent(null, PLAYER_RECONNECTED, new EventDataContainer(player, result), null);
     } else {
       if (maxPlayersCount >= players.size()) {
         if ((result = player.replaceContext(context)).isSuccess()) {
           players.put(player.getId(), player);
+          player.setStartZone(playerStartZones.get(players.size() - 1));
           result = ResultImpl.success(player);
         }
       } else {
