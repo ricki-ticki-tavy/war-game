@@ -1,6 +1,5 @@
 package api.game;
 
-import api.entity.base.BaseEntityHeader;
 import org.springframework.util.ClassUtils;
 
 import java.util.Arrays;

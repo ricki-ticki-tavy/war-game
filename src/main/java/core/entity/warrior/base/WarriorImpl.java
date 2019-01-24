@@ -21,8 +21,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static api.enums.EventType.*;
-import static core.system.error.GameErrors.ALL_WARRIOR_S_HANDS_ARE_BUSY;
-import static core.system.error.GameErrors.WARRIOR_HAS_NOT_WEAPON;
+import static core.system.error.GameErrors.WARRIOR_HANDS_NO_FREE_SLOTS;
+import static core.system.error.GameErrors.WARRIOR_WEAPON_NOT_FOUND;
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -117,7 +117,7 @@ public class WarriorImpl implements Warrior {
       if (weapon.getNeededHandsCountToTakeWeapon() > 0) {
         int freePoints = 2 - hands.values().stream().map(hand -> hand.isFree() ? 0 : 1).reduce(0, (acc, chg) -> acc += chg);
         if (freePoints < weapon.getNeededHandsCountToTakeWeapon()) {
-          result = ResultImpl.fail(ALL_WARRIOR_S_HANDS_ARE_BUSY.getError(String.valueOf(freePoints)
+          result = ResultImpl.fail(WARRIOR_HANDS_NO_FREE_SLOTS.getError(String.valueOf(freePoints)
                   , weapon.getTitle()
                   , String.valueOf(weapon.getNeededHandsCountToTakeWeapon())));
           return result;
@@ -143,7 +143,7 @@ public class WarriorImpl implements Warrior {
   public Result dropWeapon(String weaponInstanceId) {
     Result result = hands.values().stream().filter(hand -> hand.hasWeapon(weaponInstanceId)).findFirst()
             .map(warriorSHand -> ResultImpl.success(warriorSHand.removeWeapon(weaponInstanceId)))
-            .orElse(ResultImpl.fail(WARRIOR_HAS_NOT_WEAPON.getError(weaponInstanceId)));
+            .orElse(ResultImpl.fail(WARRIOR_WEAPON_NOT_FOUND.getError(weaponInstanceId)));
 
     gameContext.fireGameEvent(null
             , result.isSuccess() ? WEAPON_DROPED : WEAPON_TRY_TO_DROP

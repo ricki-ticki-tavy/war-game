@@ -1,10 +1,11 @@
 package api.game.map;
 
 import api.core.Context;
+import api.core.Result;
 import api.entity.warrior.Warrior;
 import api.game.Coords;
 import api.game.Rectangle;
-import api.game.map.metadata.LevelMapMetaData;
+import api.game.map.metadata.LevelMapMetaDataXml;
 
 import java.util.List;
 
@@ -69,7 +70,15 @@ public interface LevelMap {
    * Добавить игрока в игру
    * @return
    */
-  Player connectPlayer(String playerName, String playerSessionId);
+  Result connectPlayer(Player player, String sessionId);
+
+  /**
+   * Отключить пользователя от игры.
+   *
+   * @param player
+   * @return
+   */
+  Result disconnectPlayer(Player player);
 
   /**
    * Вернуть список игроков
@@ -92,7 +101,7 @@ public interface LevelMap {
   /**
    * Инициализация карты
    */
-  void init(Context gameContext, LevelMapMetaData levelMapMetaData);
+  void init(Context gameContext, LevelMapMetaDataXml levelMapMetaData);
 
   /**
    * Признак успешно липодготовлена карта

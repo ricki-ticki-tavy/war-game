@@ -11,7 +11,7 @@ import api.game.Event;
 import java.util.List;
 import java.util.UUID;
 
-import static core.system.error.GameErrors.BASE_WARRIOR_S_ATTRS_IS_FINAL;
+import static core.system.error.GameErrors.WARRIOR_BASE_ATTRS_IS_FINAL;
 
 public abstract class AbstractBaseWarriorClass implements WarriorBaseClass {
 
@@ -30,7 +30,7 @@ public abstract class AbstractBaseWarriorClass implements WarriorBaseClass {
   @Override
   public void setWarriorSBaseAttributes(WarriorSBaseAttributesImpl warriorSBaseAttributes) {
     if (this.warriorSBaseAttributes != null) {
-      BASE_WARRIOR_S_ATTRS_IS_FINAL.error();
+      WARRIOR_BASE_ATTRS_IS_FINAL.error();
     } else {
       this.warriorSBaseAttributes =  warriorSBaseAttributes;
     }

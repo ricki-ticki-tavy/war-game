@@ -1,5 +1,7 @@
 package api.game.map;
 
+import api.core.Context;
+import api.core.Result;
 import api.entity.base.BaseEntityHeader;
 import api.entity.warrior.Warrior;
 import api.game.Rectangle;
@@ -36,5 +38,25 @@ public interface Player extends BaseEntityHeader{
    * @return
    */
   Rectangle getStartZone();
+
+  /**
+   * Задать игроку новый контекст. При этом из старого контекста должен быть выход
+   * @param newContext
+   * @return
+   */
+  Result replaceContext(Context newContext);
+
+  /**
+   * Задать игроку новый контекст без проверок и переподключений
+   * @param newContext
+   * @return
+   */
+  Player replaceContextSilent(Context newContext);
+
+  /**
+   * Получить контекст игрока
+   * @return
+   */
+  Context getContext();
 
 }

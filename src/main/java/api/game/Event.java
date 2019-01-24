@@ -1,149 +1,70 @@
 package api.game;
 
 import api.core.Context;
-import api.entity.base.BaseEntityHeader;
 import api.enums.EventType;
 
-import java.util.Collections;
 import java.util.Map;
 
-public class Event {
-
-  protected Context sourceContext;
-  protected EventType eventType;
-  protected Event causeEvent;
-  protected EventDataContainer source;
-  protected EventDataContainer target;
-  protected Object error;
-  protected Map<String, Object> params;
+public interface Event {
   /**
    * Получить контекст
    *
    * @return
    */
-  public Context getSourceContext() {
-    return sourceContext;
-  }
+  Context getSourceContext();
 
   /**
    * Тип события
    *
    * @return
    */
-  public EventType getEventType() {
-    return eventType;
-  }
+  EventType getEventType();
 
   /**
    * Событие, приведшее к этому событию
    *
    * @return
    */
-  public Event getCauseEvent() {
-    return causeEvent;
-  }
+  Event getCauseEvent();
 
   /**
    * Инициатор события. Игрок, воин, система
    *
    * @return
    */
-  public <T extends Object> T  getSource(Class<T> clazz) {
-    return source.get(clazz);
-  }
+  <T extends Object> T  getSource(Class<T> clazz);
 
   /**
    * На кого направлено событие. Игрок, воин, система
    *
    * @return
    */
-  public <T extends Object> T  getTarget(Class<T> clazz) {
-    return target.get(clazz);
-  }
+  <T extends Object> T  getTarget(Class<T> clazz);
 
   /**
    * Ошибка, если была
    *
    * @return
    */
-  public Object getError() {
-    return error;
-  }
+  Object getError();
 
   /**
    * Сохранить ошибку
    *
    * @param errorObject
    */
-  public void fail(Object errorObject) {
-    error = errorObject;
-  }
+  void fail(Object errorObject);
 
   /**
    * Получить набор параметров события.
    * @return
    */
-  public Map<String, Object> getParams(){
-    return params;
-  }
-
-  private void init(Context sourceContext
-          , Event causeEvent
-          , EventType eventType
-          , EventDataContainer source
-          , EventDataContainer target
-          , Map<String, Object> params){
-    this.sourceContext = sourceContext;
-    this.eventType = eventType;
-    this.source = source;
-    this.causeEvent = causeEvent;
-    this.causeEvent = causeEvent;
-    this.params = params != null ? params : Collections.EMPTY_MAP;
-    this.target = target != null ? target : new EventDataContainer();
-  }
-
-  /**
-   *
-   * @param sourceContext
-   * @param causeEvent
-   * @param eventType
-   * @param source
-   * @param params
-   */
-  public Event(
-          Context sourceContext
-          , Event causeEvent
-          , EventType eventType
-          , EventDataContainer source
-          , Map<String, Object> params) {
-    init(sourceContext, causeEvent, eventType, source, null, params);
-  }
-
-  /**
-   *
-   * @param sourceContext
-   * @param causeEvent
-   * @param eventType
-   * @param source
-   * @param params
-   */
-  public Event(
-          Context sourceContext
-          , Event causeEvent
-          , EventType eventType
-          , EventDataContainer source
-          , EventDataContainer target
-          , Map<String, Object> params) {
-    init(sourceContext, causeEvent, eventType, source, target, params);
-  }
+  Map<String, Object> getParams();
 
   /**
    * инициировать обработку события
    *
    * @return
    */
-  Event fire() {
-    sourceContext.fireGameEvent(this);
-    return this;
-  }
+  Event fire();
 }

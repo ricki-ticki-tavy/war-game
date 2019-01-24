@@ -3,68 +3,35 @@ package api.game.map.metadata;
 /**
  * Глобальные правила
  */
-public class GameRules {
+public interface GameRules {
   /**
    * Максимум созданий на игрока при старте игры
    */
-  int maxStartCreaturePerPlayer;
+  int getMaxStartCreaturePerPlayer();
 
   /**
    * Максимум призванных созданий на игрока
    */
-  int maxSummonedCreaturePerPlayer;
+  int getMaxSummonedCreaturePerPlayer();
 
   /**
    * Максимальное время на ход каждому игроку
    */
-  int maxPlayerRoundTime;
+  int getMaxPlayerRoundTime();
 
   /**
    * Кол-во очков магии у каждого игрока при старте
    */
-  int startMannaPoints;
+  int getStartMannaPoints();
 
   /**
    * Максимально допустимое кол-во очков магии игрока
    */
-  int maxMannaPoints;
+  int getMaxMannaPoints();
 
   /**
    * Кол-во магии, восстанавливаемый каждый ход
    */
-  int restorationMannaPointsPerTotalRound;
+  int getRestorationMannaPointsPerTotalRound();
 
-  public int getMaxStartCreaturePerPlayer() {
-    return maxStartCreaturePerPlayer;
-  }
-
-  public int getMaxSummonedCreaturePerPlayer() {
-    return maxSummonedCreaturePerPlayer;
-  }
-
-  public int getMaxPlayerRoundTime() {
-    return maxPlayerRoundTime;
-  }
-
-  public int getStartMannaPoints() {
-    return startMannaPoints;
-  }
-
-  public int getMaxMannaPoints() {
-    return maxMannaPoints;
-  }
-
-  public int getRestorationMannaPointsPerTotalRound() {
-    return restorationMannaPointsPerTotalRound;
-  }
-
-  public GameRules(int maxStartCreaturePerPlayer, int maxSummonedCreaturePerPlayer, int startMannaPoints
-          , int maxMannaPoints, int restorationMannaPointsPerTotalRound, int maxPlayerRoundTime) {
-    this.maxStartCreaturePerPlayer = maxStartCreaturePerPlayer;
-    this.maxSummonedCreaturePerPlayer = maxSummonedCreaturePerPlayer;
-    this.startMannaPoints = startMannaPoints;
-    this.maxMannaPoints = maxMannaPoints;
-    this.restorationMannaPointsPerTotalRound = restorationMannaPointsPerTotalRound;
-    this.maxPlayerRoundTime = maxPlayerRoundTime;
-  }
 }

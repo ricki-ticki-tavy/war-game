@@ -81,16 +81,24 @@ public interface Context {
    * @param map
    * @return
    */
-  void loadMap(String userGameCreator, GameRules gameRules, InputStream map, String gameName, boolean hidden);
+  Result loadMap(Player userGameCreator, GameRules gameRules, InputStream map, String gameName, boolean hidden);
 
   /**
    * Создать и подключить к игре игрока.
    *
-   * @param playerName
+   * @param player
    * @param playerSessionId
    * @return
    */
-  Player connectPlayer(String playerName, String playerSessionId);
+  Result connectPlayer(Player player, String playerSessionId);
+
+  /**
+   * Отключить пользователя от игры.
+   *
+   * @param player
+   * @return
+   */
+  Result disconnectPlayer(Player player);
 
   /**
    * Создать воина на карте
@@ -106,7 +114,7 @@ public interface Context {
    *
    * @return
    */
-  String getUserGameCreator();
+  Player getUserGameCreator();
 
   /**
    * Получить параметры игры

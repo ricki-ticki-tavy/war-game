@@ -2,7 +2,6 @@ package core.entity.weapon;
 
 import api.entity.ability.Modifier;
 import api.entity.weapon.Weapon;
-import api.entity.weapon.WeaponBuilder;
 
 import java.util.ArrayList;
 import java.util.List;

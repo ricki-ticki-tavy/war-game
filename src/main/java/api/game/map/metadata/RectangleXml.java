@@ -1,7 +1,5 @@
 package api.game.map.metadata;
 
-import api.game.Coords;
-
 import javax.xml.bind.annotation.*;
 
 /**
@@ -10,11 +8,11 @@ import javax.xml.bind.annotation.*;
 @XmlType(propOrder = {"topLeftConner", "bottomRightConner"})
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "reqtangle")
-public class XmlRectangle {
+public class RectangleXml {
 
   @XmlElement(name = "topLeftConner")
-  public XmlCoords topLeftConner;
+  public CoordsXml topLeftConner;
 
   @XmlElement(name = "bottomRightConner")
-  public XmlCoords bottomRightConner;
+  public CoordsXml bottomRightConner;
 }

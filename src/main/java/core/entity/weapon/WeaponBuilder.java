@@ -1,6 +1,7 @@
-package api.entity.weapon;
+package core.entity.weapon;
 
 import api.entity.ability.Modifier;
+import api.entity.weapon.Weapon;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;

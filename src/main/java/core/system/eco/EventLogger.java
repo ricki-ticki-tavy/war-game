@@ -1,10 +1,11 @@
-package core.game;
+package core.system.eco;
 
 import api.core.Result;
 import api.entity.warrior.Warrior;
 import api.entity.weapon.Weapon;
 import api.game.Event;
 import api.game.map.Player;
+import core.game.CoreImpl;
 import core.system.error.GameErrors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,31 +18,41 @@ import org.springframework.stereotype.Component;
 public class EventLogger {
   private static final Logger logger = LoggerFactory.getLogger(CoreImpl.class);
 
-  public Event logGameEvent(Event event){
+  public Event logGameEvent(Event event) {
     switch (event.getEventType()) {
-      case PLAYER_ADDED: {
-          // ("Игрок '%s' присоединился к игре '%s'  (контекст '%s'). Теперь в игре %s игроков из %s");
-        logger.info(event.getEventType().getFormattedMessage(event.getSource(Player.class).getTitle(), event.getSourceContext().getGameName()
-                , event.getSourceContext().getContextId(), String.valueOf(event.getSourceContext().getLevelMap().getPlayers().size())
-                        , String.valueOf(event.getSourceContext().getLevelMap().getMaxPlayerCount())));
+      case PLAYER_LOGGED_IN: {
+        // "Вход игрока %s. %s"
+        logger.info(event.getEventType().getFormattedMessage(event.getSource(Player.class).getTitle()
+                , event.getSource(Result.class).toString()));
         break;
       }
       case PLAYER_CONNECTED: {
-          // "Игрок '%s' повторно подключился к игре '%s'  (контекст '%s'). В игре %s игроков из %s"
-        logger.info(event.getEventType().getFormattedMessage(event.getSource(Player.class).getTitle(), event.getSourceContext().getGameName()
-                , event.getSourceContext().getContextId(), String.valueOf(event.getSourceContext().getLevelMap().getPlayers().size())
-                        , String.valueOf(event.getSourceContext().getLevelMap().getMaxPlayerCount())));
-        break;
-      }
-      case PLAYER_REMOVED: {
-        // "Игрок '%s' покинул игру '%s'  (контекст '%s'). Теперь в игре %s игроков из %s"
-        logger.info(event.getEventType().getFormattedMessage(event.getSource(Player.class).getTitle(), event.getSourceContext().getGameName()
+        // ("Игрок '%s' присоединился к игре (контекст '%s'). Теперь в игре %s игроков из %s");
+        logger.info(event.getEventType().getFormattedMessage(event.getSource(Player.class).getTitle()
                 , event.getSourceContext().getContextId()
                 , String.valueOf(event.getSourceContext().getLevelMap().getPlayers().size())
                 , String.valueOf(event.getSourceContext().getLevelMap().getMaxPlayerCount())));
         break;
       }
-      case WARRIOR_ADDED : {
+      case PLAYER_RECONNECTED: {
+        // "Игрок '%s' повторно подключился к игре (контекст '%s'). В игре %s игроков из %s. %s"
+        logger.info(event.getEventType().getFormattedMessage(event.getSource(Player.class).getTitle()
+                , event.getSourceContext().getContextId()
+                , String.valueOf(event.getSourceContext().getLevelMap().getPlayers().size())
+                , String.valueOf(event.getSourceContext().getLevelMap().getMaxPlayerCount())
+                , event.getSource(Result.class).toString()));
+        break;
+      }
+      case PLAYER_DISCONNECTED: {
+        // "Игрок '%s' покинул игру (контекст '%s'). Теперь в игре %s игроков из %s. %s"
+        logger.info(event.getEventType().getFormattedMessage(event.getSource(Player.class).getTitle()
+                , event.getSourceContext().getContextId()
+                , String.valueOf(event.getSourceContext().getLevelMap().getPlayers().size())
+                , String.valueOf(event.getSourceContext().getLevelMap().getMaxPlayerCount())
+                , event.getSource(Result.class).toString()));
+        break;
+      }
+      case WARRIOR_ADDED: {
         // "В игре '%s' (контекст '%s') игроком '%s' добавлен воин '%s'"
         logger.info(event.getEventType().getFormattedMessage(
                 event.getSourceContext().getGameName()
@@ -87,6 +98,22 @@ public class EventLogger {
                 , event.getSource(Warrior.class).getWarriorBaseClass().getId()
                 , event.getSource(Weapon.class).getTitle()
                 , event.getSource(Weapon.class).getId()
+                , event.getSource(Result.class).toString()));
+        break;
+      }
+      case GAME_CONTEXT_CREATE: {
+        //   "Создание контекста '%s'. %s"
+        logger.info(event.getEventType().getFormattedMessage(event.getSourceContext().getGameName()
+                , event.getSource(Result.class).toString()));
+        break;
+      }
+      case GAME_CONTEXT_LOAD_MAP: {
+        // "игра '%s' Контекст %s : загрузка карты '%s' игроком '%s'. тип игры %s.  %s"
+        logger.info(event.getEventType().getFormattedMessage(event.getSourceContext().getGameName()
+                , event.getSourceContext().getContextId()
+                , event.getSource(String.class)
+                , event.getSource(Player.class).getTitle()
+                , event.getSource(Boolean.class) ? "скрытая" : "открыта для всех"
                 , event.getSource(Result.class).toString()));
         break;
       }

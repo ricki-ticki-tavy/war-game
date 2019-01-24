@@ -1,10 +1,12 @@
-package core.entity.map;
+package core.entity.player;
 
 import api.core.Context;
+import api.core.Result;
 import api.entity.warrior.Warrior;
 import api.game.EventDataContainer;
 import api.game.Rectangle;
 import api.game.map.Player;
+import core.system.ResultImpl;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -19,17 +21,15 @@ import static api.enums.EventType.WARRIOR_ADDED;
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class PlayerImpl implements Player{
+public class PlayerImpl implements Player {
 
   private Context context;
-  private String playerSessionId;
   private String playerName;
   private Rectangle startZone;
   private Map<String, Warrior> warriors = new ConcurrentHashMap();
 
-  public PlayerImpl(Context context, String playerName, String playerSessionId){
-    this.context = context;
-    this.playerSessionId = playerSessionId;
+  public PlayerImpl(String playerName) {
+    this.context = null;
     this.playerName = playerName;
   }
 
@@ -43,11 +43,6 @@ public class PlayerImpl implements Player{
   @Override
   public List<Warrior> getWarriors() {
     return new ArrayList(warriors.values());
-  }
-
-  @Override
-  public String getId() {
-    return playerSessionId;
   }
 
   @Override
@@ -69,4 +64,38 @@ public class PlayerImpl implements Player{
   public Rectangle getStartZone() {
     return startZone;
   }
+
+  @Override
+  public Result replaceContext(Context newContext) {
+    Result result;
+    if (context != null) {
+      if ((result = context.disconnectPlayer(this)).isFail())
+        return result;
+    }
+
+    this.context = newContext;
+    return ResultImpl.success(this);
+  }
+
+  @Override
+  public Player replaceContextSilent(Context newContext) {
+    this.context = newContext;
+    return this;
+  }
+
+  @Override
+  public Context getContext() {
+    return context;
+  }
+
+  @Override
+  public String getId() {
+    return playerName;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return (obj instanceof Player) && ((Player) obj).getId().equals(getId());
+  }
+
 }

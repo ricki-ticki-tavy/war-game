@@ -8,7 +8,7 @@ import javax.xml.bind.annotation.*;
 @XmlType(propOrder = {"x", "y"})
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement
-public class XmlCoords {
+public class CoordsXml {
   @XmlElement(name = "x")
   public int x;
 

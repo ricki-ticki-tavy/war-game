@@ -2,9 +2,16 @@ package core.game;
 
 import api.core.Core;
 import api.core.Context;
+import api.core.Result;
 import api.enums.EventType;
 import api.game.Event;
+import api.game.EventDataContainer;
+import api.game.map.Player;
 import api.game.map.metadata.GameRules;
+import core.entity.player.PlayerImpl;
+import core.system.ResultImpl;
+import core.system.eco.EventLogger;
+import core.system.event.EventImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanFactory;
@@ -30,6 +37,7 @@ public class CoreImpl implements Core {
   private static final Logger logger = LoggerFactory.getLogger(CoreImpl.class);
 
   private Map<String, Context> contextMap = new ConcurrentHashMap<>(10);
+  private Map<String, Player> players = new ConcurrentHashMap<>(1000);
 
   /**
    * групировка по контекстам, далее внутри групировка по типам событий. Один и тот же потребитель может
@@ -45,10 +53,10 @@ public class CoreImpl implements Core {
   EventLogger gameEventLogger;
 
   @Override
-  public Context createGameContext(String userGameCreator, GameRules gameRules
+  public Context createGameContext(Player gameCreator, GameRules gameRules
           , InputStream map, String gameName, boolean hidden) {
     Context context = beanFactory.getBean(Context.class);
-    context.loadMap(userGameCreator, gameRules, map, gameName, hidden);
+    context.loadMap(gameCreator, gameRules, map, gameName, hidden);
     contextMap.put(context.getContextId(), context);
     return context;
   }
@@ -69,8 +77,10 @@ public class CoreImpl implements Core {
 
   @PostConstruct
   public void init() {
-    subscribeEvent(null, this::eventLogger, PLAYER_ADDED, PLAYER_REMOVED, WARRIOR_MOVED, PLAYER_REMOVED
-            , WARRIOR_ADDED, WEAPON_TAKEN, WEAPON_TRY_TO_DROP, WEAPON_DROPED);
+    subscribeEvent(null, this::eventLogger, WARRIOR_MOVED, PLAYER_DISCONNECTED
+            , WARRIOR_ADDED, WEAPON_TAKEN, WEAPON_TRY_TO_DROP, WEAPON_DROPED
+            , GAME_CONTEXT_CREATED, GAME_CONTEXT_CREATE, GAME_CONTEXT_LOAD_MAP
+            , PLAYER_LOGGED_IN, PLAYER_CONNECTED, PLAYER_DISCONNECTED, PLAYER_RECONNECTED);
   }
 
   @Override
@@ -123,8 +133,15 @@ public class CoreImpl implements Core {
     return consumerUID;
   }
 
-  private void eventLogger(Event event){
+  private void eventLogger(Event event) {
     gameEventLogger.logGameEvent(event);
   }
 
+  @Override
+  public Result loginPlayer(String playerName) {
+    Player player = players.computeIfAbsent(playerName, playerNameKey -> beanFactory.getBean(Player.class, playerNameKey));
+    Result result = ResultImpl.success(player);
+    fireEvent(new EventImpl(null, null, PLAYER_LOGGED_IN, new EventDataContainer(player), null));
+    return result;
+  }
 }

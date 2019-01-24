@@ -6,7 +6,7 @@ import java.util.List;
 @XmlType(propOrder = {"name", "description", "simpleUnitSize", "width", "height", "maxPlayersCount", "playerStartZones"})
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "map")
-public class LevelMapMetaData {
+public class LevelMapMetaDataXml {
 
   @XmlElement(name = "name", required = true)
   public String name;
@@ -28,6 +28,6 @@ public class LevelMapMetaData {
 
   @XmlElementWrapper(name = "playerStartZones")
   @XmlElement(name = "startZone", required = true)
-  public List<XmlRectangle> playerStartZones;
+  public List<RectangleXml> playerStartZones;
 
 }

@@ -2,6 +2,7 @@ package api.core;
 
 import api.enums.EventType;
 import api.game.Event;
+import api.game.map.Player;
 import api.game.map.metadata.GameRules;
 
 import java.io.InputStream;
@@ -21,7 +22,7 @@ public interface Core {
    * @param map
    * @return
    */
-  Context createGameContext(String userGameCreator, GameRules gameRules, InputStream map, String gameName, boolean hidden);
+  Context createGameContext(Player userGameCreator, GameRules gameRules, InputStream map, String gameName, boolean hidden);
 
   /**
    * Найти контекст по его UID
@@ -54,5 +55,15 @@ public interface Core {
    */
   String subscribeEvent(Context context, Consumer<Event> consumer, EventType... eventTypes);
 
-//  void unsubscribeEvent(Context context, Consumer<Event> consumer);
+  /**
+   * подключить к игре игрока.
+   *
+   * @param playerName
+   * @return
+   */
+  Result loginPlayer(String playerName);
+
+
+
+//  void unsubscribeEvent(Context context, Consumer<EventImpl> consumer);
 }
