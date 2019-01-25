@@ -32,7 +32,7 @@ public interface Core {
    * @param contextId
    * @return
    */
-  Context findGameContextByUID(String contextId);
+  Result<Context> findGameContextByUID(String contextId);
 
   /**
    * Удалить игру и ее контекст с сервера
@@ -71,7 +71,7 @@ public interface Core {
    * @param playerName
    * @return
    */
-  Result<Player> findPlayer(String playerName);
+  Result<Player> findUserByName(String playerName);
 
   /**
    * Получить список активных контекстов

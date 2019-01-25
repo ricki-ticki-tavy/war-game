@@ -87,30 +87,25 @@ public class CoreImpl implements Core {
   @Override
   public Result<Context> createGameContext(Player gameCreator, GameRules gameRules
           , InputStream map, String gameName, boolean hidden) {
-    Result<Context> result;
-
     // Если у пользователя была привязка к другим контекстам - надо разорвать ее
-    if ((result = gameCreator.replaceContext(null)).isSuccess()) {
-      // Создадим контекст новой игры
-      Context context = beanFactory.getBean(Context.class, gameCreator);
-
-      // Загрузим карту
-      if ((result = context.loadMap(gameRules, map, gameName, hidden)).isSuccess()) {
-        contextMap.put(context.getContextId(), context);
-
-        // сделаем вход пользователем в эту карту
-        if ((result = context.connectPlayer(gameCreator)).isSuccess()) {
-          result = ResultImpl.success(context);
-        }
-      }
-    }
-
-    return result;
+    return gameCreator.replaceContext(null).onSuccess(nullCtx ->
+            // Создадим контекст новой игры
+            beanFactory.getBean(Context.class, gameCreator)
+                    // Загрузим карту
+                    .loadMap(gameRules, map, gameName, hidden).onSuccess(createdCtx ->
+                    // сделаем вход пользователем в эту карту
+                    createdCtx.connectPlayer(gameCreator).onSuccess(connectedPlayer -> {
+                      contextMap.put(createdCtx.getContextId(), createdCtx);
+                      // подменим в ответе добавленного пользователя на контекст
+                      return ResultImpl.success(createdCtx);
+                    })));
   }
 
   @Override
-  public Context findGameContextByUID(String contextId) {
-    return contextMap.get(contextId);
+  public Result<Context> findGameContextByUID(String contextId) {
+    return Optional.ofNullable(contextMap.get(contextId))
+            .map(foundContext -> ResultImpl.success(foundContext))
+            .orElse(ResultImpl.fail(CONTEXT_NOT_FOUND_BY_ID.getError(contextId)));
   }
 
   @Override
@@ -208,7 +203,7 @@ public class CoreImpl implements Core {
   }
 
   @Override
-  public Result<Player> findPlayer(String playerName) {
+  public Result<Player> findUserByName(String playerName) {
     return Optional.ofNullable(players.get(playerName))
             .map(player -> ResultImpl.success(player))
             .orElse(ResultImpl.fail(USER_NOT_LOGGED_IN.getError(playerName)));

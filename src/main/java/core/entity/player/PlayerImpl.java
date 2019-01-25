@@ -67,8 +67,8 @@ public class PlayerImpl implements Player {
   @Override
   public Result replaceContext(Context newContext) {
     Result result;
-    if (context != null) {
-      if ((result = context.disconnectPlayer(this)).isFail())
+    if (this.context != null && (newContext == null || !this.context.getContextId().equals(newContext.getContextId()))) {
+      if ((result = this.context.disconnectPlayer(this)).isFail())
         return result;
     }
 

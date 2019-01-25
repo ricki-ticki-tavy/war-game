@@ -81,7 +81,7 @@ public interface Context {
    * @param map
    * @return
    */
-  Result loadMap(GameRules gameRules, InputStream map, String gameName, boolean hidden);
+  Result<Context> loadMap(GameRules gameRules, InputStream map, String gameName, boolean hidden);
 
   /**
    * Создать и подключить к игре игрока.

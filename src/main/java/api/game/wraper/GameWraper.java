@@ -36,6 +36,14 @@ public interface GameWraper {
           , boolean hidden);
 
   /**
+   * Подключиться к игре
+   * @param userName
+   * @param contextId
+   * @return
+   */
+  Result<Player> connectToGame(String userName, String contextId);
+
+  /**
    * Получить список игровых контекстов
    * @return
    */
@@ -57,5 +65,14 @@ public interface GameWraper {
    * @return
    */
   Result<Weapon> giveWeaponToWarrior(String userName, String warriorId, String weaponName);
+
+  /**
+   * Забрать предмет у воина
+   * @param userName
+   * @param warriorId
+   * @param weaponId
+   * @return
+   */
+  Result<Weapon> takeWeaponFromWarrior(String userName, String warriorId, String weaponId);
 
 }

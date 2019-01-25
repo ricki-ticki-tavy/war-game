@@ -28,10 +28,8 @@ import org.springframework.util.Assert;
 import javax.annotation.PostConstruct;
 
 import java.util.List;
-import java.util.Optional;
 
 import static core.system.error.GameErrors.USER_NOT_CONNECTED_TO_ANY_GAME;
-import static core.system.error.GameErrors.USER_NOT_LOGGED_IN;
 
 @Component
 public class GameWraperImpl implements GameWraper {
@@ -74,6 +72,7 @@ public class GameWraperImpl implements GameWraper {
     createContextResult = createGame(player.getId(), rules, "level2.xml", "test-game", false);
     Assert.isTrue(createContextResult.isSuccess(), "Карта не загружена");
     Assert.isTrue(((List<Context>) getGamesList().getResult()).size() == 1, "Контекст не появился в списке контекстов");
+    Context context1 = createContextResult.getResult();
 
     Result<Context> createContextResult2 = createGame(player2.getId(), rules, "level2.xml", "test-game", false);
     Assert.isTrue(createContextResult2.isSuccess(), "Карта 2 не загружена");
@@ -88,53 +87,60 @@ public class GameWraperImpl implements GameWraper {
     Assert.isTrue(warriorResult.getResult() == player.getWarriors().get(0), "Созданный воин и воин на карте не равны");
     Warrior warrior = warriorResult.getResult();
 
-    Result resultW1 = giveWeaponToWarrior(player.getId(), warrior.getId(), ShortSword.CLASS_NAME);
+    Result<Player> reconnectUserResult = connectToGame(player.getId(), context1.getContextId());
+    Assert.isTrue(reconnectUserResult.isSuccess(), "Игрок не переподключен");
+    Assert.isTrue(context1.getLevelMap().getPlayers().size() == 1, "Игрок был создан дополниткльно с теми же параметрами вместо переподключения");
+    // этот плеер имеет одного воина, добавленного тестом выше
+    Assert.isTrue(player.getWarriors().size() == 1, "Игрок был пересоздан на месте первого вместо переподключения");
+
+    Result<Weapon> resultW1 = giveWeaponToWarrior(player.getId(), warrior.getId(), ShortSword.CLASS_NAME);
     Assert.isTrue(resultW1.isSuccess(), "Ошибка добавления короткого меча (первого оружия)");
     Assert.isTrue(warrior.getWeapons().size() == 1, "У воина отсутствует добавленное оружие");
+    Weapon weapon1 = resultW1.getResult();
 
-    Result resultW2 = giveWeaponToWarrior(player.getId(), warrior.getId(), Sword.CLASS_NAME);
+    Result<Weapon> resultW2 = giveWeaponToWarrior(player.getId(), warrior.getId(), Sword.CLASS_NAME);
     Assert.isTrue(resultW2.isSuccess(), "Ошибка добавления меча (второго оружия)");
     Assert.isTrue(warrior.getWeapons().size() == 2, "У воина отсутствует второе добавленное оружие");
+    Weapon weapon2 = resultW2.getResult();
 
-    Result resultW3 = giveWeaponToWarrior(player.getId(), warrior.getId(), Sword.CLASS_NAME);
+    Result<Weapon> resultW3 = giveWeaponToWarrior(player.getId(), warrior.getId(), Sword.CLASS_NAME);
     Assert.isTrue(resultW3.isFail(), "Ошибка добавления меча (третьего оружия). Оружие не должно быть добавлено ");
     Assert.isTrue(warrior.getWeapons().size() == 2, "У воина присутствует третье добавленное оружие");
 
-//    result = warrior.dropWeapon(((Weapon) resultW1.getResult()).getId());
-//    Assert.isTrue(result.isSuccess(), "Ошибка удаления короткого меча (первого оружия)");
-//    Assert.isTrue(warrior.getWeapons().size() == 1, "У воина присутствует удаленное первое оружие");
+    Result<Weapon> resultDropWeapon1 = takeWeaponFromWarrior(player.getId(), warrior.getId(), weapon1.getId());
+    Assert.isTrue(resultDropWeapon1.isSuccess(), "Ошибка удаления короткого меча (первого оружия)");
+    Assert.isTrue(warrior.getWeapons().size() == 1, "У воина присутствует удаленное первое оружие");
 
-//    result = warrior.dropWeapon(((Weapon) resultW1.getResult()).getId());
-//    Assert.isTrue(result.isFail(), "Ошибка повторного удаления ранее удаленного оружия (короткого меча (первого оружия))");
-//    Assert.isTrue(warrior.getWeapons().size() == 1, "У воина неверное кол-во оружияпосле удаления первое оружие");
-//
-//    result = warrior.takeWeapon(Bow.class);
-//    Assert.isTrue(result.isFail(), "Ошибка добавления лука (третьего оружия). Оружие не должно быть добавлено ");
-//    Assert.isTrue(warrior.getWeapons().size() == 1, "У воина присутствует лук. третье добавленное оружие");
-//
-//    result = warrior.dropWeapon(((Weapon) resultW2.getResult()).getId());
-//    Assert.isTrue(result.isSuccess(), "Ошибка удаления меча (второго оружия)");
-//    Assert.isTrue(warrior.getWeapons().size() == 0, "У воина присутствует удаленное второе оружие");
-//
-//    Result resultBow = warrior.takeWeapon(Bow.class);
-//    Assert.isTrue(resultBow.isSuccess(), "Ошибка добавления лука (единственного оружия)");
-//    Assert.isTrue(warrior.getWeapons().size() == 1, "У воина отсутствует лук");
-//
-//    resultW2 = warrior.takeWeapon(Sword.class);
-//    Assert.isTrue(resultW2.isFail(), "Ошибка добавления меча (третьего оружия). Оружие не должно быть добавлено ");
-//    Assert.isTrue(warrior.getWeapons().size() == 1, "У воина присутствует не добавленное оружие");
+    resultDropWeapon1 = takeWeaponFromWarrior(player.getId(), warrior.getId(), weapon1.getId());
+    Assert.isTrue(resultDropWeapon1.isFail(), "Ошибка повторного удаления ранее удаленного оружия (короткого меча (первого оружия))");
+    Assert.isTrue(warrior.getWeapons().size() == 1, "У воина неверное кол-во оружияпосле удаления первое оружие");
 
-//    player = context.connectPlayer("test", "testSession1");
-//    Assert.notNull(player, "Игрок не переподключен");
-//    Assert.isTrue(context.getLevelMap().getPlayers().size() == 1, "Игрок был создан дополниткльно с теми же параметрами вместо переподключения");
-//    Assert.isTrue(player.getWarriors().size() == 1, "Игрок был пересоздан на месте первого вместо переподключения");
-//
-//    player = context.connectPlayer("test2", "testSession2");
-//    Assert.notNull(player, "Игрок не создан");
-//    Assert.isTrue(context.getLevelMap().getPlayers().size() == 2, "Игрок был создан На месте первого");
-//
-    core.removeGameContext(createContextResult.getResult());
-    Assert.isTrue(core.findGameContextByUID(createContextResult.getResult().getContextId()) == null, "Контекст не удален");
+    Result<Weapon> resultDropWeapon3 = giveWeaponToWarrior(player.getId(), warrior.getId(), Bow.CLASS_NAME);
+    Assert.isTrue(resultDropWeapon3.isFail(), "Ошибка добавления лука (третьего оружия). Оружие не должно быть добавлено ");
+    Assert.isTrue(warrior.getWeapons().size() == 1, "У воина присутствует лук. третье добавленное оружие");
+
+    resultDropWeapon1 = takeWeaponFromWarrior(player.getId(), warrior.getId(), weapon2.getId());
+    Assert.isTrue(resultDropWeapon1.isSuccess(), "Ошибка удаления меча (второго оружия)");
+    Assert.isTrue(warrior.getWeapons().size() == 0, "У воина присутствует удаленное второе оружие");
+
+    resultDropWeapon3 = giveWeaponToWarrior(player.getId(), warrior.getId(), Bow.CLASS_NAME);
+    Assert.isTrue(resultDropWeapon3.isSuccess(), "Ошибка добавления лука (единственного оружия)");
+    Assert.isTrue(warrior.getWeapons().size() == 1, "У воина отсутствует лук");
+    Weapon weapon3 = resultDropWeapon3.getResult();
+
+    resultW2 = giveWeaponToWarrior(player.getId(), warrior.getId(), Sword.CLASS_NAME);
+    Assert.isTrue(resultW2.isFail(), "Ошибка добавления меча (третьего оружия). Оружие не должно быть добавлено ");
+    Assert.isTrue(warrior.getWeapons().size() == 1, "У воина присутствует не добавленное оружие");
+
+    Result<Player> playerConnectResult2 = connectToGame(player2.getId(), context1.getContextId());
+    Assert.isTrue(playerConnectResult2.isSuccess(), "Игрок не создан подключен");
+    Assert.isTrue(context1.getLevelMap().getPlayers().size() == 2, "Игрок 2 не был подключен к контексту 1");
+    // игрок 2 имел созданную игру. После подключения к этой игре его контекст должен былудалиться
+    Assert.isTrue(((List<Context>) getGamesList().getResult()).size() == 1, "Старый контекст подключенного игрока не удалился как контекст владельца");
+
+
+    core.removeGameContext(context1);
+    Assert.isTrue(core.findGameContextByUID(context1.getContextId()).isFail(), "Контекст не удален");
     return true;
   }
 
@@ -160,7 +166,7 @@ public class GameWraperImpl implements GameWraper {
           , String gameName
           , boolean hidden) {
     Result<Player> playerResult;
-    if ((playerResult = core.findPlayer(ownerUserName)).isFail()) {
+    if ((playerResult = core.findUserByName(ownerUserName)).isFail()) {
       core.fireEvent(new EventImpl(null, null, EventType.GAME_CONTEXT_CREATE
               , new EventDataContainer(playerResult, new String[]{gameName, ownerUserName}), null));
       return playerResult;
@@ -173,13 +179,21 @@ public class GameWraperImpl implements GameWraper {
   }
 
   @Override
+  public Result<Player> connectToGame(String userName, String contextId) {
+    return core.findUserByName(userName)
+            .onSuccess(foundUser -> core.findGameContextByUID(contextId)
+            .onSuccess(foundContext -> foundContext.connectPlayer(foundUser))
+            .onSuccess(ctx -> ResultImpl.success(foundUser)));
+  }
+
+  @Override
   public Result getGamesList() {
     return ResultImpl.success(core.getContextList());
   }
 
   @Override
   public Result<Warrior> createWarrior(String userName, String className, Coords coords) {
-    return core.findPlayer(userName)
+    return core.findUserByName(userName)
             .onSuccess(foundPlayer -> {
               Context context = foundPlayer.getContext();
               if (context != null) {
@@ -193,13 +207,27 @@ public class GameWraperImpl implements GameWraper {
 
   @Override
   public Result<Weapon> giveWeaponToWarrior(String userName, String warriorId, String weaponClassName) {
-    return core.findPlayer(userName)
+    return core.findUserByName(userName)
             .onSuccess(foundPlayer -> {
               Context context = foundPlayer.getContext();
               if (context != null) {
                 return core.findWeaponByName(weaponClassName)
                         .onSuccess(baseClass -> foundPlayer.findWarriorById(warriorId)
                                 .onSuccess(foundWarrior -> foundWarrior.takeWeapon(baseClass)));
+              } else {
+                return ResultImpl.fail(USER_NOT_CONNECTED_TO_ANY_GAME.getError(foundPlayer.getTitle()));
+              }
+            });
+  }
+
+  @Override
+  public Result<Weapon> takeWeaponFromWarrior(String userName, String warriorId, String weaponId) {
+    return core.findUserByName(userName)
+            .onSuccess(foundPlayer -> {
+              Context context = foundPlayer.getContext();
+              if (context != null) {
+                return foundPlayer.findWarriorById(warriorId)
+                        .onSuccess(foundWarrior -> foundWarrior.dropWeapon(weaponId));
               } else {
                 return ResultImpl.fail(USER_NOT_CONNECTED_TO_ANY_GAME.getError(foundPlayer.getTitle()));
               }
