@@ -11,13 +11,11 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static api.enums.EventType.WARRIOR_ADDED;
+import static core.system.error.GameErrors.WARRIOR_NOT_FOUND_AT_PLAYER_BY_NAME;
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -34,10 +32,11 @@ public class PlayerImpl implements Player {
   }
 
   @Override
-  public Warrior addWarrior(Warrior warrior) {
+  public Result<Warrior> addWarrior(Warrior warrior) {
     warriors.put(warrior.getId(), warrior);
-    context.fireGameEvent(null, WARRIOR_ADDED, new EventDataContainer(warrior), Collections.EMPTY_MAP);
-    return warrior;
+    Result result = ResultImpl.success(warrior);
+    context.fireGameEvent(null, WARRIOR_ADDED, new EventDataContainer(warrior, result), Collections.EMPTY_MAP);
+    return result;
   }
 
   @Override
@@ -68,8 +67,8 @@ public class PlayerImpl implements Player {
   @Override
   public Result replaceContext(Context newContext) {
     Result result;
-    if (context != null) {
-      if ((result = context.disconnectPlayer(this)).isFail())
+    if (this.context != null && (newContext == null || !this.context.getContextId().equals(newContext.getContextId()))) {
+      if ((result = this.context.disconnectPlayer(this)).isFail())
         return result;
     }
 
@@ -78,9 +77,9 @@ public class PlayerImpl implements Player {
   }
 
   @Override
-  public Player replaceContextSilent(Context newContext) {
+  public Result<Player> replaceContextSilent(Context newContext) {
     this.context = newContext;
-    return this;
+    return ResultImpl.success(this);
   }
 
   @Override
@@ -98,4 +97,10 @@ public class PlayerImpl implements Player {
     return (obj instanceof Player) && ((Player) obj).getId().equals(getId());
   }
 
+  @Override
+  public Result<Warrior> findWarriorById(String warriorId) {
+    return Optional.ofNullable(warriors.get(warriorId))
+            .map(foundWarrior -> ResultImpl.success(foundWarrior))
+            .orElse(ResultImpl.fail(WARRIOR_NOT_FOUND_AT_PLAYER_BY_NAME.getError(getTitle(), warriorId)));
+  }
 }

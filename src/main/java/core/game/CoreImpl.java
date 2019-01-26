@@ -1,14 +1,20 @@
 package core.game;
 
-import api.core.Core;
 import api.core.Context;
+import api.core.Core;
 import api.core.Result;
+import api.entity.warrior.WarriorBaseClass;
+import api.entity.weapon.Weapon;
 import api.enums.EventType;
 import api.game.Event;
 import api.game.EventDataContainer;
 import api.game.map.Player;
 import api.game.map.metadata.GameRules;
-import core.entity.player.PlayerImpl;
+import core.entity.warrior.Skeleton;
+import core.entity.warrior.Viking;
+import core.entity.weapon.Bow;
+import core.entity.weapon.ShortSword;
+import core.entity.weapon.Sword;
 import core.system.ResultImpl;
 import core.system.eco.EventLogger;
 import core.system.event.EventImpl;
@@ -27,6 +33,7 @@ import java.util.stream.Stream;
 
 import static api.enums.EventType.*;
 import static core.game.ContextImpl.NULL_GAME_CONTEXT;
+import static core.system.error.GameErrors.*;
 
 /**
  * Игровой движок. Все операции выполняютсяв рамках динамического игрового контекста
@@ -35,6 +42,9 @@ import static core.game.ContextImpl.NULL_GAME_CONTEXT;
 public class CoreImpl implements Core {
 
   private static final Logger logger = LoggerFactory.getLogger(CoreImpl.class);
+
+  private final Map<String, Class<? extends WarriorBaseClass>> registeredWarriorBaseClasses = new ConcurrentHashMap<>(100);
+  private final Map<String, Class<? extends Weapon>> registeredWeaponClasses = new ConcurrentHashMap<>(100);
 
   private Map<String, Context> contextMap = new ConcurrentHashMap<>(10);
   private Map<String, Player> players = new ConcurrentHashMap<>(1000);
@@ -52,26 +62,71 @@ public class CoreImpl implements Core {
   @Autowired
   EventLogger gameEventLogger;
 
+  /**
+   * Зарегистрировать базовый класс воина
+   *
+   * @param className
+   * @param warriorBaseClass
+   */
+  private void registerWarriorBaseClass(String className, Class<? extends WarriorBaseClass> warriorBaseClass) {
+    registeredWarriorBaseClasses.put(className, warriorBaseClass);
+  }
+
+  /**
+   * Зарегистрировать базовый класс оружия
+   *
+   * @param className
+   * @param weaponClass
+   */
+  private void registerWeaponClass(String className, Class<? extends Weapon> weaponClass) {
+    registeredWeaponClasses.put(className, weaponClass);
+  }
+
+
   @Override
-  public Context createGameContext(Player gameCreator, GameRules gameRules
+  public Result<Context> createGameContext(Player gameCreator, GameRules gameRules
           , InputStream map, String gameName, boolean hidden) {
-    Context context = beanFactory.getBean(Context.class);
-    context.loadMap(gameCreator, gameRules, map, gameName, hidden);
-    contextMap.put(context.getContextId(), context);
-    return context;
+    // Если у пользователя была привязка к другим контекстам - надо разорвать ее
+    return gameCreator.replaceContext(null).map(nullCtx ->
+            // Создадим контекст новой игры
+            beanFactory.getBean(Context.class, gameCreator)
+                    // Загрузим карту
+                    .loadMap(gameRules, map, gameName, hidden).map(createdCtx ->
+                    // сделаем вход пользователем в эту карту
+                    createdCtx.connectPlayer(gameCreator).map(connectedPlayer -> {
+                      contextMap.put(createdCtx.getContextId(), createdCtx);
+                      // подменим в ответе добавленного пользователя на контекст
+                      return ResultImpl.success(createdCtx);
+                    })));
   }
 
   @Override
-  public Context findGameContextByUID(String contextId) {
-    return contextMap.get(contextId);
+  public Result<Context> findGameContextByUID(String contextId) {
+    return Optional.ofNullable(contextMap.get(contextId))
+            .map(foundContext -> ResultImpl.success(foundContext))
+            .orElse(ResultImpl.fail(CONTEXT_NOT_FOUND_BY_ID.getError(contextId)));
   }
 
   @Override
-  public void removeGameContext(Context context) {
-    Optional.ofNullable(contextMap.get(context.getContextId()))
-            .ifPresent(foundContext -> {
+  public Result<Context> removeGameContext(String contextId) {
+
+    return findGameContextByUID(contextId)
+            // переводим контекст в режим удаления
+            .map(contextToDelete -> contextToDelete.initDelete())
+            .map(foundContext -> {
+              // отключим всех пользователей
+              foundContext.getLevelMap().getPlayers()
+                      .stream()
+                      .forEach(player ->
+                          foundContext.disconnectPlayer(player));
+              // вычеркнуть контекст из списка
               contextMap.remove(foundContext.getContextId());
+              // отправимсообщение об удалении контекста
+              Result result = ResultImpl.success(foundContext);
+              foundContext.fireGameEvent(null, GAME_CONTEXT_REMOVED, new EventDataContainer(foundContext, result), null);
+              // удалить все подписи данного контекста  на события
               eventConsumers.remove(foundContext);
+              return result;
             });
   }
 
@@ -79,8 +134,15 @@ public class CoreImpl implements Core {
   public void init() {
     subscribeEvent(null, this::eventLogger, WARRIOR_MOVED, PLAYER_DISCONNECTED
             , WARRIOR_ADDED, WEAPON_TAKEN, WEAPON_TRY_TO_DROP, WEAPON_DROPED
-            , GAME_CONTEXT_CREATED, GAME_CONTEXT_CREATE, GAME_CONTEXT_LOAD_MAP
+            , GAME_CONTEXT_CREATED, GAME_CONTEXT_CREATE, GAME_CONTEXT_LOAD_MAP, GAME_CONTEXT_REMOVED
             , PLAYER_LOGGED_IN, PLAYER_CONNECTED, PLAYER_DISCONNECTED, PLAYER_RECONNECTED);
+
+    registerWarriorBaseClass(Skeleton.CLASS_NAME, Skeleton.class);
+    registerWarriorBaseClass(Viking.CLASS_NAME, Viking.class);
+
+    registerWeaponClass(Bow.CLASS_NAME, Bow.class);
+    registerWeaponClass(ShortSword.CLASS_NAME, ShortSword.class);
+    registerWeaponClass(Sword.CLASS_NAME, Sword.class);
   }
 
   @Override
@@ -95,10 +157,11 @@ public class CoreImpl implements Core {
    * @param event
    */
   private void fireEventInContext(Context fireInContext, Event event) {
-    Optional.ofNullable(eventConsumers.get(fireInContext))
-            .ifPresent(consumerMap -> Optional.ofNullable(consumerMap.get(event.getEventType()))
-                    .ifPresent(uidToConsumerMap -> uidToConsumerMap.values().stream()
-                            .forEach(gameEventConsumer -> gameEventConsumer.accept(event))));
+    Optional.ofNullable(fireInContext)
+            .ifPresent(firedContext -> Optional.ofNullable(eventConsumers.get(firedContext))
+                    .ifPresent(consumerMap -> Optional.ofNullable(consumerMap.get(event.getEventType()))
+                            .ifPresent(uidToConsumerMap -> uidToConsumerMap.values().stream()
+                                    .forEach(gameEventConsumer -> gameEventConsumer.accept(event)))));
   }
 
   /**
@@ -141,7 +204,43 @@ public class CoreImpl implements Core {
   public Result loginPlayer(String playerName) {
     Player player = players.computeIfAbsent(playerName, playerNameKey -> beanFactory.getBean(Player.class, playerNameKey));
     Result result = ResultImpl.success(player);
-    fireEvent(new EventImpl(null, null, PLAYER_LOGGED_IN, new EventDataContainer(player), null));
+    fireEvent(new EventImpl(null, null, PLAYER_LOGGED_IN, new EventDataContainer(player, result), null));
     return result;
+  }
+
+  @Override
+  public Result<Player> findUserByName(String playerName) {
+    return Optional.ofNullable(players.get(playerName))
+            .map(player -> ResultImpl.success(player))
+            .orElse(ResultImpl.fail(USER_NOT_LOGGED_IN.getError(playerName)));
+  }
+
+  @Override
+  public List<Context> getContextList() {
+    return new ArrayList(contextMap.values());
+  }
+
+  @Override
+  public Result<List<String>> getBaseWarriorClasses() {
+    return ResultImpl.success(new ArrayList(registeredWarriorBaseClasses.keySet()));
+  }
+
+  @Override
+  public Result<List<String>> getWeaponClasses() {
+    return ResultImpl.success(new ArrayList(registeredWeaponClasses.keySet()));
+  }
+
+  @Override
+  public Result<Class<? extends WarriorBaseClass>> findWarriorBaseClassByName(String className) {
+    return Optional.ofNullable(registeredWarriorBaseClasses.get(className))
+            .map(clazz -> ResultImpl.success(clazz))
+            .orElse(ResultImpl.fail(WARRIOR_BASE_CLASS_NOT_FOUND_BY_NAME.getError(className)));
+  }
+
+  @Override
+  public Result<Class<? extends Weapon>> findWeaponByName(String weaponClassName) {
+    return Optional.ofNullable(registeredWeaponClasses.get(weaponClassName))
+            .map(clazz -> ResultImpl.success(clazz))
+            .orElse(ResultImpl.fail(WEAPON_BASE_CLASS_NOT_FOUND_BY_NAME.getError(weaponClassName)));
   }
 }

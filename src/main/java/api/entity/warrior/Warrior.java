@@ -40,7 +40,7 @@ public interface Warrior extends BaseEntityHeader{
    * Перемещает юнит в заданные координаты
    * @param coords
    */
-  Warrior moveTo(Coords coords);
+  Result<Warrior> moveTo(Coords coords);
 
   /**
    * Получить игрока - владельца юнита

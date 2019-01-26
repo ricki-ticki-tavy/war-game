@@ -116,36 +116,29 @@ public class LevelMapImpl implements LevelMap {
   }
 
   @Override
-  public Warrior addWarrior(String playerId, Coords coords, Warrior warrior) {
-    return Optional.ofNullable(getPlayer(playerId))
-            .map(player -> {
-              if (player.getWarriors().size() >= context.getGameRules().getMaxStartCreaturePerPlayer()) {
-                GameErrors.TOO_MANY_UNITS_FOR_PLAYER.error(playerId, String.valueOf(context.getGameRules().getMaxStartCreaturePerPlayer()));
-              }
-              player.addWarrior(warrior);
-              warrior.moveTo(coords);
-              return warrior;
-            }).orElseThrow(() -> GameErrors.UNKNOWN_USER_UID.getError(playerId));
+  public Result<Warrior> addWarrior(Player player, Coords coords, Warrior warrior) {
+    if (player.getWarriors().size() >= context.getGameRules().getMaxStartCreaturePerPlayer()) {
+      return ResultImpl.fail(GameErrors.PLAYER_UNITS_LIMIT_EXCEEDED.getError(player.getTitle()
+              , String.valueOf(context.getGameRules().getMaxStartCreaturePerPlayer())));
+    }
+    return player.addWarrior(warrior)
+            .map(addedWarrior -> addedWarrior.moveTo(coords));
   }
 
   @Override
-  public Result connectPlayer(Player player, String sessionId) {
+  public Result connectPlayer(Player player) {
     Result result = null;
-    if (!players.containsValue(player)) {
-      // плэер есть. Перепакуем с, возможно, новым sessionId
-      Map<String, Player> tempPlayerMap = new HashMap<>(players.size());
-      players.forEach((sessId, foundPlayer) -> {
-        tempPlayerMap.put(foundPlayer.getId().equals(player.getId())
-                ? sessionId : sessId, foundPlayer);
-      });
-      players.clear();
-      players.putAll(tempPlayerMap);
+    if (players.containsKey(player.getId())) {
+      // игрок есть.
       result = ResultImpl.success(player);
       context.fireGameEvent(null, PLAYER_RECONNECTED, new EventDataContainer(player, result), null);
     } else {
-      if (maxPlayersCount < players.size()) {
-        players.put(sessionId, player);
-        result = ResultImpl.success(player);
+      if (maxPlayersCount >= players.size()) {
+        if ((result = player.replaceContext(context)).isSuccess()) {
+          players.put(player.getId(), player);
+          player.setStartZone(playerStartZones.get(players.size() - 1));
+          result = ResultImpl.success(player);
+        }
       } else {
         result = ResultImpl.fail(USER_CONNECT_TO_CONTEXT_TOO_MANY_USERS.getError());
       }
@@ -157,19 +150,19 @@ public class LevelMapImpl implements LevelMap {
 
   @Override
   public Result disconnectPlayer(Player player) {
-    Result result = null;
-    if (players.containsKey(player.getId())){
+    Result result;
+    if (players.containsKey(player.getId())) {
       players.remove(player.getId());
       player.replaceContextSilent(null);
       result = ResultImpl.success(player);
       context.fireGameEvent(null, PLAYER_DISCONNECTED, new EventDataContainer(player, result), null);
 
-      // если это создатель игры, то
-      if (context.getUserGameCreator().equals(player)){
+      // если это создатель игры, и контекст УЖЕ не в режиме удаления, то
+      if (!context.isDeleting() && context.getContextOwner().equals(player)) {
         // выкидываем всех игроков
         players.values().stream().forEach(this::disconnectPlayer);
         // Удаляем контекст
-        context.getCore().removeGameContext(context);
+        context.getCore().removeGameContext(context.getContextId());
       }
     } else {
       result = ResultImpl.fail(USER_DISCONNECT_NOT_CONNECTED.getError());

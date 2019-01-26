@@ -93,10 +93,11 @@ public class WarriorImpl implements Warrior {
   }
 
   @Override
-  public Warrior moveTo(Coords coords) {
+  public Result<Warrior> moveTo(Coords coords) {
     this.coords = new Coords(coords);
-    gameContext.fireGameEvent(null, WARRIOR_MOVED, new EventDataContainer(this), null);
-    return this;
+    Result result = ResultImpl.success(this);
+    gameContext.fireGameEvent(null, WARRIOR_MOVED, new EventDataContainer(this, result), null);
+    return result;
   }
 
   @Override

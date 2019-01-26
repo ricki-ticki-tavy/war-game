@@ -1,11 +1,14 @@
 package api.core;
 
+import api.entity.warrior.WarriorBaseClass;
+import api.entity.weapon.Weapon;
 import api.enums.EventType;
 import api.game.Event;
 import api.game.map.Player;
 import api.game.map.metadata.GameRules;
 
 import java.io.InputStream;
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -22,20 +25,20 @@ public interface Core {
    * @param map
    * @return
    */
-  Context createGameContext(Player userGameCreator, GameRules gameRules, InputStream map, String gameName, boolean hidden);
+  Result<Context> createGameContext(Player userGameCreator, GameRules gameRules, InputStream map, String gameName, boolean hidden);
 
   /**
    * Найти контекст по его UID
    * @param contextId
    * @return
    */
-  Context findGameContextByUID(String contextId);
+  Result<Context> findGameContextByUID(String contextId);
 
   /**
    * Удалить игру и ее контекст с сервера
-   * @param context
+   * @param contextId
    */
-  void removeGameContext(Context context);
+  Result<Context> removeGameContext(String contextId);
 
   /**
    * Отправить сообщение о событии
@@ -63,7 +66,42 @@ public interface Core {
    */
   Result loginPlayer(String playerName);
 
+  /**
+   * Вернуть пользователя из списка вошедших в игру
+   * @param playerName
+   * @return
+   */
+  Result<Player> findUserByName(String playerName);
 
+  /**
+   * Получить список активных контекстов
+   * @return
+   */
+  List<Context> getContextList();
 
-//  void unsubscribeEvent(Context context, Consumer<EventImpl> consumer);
+  /**
+   * Возвращает имена базовых классов воинов
+   * @return
+   */
+  Result<List<String>> getBaseWarriorClasses();
+
+  /**
+   * Возвращает имена базовых классов вооружения
+   * @return
+   */
+  Result<List<String>> getWeaponClasses();
+
+  /**
+   * Ищет базовый класс воина по его названию
+   * @param className
+   * @return
+   */
+  Result<Class<? extends WarriorBaseClass>> findWarriorBaseClassByName(String className);
+
+  /**
+   * Ищет базовый класс воина по его названию
+   * @param weaponClassName
+   * @return
+   */
+  Result<Class<? extends Weapon>> findWeaponByName(String weaponClassName);
 }

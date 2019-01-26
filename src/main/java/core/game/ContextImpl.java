@@ -6,6 +6,7 @@ import api.core.Result;
 import api.entity.warrior.Warrior;
 import api.entity.warrior.WarriorBaseClass;
 import api.enums.EventType;
+import api.game.Coords;
 import api.game.Event;
 import api.game.EventDataContainer;
 import api.game.map.LevelMap;
@@ -13,7 +14,6 @@ import api.game.map.Player;
 import api.game.map.metadata.GameRules;
 import api.game.map.metadata.LevelMapMetaDataXml;
 import core.system.ResultImpl;
-import core.system.error.GameErrors;
 import core.system.event.EventImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,21 +28,19 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.InputStream;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
-import static api.enums.EventType.GAME_CONTEXT_CREATE;
+import static api.enums.EventType.GAME_CONTEXT_CREATED;
 import static api.enums.EventType.GAME_CONTEXT_LOAD_MAP;
-import static core.system.error.GameErrors.MAP_IS_NOT_LOADED;
-import static core.system.error.GameErrors.MAP_LOAD_ERROR;
+import static core.system.error.GameErrors.*;
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ContextImpl implements Context {
 
-  public static Context NULL_GAME_CONTEXT = new ContextImpl();
+  public static Context NULL_GAME_CONTEXT = new ContextImpl(null);
 
   private static final Logger logger = LoggerFactory.getLogger(Context.class);
   private String contextId = UUID.randomUUID().toString();
@@ -56,10 +54,41 @@ public class ContextImpl implements Context {
   @Autowired
   private BeanFactory beanFactory;
 
-  private Player userGameCreator;
+  private Player contextOwner;
   private GameRules gameRules;
   private String gameName;
   private boolean hidden;
+  private final List<String> frozenListOfPlayers = new ArrayList<>(5);
+  private AtomicBoolean gameRan = new AtomicBoolean(false);
+  protected AtomicBoolean deleting = new AtomicBoolean(false);
+
+  public ContextImpl(Player owner) {
+    this.contextOwner = owner;
+  }
+
+  @Override
+  public Result<List<String>> getFrozenListOfPlayers() {
+    return gameRan.get()
+            ? ResultImpl.success(new ArrayList(frozenListOfPlayers))
+            : ResultImpl.fail(CONTEXT_GAME_NOT_STARTED.getError(getGameName(), getContextId()));
+  }
+
+  @Override
+  public boolean isGameRan() {
+    return gameRan.get();
+  }
+
+  @Override
+  public boolean isDeleting() {
+    return deleting.get();
+  }
+
+  @Override
+  public Result<Context> initDelete() {
+    return deleting.get()
+            ? ResultImpl.fail(CONTEXT_DELETE_ALREADY_IN_PROGRESS.getError(getGameName(), getContextId()))
+            : ResultImpl.success(this).doIfSuccess(context -> deleting.set(true));
+  }
 
   @Override
   public String getGameName() {
@@ -98,7 +127,7 @@ public class ContextImpl implements Context {
   }
 
   @Override
-  public Result loadMap(Player gameCreator, GameRules gameRules, InputStream map, String gameName, boolean hidden) {
+  public Result loadMap(GameRules gameRules, InputStream map, String gameName, boolean hidden) {
     Result result = null;
     LevelMapMetaDataXml mapMetadata = null;
     try {
@@ -111,22 +140,21 @@ public class ContextImpl implements Context {
 
       levelMap.init(this, mapMetadata);
 
-      this.userGameCreator = gameCreator;
       this.gameRules = gameRules;
       result = ResultImpl.success(this);
     } catch (JAXBException e) {
       result = ResultImpl.fail(MAP_LOAD_ERROR.getError(e.getMessage() == null ? "NPE" : e.getMessage()));
     }
     fireGameEvent(null, GAME_CONTEXT_LOAD_MAP
-            , new EventDataContainer(result, gameCreator, mapMetadata == null ? gameName : mapMetadata.name, hidden)
+            , new EventDataContainer(result, contextOwner, mapMetadata == null ? gameName : mapMetadata.name, hidden)
             , null);
     return result;
   }
 
   @Override
-  public Result connectPlayer(Player player, String playerSessionId) {
+  public Result connectPlayer(Player player) {
     if (levelMap != null) {
-      return levelMap.connectPlayer(player, playerSessionId);
+      return levelMap.connectPlayer(player);
     } else {
       return ResultImpl.fail(MAP_IS_NOT_LOADED.getError());
     }
@@ -143,18 +171,13 @@ public class ContextImpl implements Context {
 
 
   @Override
-  public Warrior createWarrior(String playerId, Class<? extends WarriorBaseClass> baseWarriorClass) {
-    return Optional.ofNullable(levelMap.getPlayer(playerId))
-            .map(player -> {
-              Warrior warrior = beanFactory.getBean(Warrior.class, this, player, beanFactory.getBean(baseWarriorClass), "", false);
-              levelMap.addWarrior(playerId, player.getStartZone().getTopLeftConner(), warrior);
-              return warrior;
-            })
-            .orElseThrow(() -> GameErrors.UNKNOWN_USER_UID.getError(playerId));
+  public Result<Warrior> createWarrior(Player player, Class<? extends WarriorBaseClass> baseWarriorClass, Coords coords) {
+    Warrior warrior = beanFactory.getBean(Warrior.class, this, player, beanFactory.getBean(baseWarriorClass), "", false);
+    return levelMap.addWarrior(player, coords, warrior);
   }
 
-  public Player getUserGameCreator() {
-    return userGameCreator;
+  public Player getContextOwner() {
+    return contextOwner;
   }
 
   public GameRules getGameRules() {
@@ -168,6 +191,8 @@ public class ContextImpl implements Context {
 
   @PostConstruct
   public void firstCry() {
-    fireGameEvent(null, GAME_CONTEXT_CREATE, new EventDataContainer(), null);
+    fireGameEvent(null, GAME_CONTEXT_CREATED, new EventDataContainer(ResultImpl.success(this), getContextOwner()), null);
   }
+
+
 }

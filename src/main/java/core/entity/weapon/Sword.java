@@ -13,12 +13,13 @@ import java.util.UUID;
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class Sword extends AbstractWeapon {
 
+  public static final String CLASS_NAME = "Простой меч";
   private static final String OUID = "WepSwd_" + UUID.randomUUID().toString();
 
   public Sword() {
     super();
     this.id = OUID;
-    this.title = "Простой меч";
+    this.title = CLASS_NAME;
     this.description = "Простой меч. Ближний бой ";
     this.meleeMinDamage = 1;
     this.meleeMaxDamage = 5;

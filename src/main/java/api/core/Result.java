@@ -4,11 +4,13 @@ import api.entity.base.BaseEntityHeader;
 import core.system.error.GameError;
 
 import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Класс результата действия
  */
-public interface Result extends BaseEntityHeader{
+public interface Result<T> extends BaseEntityHeader{
 
   boolean isFail();
 
@@ -16,5 +18,11 @@ public interface Result extends BaseEntityHeader{
 
   GameError getError();
 
-  Object getResult();
+  T getResult();
+
+  <O> Result<O> map(Function<T, Result<O>> consumer);
+
+  Result<T> doIfSuccess(Consumer<T> consumer);
+
+  <O> Result<O> mapFail(Function<Result<T>, Result<O>> consumer);
 }

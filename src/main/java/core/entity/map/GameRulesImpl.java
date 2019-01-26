@@ -60,6 +60,15 @@ public class GameRulesImpl implements GameRules {
     return restorationMannaPointsPerTotalRound;
   }
 
+  public GameRulesImpl(GameRules gameRules){
+    this.maxStartCreaturePerPlayer = gameRules.getMaxStartCreaturePerPlayer();
+    this.maxSummonedCreaturePerPlayer = gameRules.getMaxSummonedCreaturePerPlayer();
+    this.startMannaPoints = gameRules.getStartMannaPoints();
+    this.maxMannaPoints = gameRules.getMaxMannaPoints();
+    this.restorationMannaPointsPerTotalRound = gameRules.getRestorationMannaPointsPerTotalRound();
+    this.maxPlayerRoundTime = gameRules.getMaxPlayerRoundTime();
+  }
+
   public GameRulesImpl(int maxStartCreaturePerPlayer, int maxSummonedCreaturePerPlayer, int startMannaPoints
           , int maxMannaPoints, int restorationMannaPointsPerTotalRound, int maxPlayerRoundTime) {
     this.maxStartCreaturePerPlayer = maxStartCreaturePerPlayer;

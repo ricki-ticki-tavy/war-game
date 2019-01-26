@@ -59,18 +59,18 @@ public interface LevelMap {
 
   /**
    * Добавить воина в заданные координаты заданному игроку
-   * @param playerId
+   * @param player
    * @param coords
    * @param warrior
    * @return
    */
-  Warrior addWarrior(String playerId, Coords coords, Warrior warrior);
+  Result<Warrior> addWarrior(Player player, Coords coords, Warrior warrior);
 
   /**
    * Добавить игрока в игру
    * @return
    */
-  Result connectPlayer(Player player, String sessionId);
+  Result connectPlayer(Player player);
 
   /**
    * Отключить пользователя от игры.
