@@ -20,5 +20,9 @@ public interface Result<T> extends BaseEntityHeader{
 
   T getResult();
 
-  <O> Result<O> onSuccess(Function<T, Result<O>> consumer);
+  <O> Result<O> map(Function<T, Result<O>> consumer);
+
+  Result<T> doIfSuccess(Consumer<T> consumer);
+
+  <O> Result<O> mapFail(Function<Result<T>, Result<O>> consumer);
 }

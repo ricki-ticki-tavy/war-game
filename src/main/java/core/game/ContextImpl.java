@@ -14,7 +14,6 @@ import api.game.map.Player;
 import api.game.map.metadata.GameRules;
 import api.game.map.metadata.LevelMapMetaDataXml;
 import core.system.ResultImpl;
-import core.system.error.GameErrors;
 import core.system.event.EventImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,15 +28,13 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.InputStream;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 import static api.enums.EventType.GAME_CONTEXT_CREATED;
 import static api.enums.EventType.GAME_CONTEXT_LOAD_MAP;
-import static core.system.error.GameErrors.MAP_IS_NOT_LOADED;
-import static core.system.error.GameErrors.MAP_LOAD_ERROR;
+import static core.system.error.GameErrors.*;
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -61,9 +58,36 @@ public class ContextImpl implements Context {
   private GameRules gameRules;
   private String gameName;
   private boolean hidden;
+  private final List<String> frozenListOfPlayers = new ArrayList<>(5);
+  private AtomicBoolean gameRan = new AtomicBoolean(false);
+  protected AtomicBoolean deleting = new AtomicBoolean(false);
 
   public ContextImpl(Player owner) {
     this.contextOwner = owner;
+  }
+
+  @Override
+  public Result<List<String>> getFrozenListOfPlayers() {
+    return gameRan.get()
+            ? ResultImpl.success(new ArrayList(frozenListOfPlayers))
+            : ResultImpl.fail(CONTEXT_GAME_NOT_STARTED.getError(getGameName(), getContextId()));
+  }
+
+  @Override
+  public boolean isGameRan() {
+    return gameRan.get();
+  }
+
+  @Override
+  public boolean isDeleting() {
+    return deleting.get();
+  }
+
+  @Override
+  public Result<Context> initDelete() {
+    return deleting.get()
+            ? ResultImpl.fail(CONTEXT_DELETE_ALREADY_IN_PROGRESS.getError(getGameName(), getContextId()))
+            : ResultImpl.success(this).doIfSuccess(context -> deleting.set(true));
   }
 
   @Override
@@ -169,4 +193,6 @@ public class ContextImpl implements Context {
   public void firstCry() {
     fireGameEvent(null, GAME_CONTEXT_CREATED, new EventDataContainer(ResultImpl.success(this), getContextOwner()), null);
   }
+
+
 }

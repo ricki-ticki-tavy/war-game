@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * Класс, собирающий под собой весь функционал игры
  */
-public interface GameWraper {
+public interface GameWrapper {
   /**
    * Содание экземпляра авторизованного пользователя
    */

@@ -4,6 +4,7 @@ import api.core.Result;
 import core.system.error.GameError;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -63,9 +64,26 @@ public class ResultImpl implements Result {
   }
 
   @Override
-  public Result onSuccess(Function consumer) {
+  public Result doIfSuccess(Consumer consumer) {
+    if (success){
+      consumer.accept(result);
+    }
+    return this;
+  }
+
+  @Override
+  public Result map(Function consumer) {
     if (success){
       return (Result)consumer.apply(result);
+    } else {
+      return this;
+    }
+  }
+
+  @Override
+  public Result mapFail(Function consumer) {
+    if (fail){
+      return (Result)consumer.apply(this);
     } else {
       return this;
     }

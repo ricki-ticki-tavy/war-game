@@ -36,9 +36,9 @@ public interface Core {
 
   /**
    * Удалить игру и ее контекст с сервера
-   * @param context
+   * @param contextId
    */
-  void removeGameContext(Context context);
+  Result<Context> removeGameContext(String contextId);
 
   /**
    * Отправить сообщение о событии

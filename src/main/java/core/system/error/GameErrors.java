@@ -23,8 +23,11 @@ public enum GameErrors {
   , USER_NOT_CONNECTED_TO_ANY_GAME("U-5", "Пользователь %s не подключен ни к одной игре")
   , USER_UNKNOWN_ID("U-6", "Пользователь с UID %s не найден.")
 
-  , CONTEXT_REMOVE_NOT_FOUND("C-1", "Удаляемый контекст не существует или не активен")
-  , CONTEXT_NOT_FOUND_BY_ID("C-2", "Контекст %s не существует или уничтожен.")
+  , CONTEXT_REMOVE_NOT_FOUND("CT-1", "Удаляемый контекст не существует или не активен")
+  , CONTEXT_NOT_FOUND_BY_ID("CT-2", "Контекст %s не существует или уничтожен.")
+  , CONTEXT_GAME_NOT_STARTED("CT-3", "игра '%s' (context %s) не была начата.")
+  , CONTEXT_DELETE_ALREADY_IN_PROGRESS("CT-3", "игра '%s' (context %s) уже находится в процессе удаления.")
+  , CONTEXT_DELETE_IN_PROGRESS("CT-3", "игра '%s' (context %s) в процессе удаления.")
 
 
   ;

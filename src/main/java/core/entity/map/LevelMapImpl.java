@@ -122,7 +122,7 @@ public class LevelMapImpl implements LevelMap {
               , String.valueOf(context.getGameRules().getMaxStartCreaturePerPlayer())));
     }
     return player.addWarrior(warrior)
-            .onSuccess(addedWarrior -> addedWarrior.moveTo(coords));
+            .map(addedWarrior -> addedWarrior.moveTo(coords));
   }
 
   @Override
@@ -157,12 +157,12 @@ public class LevelMapImpl implements LevelMap {
       result = ResultImpl.success(player);
       context.fireGameEvent(null, PLAYER_DISCONNECTED, new EventDataContainer(player, result), null);
 
-      // если это создатель игры, то
-      if (context.getContextOwner().equals(player)) {
+      // если это создатель игры, и контекст УЖЕ не в режиме удаления, то
+      if (!context.isDeleting() && context.getContextOwner().equals(player)) {
         // выкидываем всех игроков
         players.values().stream().forEach(this::disconnectPlayer);
         // Удаляем контекст
-        context.getCore().removeGameContext(context);
+        context.getCore().removeGameContext(context.getContextId());
       }
     } else {
       result = ResultImpl.fail(USER_DISCONNECT_NOT_CONNECTED.getError());

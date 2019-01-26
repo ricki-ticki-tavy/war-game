@@ -11,7 +11,7 @@ import api.game.Coords;
 import api.game.EventDataContainer;
 import api.game.map.Player;
 import api.game.map.metadata.GameRules;
-import api.game.wraper.GameWraper;
+import api.game.wraper.GameWrapper;
 import core.entity.map.GameRulesImpl;
 import core.entity.warrior.Viking;
 import core.entity.weapon.Bow;
@@ -32,9 +32,9 @@ import java.util.List;
 import static core.system.error.GameErrors.USER_NOT_CONNECTED_TO_ANY_GAME;
 
 @Component
-public class GameWraperImpl implements GameWraper {
+public class GameWrapperImpl implements GameWrapper {
 
-  private static final Logger logger = LoggerFactory.getLogger(GameWraperImpl.class);
+  private static final Logger logger = LoggerFactory.getLogger(GameWrapperImpl.class);
 
   @Autowired
   Core core;
@@ -139,7 +139,8 @@ public class GameWraperImpl implements GameWraper {
     Assert.isTrue(((List<Context>) getGamesList().getResult()).size() == 1, "Старый контекст подключенного игрока не удалился как контекст владельца");
 
 
-    core.removeGameContext(context1);
+
+    core.removeGameContext(context1.getContextId());
     Assert.isTrue(core.findGameContextByUID(context1.getContextId()).isFail(), "Контекст не удален");
     return true;
   }
@@ -165,25 +166,26 @@ public class GameWraperImpl implements GameWraper {
           , String mapName
           , String gameName
           , boolean hidden) {
-    Result<Player> playerResult;
-    if ((playerResult = core.findUserByName(ownerUserName)).isFail()) {
-      core.fireEvent(new EventImpl(null, null, EventType.GAME_CONTEXT_CREATE
-              , new EventDataContainer(playerResult, new String[]{gameName, ownerUserName}), null));
-      return playerResult;
-    } else {
 
-      return core.createGameContext(playerResult.getResult(), gameRules
-              , this.getClass().getClassLoader().getResourceAsStream(mapName)
-              , gameName, hidden);
-    }
+    return core.findUserByName(ownerUserName)
+            .mapFail(errorResult -> {
+              core.fireEvent(new EventImpl(null, null
+                      , EventType.GAME_CONTEXT_CREATE
+                      , new EventDataContainer(errorResult
+                      , new String[]{gameName, ownerUserName}), null));
+              return errorResult;
+            })
+            .map(foundUser -> core.createGameContext(foundUser, new GameRulesImpl(gameRules)
+                    , this.getClass().getClassLoader().getResourceAsStream(mapName)
+                    , gameName, hidden));
   }
 
   @Override
   public Result<Player> connectToGame(String userName, String contextId) {
     return core.findUserByName(userName)
-            .onSuccess(foundUser -> core.findGameContextByUID(contextId)
-            .onSuccess(foundContext -> foundContext.connectPlayer(foundUser))
-            .onSuccess(ctx -> ResultImpl.success(foundUser)));
+            .map(foundUser -> core.findGameContextByUID(contextId)
+                    .map(foundContext -> foundContext.connectPlayer(foundUser))
+                    .map(ctx -> ResultImpl.success(foundUser)));
   }
 
   @Override
@@ -194,11 +196,11 @@ public class GameWraperImpl implements GameWraper {
   @Override
   public Result<Warrior> createWarrior(String userName, String className, Coords coords) {
     return core.findUserByName(userName)
-            .onSuccess(foundPlayer -> {
+            .map(foundPlayer -> {
               Context context = foundPlayer.getContext();
               if (context != null) {
                 return core.findWarriorBaseClassByName(className)
-                        .onSuccess(baseClass -> context.createWarrior(foundPlayer, baseClass, coords));
+                        .map(baseClass -> context.createWarrior(foundPlayer, baseClass, coords));
               } else {
                 return ResultImpl.fail(USER_NOT_CONNECTED_TO_ANY_GAME.getError(foundPlayer.getTitle()));
               }
@@ -208,12 +210,12 @@ public class GameWraperImpl implements GameWraper {
   @Override
   public Result<Weapon> giveWeaponToWarrior(String userName, String warriorId, String weaponClassName) {
     return core.findUserByName(userName)
-            .onSuccess(foundPlayer -> {
+            .map(foundPlayer -> {
               Context context = foundPlayer.getContext();
               if (context != null) {
                 return core.findWeaponByName(weaponClassName)
-                        .onSuccess(baseClass -> foundPlayer.findWarriorById(warriorId)
-                                .onSuccess(foundWarrior -> foundWarrior.takeWeapon(baseClass)));
+                        .map(baseClass -> foundPlayer.findWarriorById(warriorId)
+                                .map(foundWarrior -> foundWarrior.takeWeapon(baseClass)));
               } else {
                 return ResultImpl.fail(USER_NOT_CONNECTED_TO_ANY_GAME.getError(foundPlayer.getTitle()));
               }
@@ -223,11 +225,11 @@ public class GameWraperImpl implements GameWraper {
   @Override
   public Result<Weapon> takeWeaponFromWarrior(String userName, String warriorId, String weaponId) {
     return core.findUserByName(userName)
-            .onSuccess(foundPlayer -> {
+            .map(foundPlayer -> {
               Context context = foundPlayer.getContext();
               if (context != null) {
                 return foundPlayer.findWarriorById(warriorId)
-                        .onSuccess(foundWarrior -> foundWarrior.dropWeapon(weaponId));
+                        .map(foundWarrior -> foundWarrior.dropWeapon(weaponId));
               } else {
                 return ResultImpl.fail(USER_NOT_CONNECTED_TO_ANY_GAME.getError(foundPlayer.getTitle()));
               }

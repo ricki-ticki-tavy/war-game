@@ -28,7 +28,6 @@ import javax.annotation.PostConstruct;
 import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -88,13 +87,13 @@ public class CoreImpl implements Core {
   public Result<Context> createGameContext(Player gameCreator, GameRules gameRules
           , InputStream map, String gameName, boolean hidden) {
     // Если у пользователя была привязка к другим контекстам - надо разорвать ее
-    return gameCreator.replaceContext(null).onSuccess(nullCtx ->
+    return gameCreator.replaceContext(null).map(nullCtx ->
             // Создадим контекст новой игры
             beanFactory.getBean(Context.class, gameCreator)
                     // Загрузим карту
-                    .loadMap(gameRules, map, gameName, hidden).onSuccess(createdCtx ->
+                    .loadMap(gameRules, map, gameName, hidden).map(createdCtx ->
                     // сделаем вход пользователем в эту карту
-                    createdCtx.connectPlayer(gameCreator).onSuccess(connectedPlayer -> {
+                    createdCtx.connectPlayer(gameCreator).map(connectedPlayer -> {
                       contextMap.put(createdCtx.getContextId(), createdCtx);
                       // подменим в ответе добавленного пользователя на контекст
                       return ResultImpl.success(createdCtx);
@@ -109,19 +108,26 @@ public class CoreImpl implements Core {
   }
 
   @Override
-  public void removeGameContext(Context context) {
-    AtomicBoolean found = new AtomicBoolean(false);
-    Optional.ofNullable(contextMap.get(context.getContextId()))
-            .ifPresent(foundContext -> {
+  public Result<Context> removeGameContext(String contextId) {
+
+    return findGameContextByUID(contextId)
+            // переводим контекст в режим удаления
+            .map(contextToDelete -> contextToDelete.initDelete())
+            .map(foundContext -> {
+              // отключим всех пользователей
+              foundContext.getLevelMap().getPlayers()
+                      .stream()
+                      .forEach(player ->
+                          foundContext.disconnectPlayer(player));
+              // вычеркнуть контекст из списка
               contextMap.remove(foundContext.getContextId());
+              // отправимсообщение об удалении контекста
+              Result result = ResultImpl.success(foundContext);
+              foundContext.fireGameEvent(null, GAME_CONTEXT_REMOVED, new EventDataContainer(foundContext, result), null);
+              // удалить все подписи данного контекста  на события
               eventConsumers.remove(foundContext);
-              found.set(true);
+              return result;
             });
-    context.fireGameEvent(null, GAME_CONTEXT_REMOVED
-            , new EventDataContainer(context, found.get()
-                    ? ResultImpl.success(context)
-                    : ResultImpl.fail(CONTEXT_REMOVE_NOT_FOUND.getError()))
-            , null);
   }
 
   @PostConstruct

@@ -77,9 +77,9 @@ public class PlayerImpl implements Player {
   }
 
   @Override
-  public Player replaceContextSilent(Context newContext) {
+  public Result<Player> replaceContextSilent(Context newContext) {
     this.context = newContext;
-    return this;
+    return ResultImpl.success(this);
   }
 
   @Override

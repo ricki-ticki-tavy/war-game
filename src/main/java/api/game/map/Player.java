@@ -51,7 +51,7 @@ public interface Player extends BaseEntityHeader{
    * @param newContext
    * @return
    */
-  Player replaceContextSilent(Context newContext);
+  Result<Player> replaceContextSilent(Context newContext);
 
   /**
    * Получить контекст игрока

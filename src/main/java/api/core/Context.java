@@ -11,6 +11,7 @@ import api.game.map.Player;
 import api.game.map.metadata.GameRules;
 
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -40,6 +41,30 @@ public interface Context {
    * @return
    */
   boolean isHidden();
+
+  /**
+   * Получить имена игроков, начавших игру. Только для контекста с начатой игрой
+   * @return
+   */
+  Result<List<String>> getFrozenListOfPlayers();
+
+  /**
+   * Игра уже началась и добавление новых игроков не возможно
+   * @return
+   */
+  boolean isGameRan();
+
+  /**
+   * Контекст в процессе удаления
+   * @return
+   */
+  boolean isDeleting();
+
+  /**
+   * Перевод контекста в состояние начала удаления
+   * @return
+   */
+  Result<Context> initDelete();
 
   /**
    * Возвращает игровой движок
