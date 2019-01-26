@@ -57,7 +57,7 @@ public interface Player extends BaseEntityHeader{
    * Получить контекст игрока
    * @return
    */
-  Context getContext();
+  Result<Context> findContext();
 
   /**
    * Найти воина по его коду
@@ -65,5 +65,18 @@ public interface Player extends BaseEntityHeader{
    * @return
    */
   Result<Warrior> findWarriorById(String warriorId);
+
+  /**
+   * Установить статус готовность к игре
+   * @param ready
+   * @return
+   */
+  Result<Player> setReadyToPlay(boolean ready);
+
+  /**
+   * Получить статус готовности к игре
+   * @return
+   */
+  boolean isReadyToPlay();
 
 }

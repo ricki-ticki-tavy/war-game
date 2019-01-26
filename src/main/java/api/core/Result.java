@@ -22,7 +22,11 @@ public interface Result<T> extends BaseEntityHeader{
 
   <O> Result<O> map(Function<T, Result<O>> consumer);
 
+  @Deprecated
   Result<T> doIfSuccess(Consumer<T> consumer);
+
+  @Deprecated
+  <O> Result<T> doIfFail(Consumer<O> consumer);
 
   <O> Result<O> mapFail(Function<Result<T>, Result<O>> consumer);
 }

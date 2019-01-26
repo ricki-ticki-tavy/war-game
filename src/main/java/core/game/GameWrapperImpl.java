@@ -29,8 +29,6 @@ import javax.annotation.PostConstruct;
 
 import java.util.List;
 
-import static core.system.error.GameErrors.USER_NOT_CONNECTED_TO_ANY_GAME;
-
 @Component
 public class GameWrapperImpl implements GameWrapper {
 
@@ -39,7 +37,10 @@ public class GameWrapperImpl implements GameWrapper {
   @Autowired
   Core core;
 
-  private boolean innerTest() {
+  //===================================================================================================
+  //===================================================================================================
+
+  private boolean innerTest1() {
     Result<List<String>> classesResult = core.getBaseWarriorClasses();
     Assert.isTrue(classesResult.isSuccess(), "Не удалось получить список базовых классов воинов");
     Assert.isTrue(classesResult.getResult().size() > 0, "Список базовых классов воинов пуст");
@@ -139,29 +140,41 @@ public class GameWrapperImpl implements GameWrapper {
     Assert.isTrue(((List<Context>) getGamesList().getResult()).size() == 1, "Старый контекст подключенного игрока не удалился как контекст владельца");
 
 
-
     core.removeGameContext(context1.getContextId());
     Assert.isTrue(core.findGameContextByUID(context1.getContextId()).isFail(), "Контекст не удален");
     return true;
   }
+  //===================================================================================================
+
+  private void innerTest2() {
+    Player player1 = core.findUserByName("test").getResult();
+    Player player2 = core.findUserByName("test 2").getResult();
+    GameRules rules = new GameRulesImpl(9, 2, 50, 200, 2, 600);
+    Context gameContext = createGame(player1.getId(), rules, "level2.xml", "test-game2", false).getResult();
+    connectToGame(player2.getId(), gameContext.getContextId());
+
+
+  }
+  //===================================================================================================
 
   @PostConstruct
   public void testGame() {
     logger.info("Запуск внутреннего теста...");
-    if (innerTest()) {
-      logger.info("ВНУТРЕННИЙ ТЕСТ ПРОЙДЕН");
-    } else {
-      logger.error("ВНУТРЕННИЙ ТЕСТ       НЕ   ПРОЙДЕН");
-    }
+    innerTest1();
+    logger.info("1)   ПЕРВЫЙ ВНУТРЕННИЙ ТЕСТ ПРОЙДЕН");
+    innerTest2();
+    logger.info("2)   ВТОРОЙ ВНУТРЕННИЙ ТЕСТ ПРОЙДЕН");
   }
+  //===================================================================================================
 
   @Override
   public Result<Player> login(String userName) {
     return core.loginPlayer(userName);
   }
+  //===================================================================================================
 
   @Override  // TODO рулсы надо копировать при создании игры
-  public Result createGame(String ownerUserName
+  public Result<Context> createGame(String ownerUserName
           , GameRules gameRules
           , String mapName
           , String gameName
@@ -179,6 +192,7 @@ public class GameWrapperImpl implements GameWrapper {
                     , this.getClass().getClassLoader().getResourceAsStream(mapName)
                     , gameName, hidden));
   }
+  //===================================================================================================
 
   @Override
   public Result<Player> connectToGame(String userName, String contextId) {
@@ -187,52 +201,47 @@ public class GameWrapperImpl implements GameWrapper {
                     .map(foundContext -> foundContext.connectPlayer(foundUser))
                     .map(ctx -> ResultImpl.success(foundUser)));
   }
+  //===================================================================================================
 
   @Override
   public Result getGamesList() {
     return ResultImpl.success(core.getContextList());
   }
+  //===================================================================================================
 
   @Override
   public Result<Warrior> createWarrior(String userName, String className, Coords coords) {
     return core.findUserByName(userName)
-            .map(foundPlayer -> {
-              Context context = foundPlayer.getContext();
-              if (context != null) {
-                return core.findWarriorBaseClassByName(className)
-                        .map(baseClass -> context.createWarrior(foundPlayer, baseClass, coords));
-              } else {
-                return ResultImpl.fail(USER_NOT_CONNECTED_TO_ANY_GAME.getError(foundPlayer.getTitle()));
-              }
-            });
+            .map(foundPlayer -> foundPlayer.findContext()
+                    .map(playerContext -> core.findWarriorBaseClassByName(className)
+                            .map(baseClass -> playerContext.createWarrior(foundPlayer, baseClass, coords))));
   }
+//===================================================================================================
 
   @Override
   public Result<Weapon> giveWeaponToWarrior(String userName, String warriorId, String weaponClassName) {
     return core.findUserByName(userName)
-            .map(foundPlayer -> {
-              Context context = foundPlayer.getContext();
-              if (context != null) {
-                return core.findWeaponByName(weaponClassName)
-                        .map(baseClass -> foundPlayer.findWarriorById(warriorId)
-                                .map(foundWarrior -> foundWarrior.takeWeapon(baseClass)));
-              } else {
-                return ResultImpl.fail(USER_NOT_CONNECTED_TO_ANY_GAME.getError(foundPlayer.getTitle()));
-              }
-            });
+            .map(foundPlayer -> foundPlayer.findContext()
+                    .map(foundContext -> core.findWeaponByName(weaponClassName)
+                            .map(baseClass -> foundPlayer.findWarriorById(warriorId)
+                                    .map(foundWarrior -> foundWarrior.takeWeapon(baseClass)))));
   }
+//===================================================================================================
 
   @Override
   public Result<Weapon> takeWeaponFromWarrior(String userName, String warriorId, String weaponId) {
     return core.findUserByName(userName)
-            .map(foundPlayer -> {
-              Context context = foundPlayer.getContext();
-              if (context != null) {
-                return foundPlayer.findWarriorById(warriorId)
-                        .map(foundWarrior -> foundWarrior.dropWeapon(weaponId));
-              } else {
-                return ResultImpl.fail(USER_NOT_CONNECTED_TO_ANY_GAME.getError(foundPlayer.getTitle()));
-              }
-            });
+            .map(foundPlayer -> foundPlayer.findContext()
+                    .map(foundContext -> foundPlayer.findWarriorById(warriorId)
+                            .map(foundWarrior -> foundWarrior.dropWeapon(weaponId))));
   }
+//===================================================================================================
+
+  @Override
+  public Result<Player> playerReady(String userName, boolean readyToPlay) {
+    return core.findUserByName(userName)
+            .map(foundPlayer -> foundPlayer.findContext()
+                    .map(foundContext -> foundContext.setPlayerReadyToGameState(foundPlayer, readyToPlay)));
+  }
+  //===================================================================================================
 }

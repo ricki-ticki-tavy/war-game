@@ -54,6 +54,14 @@ public class EventLogger {
                 , event.getSource(Result.class).toString()));
         break;
       }
+      case PLAYER_CHANGED_ITS_READY_TO_PLAY_STATUS: {
+        // "Игрок '%s' в игре %s (контекст '%s') сообщил о %a."
+        logger.info(event.getEventType().getFormattedMessage(
+                event.getSource(Player.class).getTitle()
+                , event.getSourceContext().getGameName()
+                , event.getSource(Player.class).isReadyToPlay() ? "готовности" : "продолжении подготовки"));
+        break;
+      }
       case WARRIOR_ADDED: {
         // "В игре '%s' (контекст '%s') игроком '%s' добавлен воин '%s'"
         logger.info(event.getEventType().getFormattedMessage(
@@ -132,6 +140,13 @@ public class EventLogger {
                 , event.getSource(Player.class).getTitle()
                 , event.getSource(Boolean.class) ? "скрытая" : "открыта для всех"
                 , event.getSource(Result.class).toString()));
+        break;
+      }
+      case GAME_CONTEXT_GAME_HAS_BEGAN: {
+        // "Игра '%s' (id '%s') Началась. В игре %s игрока(ов)"
+        logger.info(event.getEventType().getFormattedMessage(event.getSourceContext().getGameName()
+                , event.getSourceContext().getContextId()
+                , String.valueOf(event.getSourceContext().getLevelMap().getPlayers().size())));
         break;
       }
       default: {

@@ -24,6 +24,7 @@ public enum EventType {
   , PLAYER_CONNECTED("Игрок '%s' присоединился к игре (контекст '%s'). Теперь в игре %s игроков из %s. %s")
   , PLAYER_RECONNECTED("Игрок '%s' повторно подключился к игре (контекст '%s'). В игре %s игроков из %s")
   , PLAYER_DISCONNECTED("Игрок '%s' покинул игру (контекст '%s'). Теперь в игре %s игроков из %s. %s")
+  , PLAYER_CHANGED_ITS_READY_TO_PLAY_STATUS("Игрок '%s' в игре %s (контекст '%s') сообщил о %a. %s")
 
   , WARRIOR_ADDED("В игре '%s' (контекст '%s') игроком '%s' добавлен воин '%s'")
   , WARRIOR_SUMMONED("В игре '%s' (контекст '%s') игроком '%s' призван воин '%s' с '%s' очками жизни")
@@ -37,6 +38,7 @@ public enum EventType {
   , GAME_CONTEXT_CREATED("Создание контекста игры '%s' игроком '%s'. %s")
   , GAME_CONTEXT_LOAD_MAP("игра '%s' Контекст %s : загрузка карты '%s' игроком '%s'. тип игры %s.  %s")
   , GAME_CONTEXT_REMOVED("Удаление контекста игры '%s' (владелец '%s'). %s")
+  , GAME_CONTEXT_GAME_HAS_BEGAN("Игра '%s' (id '%s') началась по готовности всех игроков. В игре %s игрока(ов)")
 
   ;
 

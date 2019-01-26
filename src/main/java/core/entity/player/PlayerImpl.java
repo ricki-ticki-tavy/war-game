@@ -14,8 +14,9 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static api.enums.EventType.PLAYER_CHANGED_ITS_READY_TO_PLAY_STATUS;
 import static api.enums.EventType.WARRIOR_ADDED;
-import static core.system.error.GameErrors.WARRIOR_NOT_FOUND_AT_PLAYER_BY_NAME;
+import static core.system.error.GameErrors.*;
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -25,10 +26,12 @@ public class PlayerImpl implements Player {
   private String playerName;
   private Rectangle startZone;
   private Map<String, Warrior> warriors = new ConcurrentHashMap();
+  private volatile boolean readyToPlay;
 
   public PlayerImpl(String playerName) {
     this.context = null;
     this.playerName = playerName;
+    this.readyToPlay = false;
   }
 
   @Override
@@ -83,8 +86,10 @@ public class PlayerImpl implements Player {
   }
 
   @Override
-  public Context getContext() {
-    return context;
+  public  Result<Context> findContext() {
+    return context == null
+            ? ResultImpl.fail(USER_NOT_CONNECTED_TO_ANY_GAME.getError(getId()))
+            : ResultImpl.success(context);
   }
 
   @Override
@@ -102,5 +107,19 @@ public class PlayerImpl implements Player {
     return Optional.ofNullable(warriors.get(warriorId))
             .map(foundWarrior -> ResultImpl.success(foundWarrior))
             .orElse(ResultImpl.fail(WARRIOR_NOT_FOUND_AT_PLAYER_BY_NAME.getError(getTitle(), warriorId)));
+  }
+
+  @Override
+  public Result<Player> setReadyToPlay(boolean ready) {
+    this.readyToPlay = ready;
+    Result result = ResultImpl.success(this);
+    context.fireGameEvent(null, PLAYER_CHANGED_ITS_READY_TO_PLAY_STATUS
+            , new EventDataContainer(context, this, result), null);
+    return result;
+  }
+
+  @Override
+  public boolean isReadyToPlay() {
+    return readyToPlay;
   }
 }
