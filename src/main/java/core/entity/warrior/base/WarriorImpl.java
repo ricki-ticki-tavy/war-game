@@ -30,7 +30,7 @@ public class WarriorImpl implements Warrior {
 
   protected Map<Integer, WarriorSHand> hands;
   protected WarriorBaseClass warriorBaseClass;
-  protected Coords coords;
+  protected Coords coords = null;
   protected final String id = UUID.randomUUID().toString();
   protected String title;
   protected boolean summoned;

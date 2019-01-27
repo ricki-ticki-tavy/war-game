@@ -6,35 +6,15 @@ import api.game.map.metadata.GameRules;
  * Глобальные правила
  */
 public class GameRulesImpl implements GameRules {
-  /**
-   * Максимум созданий на игрока при старте игры
-   */
-  int maxStartCreaturePerPlayer;
+  private int maxStartCreaturePerPlayer;
+  private int maxSummonedCreaturePerPlayer;
+  private int maxPlayerRoundTime;
+  private int startMannaPoints;
+  private int maxMannaPoints;
+  private int restorationMannaPointsPerTotalRound;
+  private int warriorSize;
 
-  /**
-   * Максимум призванных созданий на игрока
-   */
-  int maxSummonedCreaturePerPlayer;
 
-  /**
-   * Максимальное время на ход каждому игроку
-   */
-  int maxPlayerRoundTime;
-
-  /**
-   * Кол-во очков магии у каждого игрока при старте
-   */
-  int startMannaPoints;
-
-  /**
-   * Максимально допустимое кол-во очков магии игрока
-   */
-  int maxMannaPoints;
-
-  /**
-   * Кол-во магии, восстанавливаемый каждый ход
-   */
-  int restorationMannaPointsPerTotalRound;
 
   public int getMaxStartCreaturePerPlayer() {
     return maxStartCreaturePerPlayer;
@@ -60,6 +40,11 @@ public class GameRulesImpl implements GameRules {
     return restorationMannaPointsPerTotalRound;
   }
 
+  @Override
+  public int getWarriorSize() {
+    return warriorSize;
+  }
+
   public GameRulesImpl(GameRules gameRules){
     this.maxStartCreaturePerPlayer = gameRules.getMaxStartCreaturePerPlayer();
     this.maxSummonedCreaturePerPlayer = gameRules.getMaxSummonedCreaturePerPlayer();
@@ -67,15 +52,17 @@ public class GameRulesImpl implements GameRules {
     this.maxMannaPoints = gameRules.getMaxMannaPoints();
     this.restorationMannaPointsPerTotalRound = gameRules.getRestorationMannaPointsPerTotalRound();
     this.maxPlayerRoundTime = gameRules.getMaxPlayerRoundTime();
+    this.warriorSize = gameRules.getWarriorSize();
   }
 
   public GameRulesImpl(int maxStartCreaturePerPlayer, int maxSummonedCreaturePerPlayer, int startMannaPoints
-          , int maxMannaPoints, int restorationMannaPointsPerTotalRound, int maxPlayerRoundTime) {
+          , int maxMannaPoints, int restorationMannaPointsPerTotalRound, int maxPlayerRoundTime, int warriorSize) {
     this.maxStartCreaturePerPlayer = maxStartCreaturePerPlayer;
     this.maxSummonedCreaturePerPlayer = maxSummonedCreaturePerPlayer;
     this.startMannaPoints = startMannaPoints;
     this.maxMannaPoints = maxMannaPoints;
     this.restorationMannaPointsPerTotalRound = restorationMannaPointsPerTotalRound;
     this.maxPlayerRoundTime = maxPlayerRoundTime;
+    this.warriorSize = warriorSize;
   }
 }

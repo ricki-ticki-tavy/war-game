@@ -67,7 +67,15 @@ public interface Context {
    * Успех, если текущий статус игры совпадает с переданным
    * @return
    */
-  Result<Context> ifDeleting(boolean state);
+  Result<Context> ifGameDeleting(boolean state);
+
+  /**
+   * Проверка допустимости новых координат воина
+   * @param warrior
+   * @param newCoords
+   * @return
+   */
+  Result<Context> ifNewWarriorSCoordinatesAreAvailable(Warrior warrior, Coords newCoords);
 
   /**
    * возвращает текущий статус игры
@@ -146,7 +154,7 @@ public interface Context {
   Result disconnectPlayer(Player player);
 
   /**
-   * Создать воина на карте
+   * Создать воина на карте при начальной расстановке
    *
    * @param baseWarriorClass
    * @return

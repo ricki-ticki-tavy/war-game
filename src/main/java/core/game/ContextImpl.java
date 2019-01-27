@@ -66,9 +66,13 @@ public class ContextImpl implements Context {
 
   private GameProcessData gameProcessData;
 
+  //===================================================================================================
+  //===================================================================================================
+
   public ContextImpl(Player owner) {
     this.contextOwner = owner;
   }
+  //===================================================================================================
 
   @Override
   public Result<List<String>> getFrozenListOfPlayers() {
@@ -76,16 +80,19 @@ public class ContextImpl implements Context {
             ? ResultImpl.success(frozenListOfPlayers.values().stream().map(player -> player.getId()).collect(Collectors.toList()))
             : ResultImpl.fail(CONTEXT_GAME_NOT_STARTED.getError(getGameName(), getContextId()));
   }
+  //===================================================================================================
 
   @Override
   public boolean isGameRan() {
     return gameRan.get();
   }
+  //===================================================================================================
 
   @Override
   public boolean isDeleting() {
     return deleting.get();
   }
+  //===================================================================================================
 
   @Override
   public Result<Context> initDelete() {
@@ -93,42 +100,50 @@ public class ContextImpl implements Context {
             ? ResultImpl.fail(CONTEXT_DELETE_ALREADY_IN_PROGRESS.getError(getGameName(), getContextId()))
             : ResultImpl.success(this).doIfSuccess(context -> deleting.set(true));
   }
+  //===================================================================================================
 
   @Override
   public String getGameName() {
     return gameName;
   }
+  //===================================================================================================
 
   @Override
   public boolean isHidden() {
     return hidden;
   }
+  //===================================================================================================
 
   @Override
   public String getContextId() {
     return contextId;
   }
+  //===================================================================================================
 
   @Override
   public Core getCore() {
     return core;
   }
+  //===================================================================================================
 
   @Override
   public void fireGameEvent(Event gameEvent) {
     core.fireEvent(gameEvent);
   }
+  //===================================================================================================
 
   @Override
   public void fireGameEvent(Event causeEvent, EventType eventType, EventDataContainer source, Map<String, Object> params) {
     fireGameEvent(new EventImpl(this, causeEvent, eventType, source, params));
   }
+  //===================================================================================================
 
 
   @Override
   public LevelMap getLevelMap() {
     return levelMap;
   }
+  //===================================================================================================
 
   @Override
   public Result loadMap(GameRules gameRules, InputStream map, String gameName, boolean hidden) {
@@ -156,6 +171,7 @@ public class ContextImpl implements Context {
       return result;
     });
   }
+  //===================================================================================================
 
   @Override
   public Result connectPlayer(Player player) {
@@ -165,6 +181,7 @@ public class ContextImpl implements Context {
       return ResultImpl.fail(MAP_IS_NOT_LOADED.getError());
     }
   }
+  //===================================================================================================
 
   @Override
   public Result disconnectPlayer(Player player) {
@@ -174,30 +191,37 @@ public class ContextImpl implements Context {
       return ResultImpl.fail(MAP_IS_NOT_LOADED.getError());
     }
   }
+  //===================================================================================================
 
 
   @Override
   public Result<Warrior> createWarrior(Player player, Class<? extends WarriorBaseClass> baseWarriorClass, Coords coords) {
     return ifGameRan(false)
+            .map(thisContext1 -> thisContext1.ifGameDeleting(false))
             .map(fineContext -> {
               Warrior warrior = beanFactory.getBean(Warrior.class, this, player
                       , beanFactory.getBean(baseWarriorClass), "", false);
-              return levelMap.addWarrior(player, coords, warrior);
+              return fineContext.ifNewWarriorSCoordinatesAreAvailable(warrior, coords)
+                      .map(wellContext -> fineContext.getLevelMap().addWarrior(player, coords, warrior));
             });
   }
+  //===================================================================================================
 
   public Player getContextOwner() {
     return contextOwner;
   }
+  //===================================================================================================
 
   public GameRules getGameRules() {
     return gameRules;
   }
+  //===================================================================================================
 
   @Override
   public String subscribeEvent(Consumer<Event> consumer, EventType... eventTypes) {
     return core.subscribeEvent(this, consumer, eventTypes);
   }
+  //===================================================================================================
 
   public Result<Context> ifGameRan(boolean state) {
     return isGameRan() == state ? ResultImpl.success(this) : ResultImpl.fail(
@@ -205,20 +229,23 @@ public class ContextImpl implements Context {
                     ? CONTEXT_NOT_IN_GAME_RAN_STATE.getError(getGameName(), getContextId())
                     : CONTEXT_IN_GAME_RAN_STATE.getError(getGameName(), getContextId()));
   }
+  //===================================================================================================
 
-  public Result<Context> ifDeleting(boolean state) {
+  public Result<Context> ifGameDeleting(boolean state) {
     return isDeleting() == state ? ResultImpl.success(this) : ResultImpl.fail(
             state
                     ? CONTEXT_IS_NOT_IN_DELETING_STATE.getError(getGameName(), getContextId())
                     : CONTEXT_IS_IN_DELETING_STATE.getError(getGameName(), getContextId()));
   }
+  //===================================================================================================
 
   @Override
   public Result<Player> setPlayerReadyToGameState(Player player, boolean readyToGame) {
     return ifGameRan(false)
-            .map(fineContext -> fineContext.ifDeleting(false)
+            .map(fineContext -> fineContext.ifGameDeleting(false)
             .map(context -> player.setReadyToPlay(readyToGame)));
   }
+  //===================================================================================================
 
   @PostConstruct
   public void firstCry() {
@@ -228,6 +255,7 @@ public class ContextImpl implements Context {
 
     fireGameEvent(null, GAME_CONTEXT_CREATED, new EventDataContainer(ResultImpl.success(this), getContextOwner()), null);
   }
+  //===================================================================================================
 
   /**
    * Начать игру
@@ -242,6 +270,7 @@ public class ContextImpl implements Context {
     fireGameEvent(null, GAME_CONTEXT_GAME_HAS_BEGAN, new EventDataContainer(this, result), null);
     return result;
   }
+  //===================================================================================================
 
   private void checkForStartGame(Event event) {
     // без разницы какое событие произошло из касающихся смены состава и качества игроков - действия будут одинаковы
@@ -259,5 +288,12 @@ public class ContextImpl implements Context {
               .doIfFail(error -> logger.error(((GameError)error).getMessage()));
     }
   }
+  //===================================================================================================
 
+  // TODO not implemented. !!!!!!!   correct it
+  @Override
+  public Result<Context> ifNewWarriorSCoordinatesAreAvailable(Warrior warrior, Coords newCoords) {
+    return ResultImpl.success(this);
+  }
+  //===================================================================================================
 }

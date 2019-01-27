@@ -13,6 +13,7 @@ import api.game.map.Player;
 import api.game.map.metadata.GameRules;
 import api.game.wraper.GameWrapper;
 import core.entity.map.GameRulesImpl;
+import core.entity.warrior.Skeleton;
 import core.entity.warrior.Viking;
 import core.entity.weapon.Bow;
 import core.entity.weapon.ShortSword;
@@ -65,11 +66,11 @@ public class GameWrapperImpl implements GameWrapper {
     Assert.notNull(playerLoginResult2.isSuccess(), "Игрок 2 не создан");
     Player player2 = playerLoginResult2.getResult();
 
-    GameRules rules = new GameRulesImpl(9, 2, 50, 200, 2, 600);
+    GameRules rules = new GameRulesImpl(9, 2, 50, 200, 2, 600, 30);
     Result<Context> createContextResult = createGame("test2", rules, "level2.xml", "test-game", false);
     Assert.isTrue(createContextResult.isFail(), "Карта создана не существующим пользователем");
 
-    rules = new GameRulesImpl(9, 2, 50, 200, 2, 600);
+    rules = new GameRulesImpl(9, 2, 50, 200, 2, 600,30);
     createContextResult = createGame(player.getId(), rules, "level2.xml", "test-game", false);
     Assert.isTrue(createContextResult.isSuccess(), "Карта не загружена");
     Assert.isTrue(((List<Context>) getGamesList().getResult()).size() == 1, "Контекст не появился в списке контекстов");
@@ -149,9 +150,16 @@ public class GameWrapperImpl implements GameWrapper {
   private void innerTest2() {
     Player player1 = core.findUserByName("test").getResult();
     Player player2 = core.findUserByName("test 2").getResult();
-    GameRules rules = new GameRulesImpl(9, 2, 50, 200, 2, 600);
+    GameRules rules = new GameRulesImpl(1, 2, 50, 200, 2, 600, 30);
     Context gameContext = createGame(player1.getId(), rules, "level2.xml", "test-game2", false).getResult();
     connectToGame(player2.getId(), gameContext.getContextId());
+    Coords player1coord = player1.getStartZone().getBottomRightConner();
+    Coords player2coord = player2.getStartZone().getBottomRightConner();
+
+    Warrior warrior1p1 = createWarrior(player1.getDescription(), Viking.CLASS_NAME
+            , new Coords(player1coord.getX(), player1coord.getY()) ).getResult();
+    Warrior warrior1p2 = createWarrior(player1.getDescription(), Skeleton.CLASS_NAME
+            , new Coords(player2coord.getX() ,player2coord.getY())).getResult();
 
 
   }
