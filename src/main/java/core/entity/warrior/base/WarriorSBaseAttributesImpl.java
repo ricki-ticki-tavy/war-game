@@ -29,6 +29,8 @@ public class WarriorSBaseAttributesImpl implements WarriorSBaseAttributes {
   int luckRangeAtack;
   int luckDefence;
 
+  boolean summonable;
+
   /**
    * ВОзвращает очки здоровья
    *
@@ -156,7 +158,7 @@ public class WarriorSBaseAttributesImpl implements WarriorSBaseAttributes {
           , ArmorClassEnum armorClass, int deltaCostMove
           , int maxAbilityActionPoints, int abilityActionPoints
           , int maxActionPoints, int actionPoints,
-          int handsCount) {
+          int handsCount, boolean summonable) {
     this.health = health;
     this.maxHealth = maxHealth;
     this.maxManna = maxManna;
@@ -168,6 +170,7 @@ public class WarriorSBaseAttributesImpl implements WarriorSBaseAttributes {
     this.maxActionPoints = maxActionPoints;
     this.actionPoints = actionPoints;
     this.handsCount = handsCount;
+    this.summonable = true;
   }
 
   public WarriorSBaseAttributesImpl(
@@ -189,11 +192,21 @@ public class WarriorSBaseAttributesImpl implements WarriorSBaseAttributes {
             , maxManna, manna
             , armorClass, deltaCostMove,
             maxAbilityActionPoints, abilityActionPoints,
-            maxActionPoints, actionPoints, handsCount);
+            maxActionPoints, actionPoints, handsCount, summonable);
   }
 
   @Override
   public int getHandsCount() {
     return handsCount;
+  }
+
+  @Override
+  public boolean isSummonable() {
+    return summonable;
+  }
+
+  public WarriorSBaseAttributesImpl setSummonable(boolean summonable) {
+    this.summonable = summonable;
+    return this;
   }
 }

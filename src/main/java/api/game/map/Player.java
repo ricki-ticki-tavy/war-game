@@ -4,6 +4,8 @@ import api.core.Context;
 import api.core.Result;
 import api.entity.base.BaseEntityHeader;
 import api.entity.warrior.Warrior;
+import api.entity.warrior.WarriorBaseClass;
+import api.game.Coords;
 import api.game.Rectangle;
 
 import java.util.List;
@@ -15,10 +17,11 @@ public interface Player extends BaseEntityHeader{
 
   /**
    * Добавить в коллекцию воина
-   * @param warrior
+   * @param coords
+   * @param warriorBaseClassName
    * @return
    */
-  Result<Warrior> addWarrior(Warrior warrior);
+  Result<Warrior> createWarrior(String warriorBaseClassName, Coords coords);
 
   /**
    *  Вернуть всех воинов
@@ -78,5 +81,37 @@ public interface Player extends BaseEntityHeader{
    * @return
    */
   boolean isReadyToPlay();
+
+  /**
+   * Переместить юнит на новые координаты
+   * @param warriorId
+   * @param newCoords
+   * @return
+   */
+  Result<Warrior> moveWarriorTo(String warriorId, Coords newCoords);
+
+  /**
+   * очищает воинов, артефакты и прочее у игрока
+   * @return
+   */
+  Result<Player> clear();
+
+  /**
+   * Переместить юнит на новые координаты
+   * @param player
+   * @param warriorId
+   * @param newCoords
+   * @return
+   */
+  Result<Warrior> moveWarriorTo(Player player, String warriorId, Coords newCoords);
+
+  /**
+   * Удалить юнит игроком
+   * @param warriorId
+   * @return
+   */
+  Result<Warrior> removeWarrior(String warriorId);
+
+
 
 }

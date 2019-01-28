@@ -70,14 +70,6 @@ public interface Context {
   Result<Context> ifGameDeleting(boolean state);
 
   /**
-   * Проверка допустимости новых координат воина
-   * @param warrior
-   * @param newCoords
-   * @return
-   */
-  Result<Context> ifNewWarriorSCoordinatesAreAvailable(Warrior warrior, Coords newCoords);
-
-  /**
    * возвращает текущий статус игры
    * @return
    */
@@ -159,8 +151,24 @@ public interface Context {
    * @param baseWarriorClass
    * @return
    */
-  Result<Warrior> createWarrior(Player player, Class<? extends WarriorBaseClass> baseWarriorClass, Coords coords);
+  Result<Warrior> createWarrior(String userName, String baseWarriorClass, Coords coords);
 
+  /**
+   * Переместить юнит на новые координаты
+   * @param userName
+   * @param warriorId
+   * @param newCoords
+   * @return
+   */
+  Result<Warrior> moveWarriorTo(String userName, String warriorId, Coords newCoords);
+
+  /**
+   * Удалить юнит игроком
+   * @param userName
+   * @param warriorId
+   * @return
+   */
+  Result<Warrior> removeWarrior(String userName, String warriorId);
 
   /**
    * Получить пользователя - создателя игры
@@ -183,5 +191,20 @@ public interface Context {
    * @return
    */
   Result<Player> setPlayerReadyToGameState(Player player, boolean readyToGame);
+
+  /**
+   * Найти пользователя в контексте
+   * @param userName
+   * @return
+   */
+  Result<Player> findUserByName(String userName);
+
+  /**
+   * Получить игрока, который сейчас ходит
+   * @return
+   */
+  Result<Player> getPlayerOwnsTheRound();
+
+
 
 }

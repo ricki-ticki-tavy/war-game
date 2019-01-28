@@ -82,4 +82,11 @@ public interface WarriorBaseClass extends BaseEntityHeader {
    * @return
    */
   int getHandsCount();
+
+  /**
+   * Указывает можно ли призывать этого воина
+   * @return
+   */
+  boolean isSummonable();
+
 }

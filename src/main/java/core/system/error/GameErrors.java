@@ -5,6 +5,7 @@ public enum GameErrors {
 
   , PLAYER_UNITS_LIMIT_EXCEEDED("PL-1", "Пользователь с UID %s уже имеет максимальное кол-во воинов %s.")
   , PLAYER_NOT_CONNECTED("PL-2", "Пользователь  %s не является участником ни одной из игр.")
+  , PLAYER_IS_NOT_OWENER_OF_THIS_ROUND("PL-3", "Пользователь  %s пытается выполнить действие не в свой ход %s")
 
   , WARRIOR_HANDS_NO_FREE_SLOTS("WR-1", "Руки воина имеют свободных %s мест, а оружие '%s' требует %s места")
   , WARRIOR_WEAPON_NOT_FOUND("WR-2", "Воин не имеет оружия с id '%s'")
@@ -22,7 +23,9 @@ public enum GameErrors {
   , USER_DISCONNECT_NOT_CONNECTED("U-3", "Не удалось отключить пользователя от игры так как он не был подключен.")
   , USER_NOT_LOGGED_IN("U-4", "Пользователь %s не авторизован")
   , USER_NOT_CONNECTED_TO_ANY_GAME("U-5", "Пользователь %s не подключен ни к одной игре")
-  , USER_UNKNOWN_ID("U-6", "Пользователь с UID %s не найден.")
+  , USER_NOT_CONNECTED_TO_THIS_GAME("U-6", "Пользователь %s не подключен к игре %s (id %s)")
+  , USER_IS_READY_TO_PLAY("U-7", "Пользователь %s в к игре %s (id %s) завершил приготовления и не может ни чего менять")
+  , USER_UNKNOWN_ID("U-80", "Пользователь с UID %s не найден.")
 
   , CONTEXT_REMOVE_NOT_FOUND("CT-1", "Удаляемый контекст не существует или не активен")
   , CONTEXT_NOT_FOUND_BY_ID("CT-2", "Контекст %s не существует или уничтожен.")

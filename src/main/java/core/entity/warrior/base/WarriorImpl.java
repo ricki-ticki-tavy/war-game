@@ -30,22 +30,23 @@ public class WarriorImpl implements Warrior {
 
   protected Map<Integer, WarriorSHand> hands;
   protected WarriorBaseClass warriorBaseClass;
-  protected Coords coords = null;
+  protected Coords coords;
   protected final String id = UUID.randomUUID().toString();
   protected String title;
   protected boolean summoned;
   protected Context gameContext;
-  protected Player player;
+  protected Player owner;
 
   @Autowired
   private BeanFactory beanFactory;
 
-  public WarriorImpl(Context gameContext, Player player, WarriorBaseClass warriorBaseClass, String title, boolean summoned) {
+  public WarriorImpl(Context gameContext, Player owner, WarriorBaseClass warriorBaseClass, String title, Coords coords, boolean summoned) {
     this.warriorBaseClass = warriorBaseClass;
     this.title = title;
     this.summoned = summoned;
     this.gameContext = gameContext;
-    this.player = player;
+    this.owner = owner;
+    this.coords = new Coords(coords);
     int handsCount = warriorBaseClass.getHandsCount();
     hands = new ConcurrentHashMap(2);
     while (handsCount-- > 0) {
@@ -102,7 +103,7 @@ public class WarriorImpl implements Warrior {
 
   @Override
   public Player getOwner() {
-    return player;
+    return owner;
   }
 
   @Override

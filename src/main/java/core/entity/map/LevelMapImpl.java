@@ -30,6 +30,7 @@ import static api.enums.EventType.PLAYER_RECONNECTED;
 import static api.enums.EventType.PLAYER_DISCONNECTED;
 import static core.system.error.GameErrors.USER_CONNECT_TO_CONTEXT_TOO_MANY_USERS;
 import static core.system.error.GameErrors.USER_DISCONNECT_NOT_CONNECTED;
+import static core.system.error.GameErrors.USER_IS_READY_TO_PLAY;
 
 /**
  * Игровая карта
@@ -50,20 +51,24 @@ public class LevelMapImpl implements LevelMap {
   private Map<String, Player> players;
   private Context context;
   private boolean loaded = false;
-  private volatile AtomicBoolean ready = new AtomicBoolean(false);
 
   @Autowired
   BeanFactory beanFactory;
+
+  //===================================================================================================
+  //===================================================================================================
 
   @Override
   public String getName() {
     return name;
   }
+  //===================================================================================================
 
   @Override
   public String getDescription() {
     return description;
   }
+  //===================================================================================================
 
   @Override
   public void init(Context gameContext, LevelMapMetaDataXml levelMapMetaData) {
@@ -84,46 +89,51 @@ public class LevelMapImpl implements LevelMap {
 
     players = new ConcurrentHashMap<>(maxPlayersCount);
 
-    context.subscribeEvent(this::checkForReady, EventType.WARRIOR_ADDED, EventType.PLAYER_DISCONNECTED);
-
     loaded = true;
     logger.info("map initializing succeed \"" + levelMapMetaData.name + "\" in context " + gameContext.getContextId());
   }
+  //===================================================================================================
 
   @Override
   public List<Rectangle> getPlayerStartZone(String playerId) {
     return playerStartZones;
   }
+  //===================================================================================================
 
   @Override
   public int getMaxPlayerCount() {
     return maxPlayersCount;
   }
+  //===================================================================================================
 
   @Override
   public int getWidthInUnits() {
     return width;
   }
+  //===================================================================================================
 
   @Override
   public int getHeightInUnits() {
     return height;
   }
+  //===================================================================================================
 
   @Override
   public List<Warrior> getWarriors(Coords center, int radius) {
     return null;
   }
+  //===================================================================================================
 
   @Override
-  public Result<Warrior> addWarrior(Player player, Coords coords, Warrior warrior) {
+  public Result<Warrior> createWarrior(Player player, String warriorBaseClassName, Coords coords) {
     if (player.getWarriors().size() >= context.getGameRules().getMaxStartCreaturePerPlayer()) {
       return ResultImpl.fail(GameErrors.PLAYER_UNITS_LIMIT_EXCEEDED.getError(player.getTitle()
               , String.valueOf(context.getGameRules().getMaxStartCreaturePerPlayer())));
     }
-    return player.addWarrior(warrior)
-            .map(addedWarrior -> addedWarrior.moveTo(coords));
+    // TODO сделать проверку координат
+    return player.createWarrior(warriorBaseClassName, coords);
   }
+  //===================================================================================================
 
   @Override
   public Result connectPlayer(Player player) {
@@ -134,6 +144,7 @@ public class LevelMapImpl implements LevelMap {
       context.fireGameEvent(null, PLAYER_RECONNECTED, new EventDataContainer(player, result), null);
     } else {
       if (maxPlayersCount >= players.size()) {
+        player.clear();
         if ((result = player.replaceContext(context)).isSuccess()) {
           players.put(player.getId(), player);
           player.setStartZone(playerStartZones.get(players.size() - 1));
@@ -144,9 +155,9 @@ public class LevelMapImpl implements LevelMap {
       }
       context.fireGameEvent(null, PLAYER_CONNECTED, new EventDataContainer(player, result), null);
     }
-
     return result;
   }
+  //===================================================================================================
 
   @Override
   public Result disconnectPlayer(Player player) {
@@ -170,36 +181,51 @@ public class LevelMapImpl implements LevelMap {
     }
     return result;
   }
+  //===================================================================================================
 
   @Override
   public List<Player> getPlayers() {
     return new LinkedList(players.values());
   }
+  //===================================================================================================
 
   @Override
   public int getSimpleUnitSize() {
     return simpleUnitSize;
   }
+  //===================================================================================================
 
   @Override
   public Player getPlayer(String playerId) {
     return players.get(playerId);
   }
+  //===================================================================================================
 
   @Override
   public boolean isLoaded() {
     return loaded;
   }
+  //===================================================================================================
 
   @Override
-  public boolean isReady() {
-    return ready.get();
+  public Result<Warrior> removeWarrior(Player player, String warriorId) {
+    return player.removeWarrior(warriorId);
   }
+  //===================================================================================================
 
-  private void checkForReady(Event event) {
-    ready.set(players.size() == maxPlayersCount
-            && players.values().stream()
-            .reduce(true, (rd, player) -> rd &= player.getWarriors().size() == context.getGameRules().getMaxStartCreaturePerPlayer()
-                    , (rd2, rd3) -> rd2));
+  @Override
+  public Result<Warrior> moveWarriorTo(Player player, String warriorId, Coords newCoords) {
+    // если режим расстановки, то ограничиваем место положения фигур регионом расстановки для данного игрока;
+    return null; // TODO реализовать
   }
+  //===================================================================================================
+
+  // TODO not implemented. !!!!!!!   correct it
+  @Override
+  public Result<Context> ifNewWarriorSCoordinatesAreAvailable(Warrior warrior, Coords newCoords) {
+    return ResultImpl.success(this);
+  }
+  //===================================================================================================
+
+
 }

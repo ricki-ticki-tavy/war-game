@@ -60,11 +60,30 @@ public interface LevelMap {
   /**
    * Добавить воина в заданные координаты заданному игроку
    * @param player
+   * @param warriorBaseClassName
    * @param coords
-   * @param warrior
    * @return
    */
-  Result<Warrior> addWarrior(Player player, Coords coords, Warrior warrior);
+  Result<Warrior> createWarrior(Player player, String warriorBaseClassName, Coords coords);
+
+  /**
+   * Переместить юнит на новые координаты
+   * @param player
+   * @param warriorId
+   * @param newCoords
+   * @return
+   */
+  Result<Warrior> moveWarriorTo(Player player, String warriorId, Coords newCoords);
+
+  /**
+   * Удалить юнит игроком
+   * @param player
+   * @param warriorId
+   * @return
+   */
+  Result<Warrior> removeWarrior(Player player, String warriorId);
+
+
 
   /**
    * Добавить игрока в игру
@@ -110,8 +129,14 @@ public interface LevelMap {
   boolean isLoaded();
 
   /**
-   * Готова ликарта к игре. То естьвсе игроки есть и все фигуры
+   * Проверка допустимости новых координат воина
+   * @param warrior
+   * @param newCoords
    * @return
    */
-  boolean isReady();
+  Result<Context> ifNewWarriorSCoordinatesAreAvailable(Warrior warrior, Coords newCoords);
+
+
+
+
 }

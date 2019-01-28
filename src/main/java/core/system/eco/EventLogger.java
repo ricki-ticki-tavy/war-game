@@ -80,6 +80,15 @@ public class EventLogger {
                 , event.getSource(Warrior.class).getCoords().toString()));
         break;
       }
+      case WARRIOR_REMOVED: {
+        //   "В игре '%s' (контекст '%s') игроком '%s' удален воин '%s' (id %s)"
+        logger.info(event.getEventType().getFormattedMessage(event.getSourceContext().getGameName()
+                , event.getSourceContext().getContextId()
+                , event.getSource(Warrior.class).getOwner().getTitle()
+                , event.getSource(Warrior.class).getWarriorBaseClass().getTitle()
+                , event.getSource(Warrior.class).getId()));
+        break;
+      }
       case WEAPON_TAKEN: {
         // "В игре '%s' игрок '%s' снарядил юнит '%s' (id '%s') оружием '%s'. %s"
         logger.info(event.getEventType().getFormattedMessage(event.getSourceContext().getGameName()

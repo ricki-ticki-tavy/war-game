@@ -101,4 +101,9 @@ public abstract class AbstractBaseWarriorClass implements WarriorBaseClass {
   public int getHandsCount() {
     return warriorSBaseAttributes.getHandsCount();
   }
+
+  @Override
+  public boolean isSummonable() {
+    return false;
+  }
 }

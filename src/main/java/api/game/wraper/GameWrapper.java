@@ -1,6 +1,7 @@
 package api.game.wraper;
 
 import api.core.Context;
+import api.core.Core;
 import api.core.Result;
 import api.entity.warrior.Warrior;
 import api.entity.weapon.Weapon;
@@ -56,7 +57,16 @@ public interface GameWrapper {
    * @param className
    * @return
    */
-  Result<Warrior> createWarrior(String userName, String className, Coords coords);
+  Result<Warrior> createWarrior(String contextId, String userName, String className, Coords coords);
+
+  /**
+   * Переместить юнит на заданные координаты
+   * @param userName
+   * @param warriorId
+   * @param coords
+   * @return
+   */
+  Result<Warrior> moveWarriorTo(String contextId, String userName, String warriorId, Coords coords);
 
   /**
    * Вооружить воина предметом
@@ -67,6 +77,7 @@ public interface GameWrapper {
    */
   Result<Weapon> giveWeaponToWarrior(String userName, String warriorId, String weaponName);
 
+  // TODO переделать с кодом контекста в параметр
   /**
    * Забрать предмет у воина
    * @param userName
@@ -77,10 +88,38 @@ public interface GameWrapper {
   Result<Weapon> takeWeaponFromWarrior(String userName, String warriorId, String weaponId);
 
   /**
+   * Удалить юнит игроком
+   * @param contextId
+   * @param userName
+   * @param warriorId
+   * @return
+   */
+  Result<Warrior> removeWarrior(String contextId, String userName, String warriorId);
+
+  /**
    * Уведомить, что игрок закончил расстановку и готов к игре
    * @param userName
    * @return
    */
   Result<Player> playerReady(String userName, boolean readyToPlay);
 
+  /**
+   * Возвращает игрока, которому сейчас принадлежит ход
+   * @return
+   */
+  Result<Player> getGetPlayerOwnsTheRound(String contextId);
+
+  /**
+   * Возвращает имена базовых классов воинов
+   * @return
+   */
+  Result<List<String>> getBaseWarriorClasses();
+
+  /**
+   * Возвращает имена базовых классов вооружения
+   * @return
+   */
+  Result<List<String>> getWeaponClasses();
+
+  Core getCore();
 }

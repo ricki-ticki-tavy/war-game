@@ -137,4 +137,11 @@ public interface WarriorSBaseAttributes {
    * @return
    */
   int getHandsCount();
+
+  /**
+   * Указывает можно ли призывать этого воина
+   * @return
+   */
+  boolean isSummonable();
+
 }
