@@ -20,6 +20,14 @@ public interface GameWrapper {
   Result<Player> login(String userName);
 
   /**
+   * Подключиться к игре
+   * @param userName
+   * @param contextId
+   * @return
+   */
+  Result<Player> connectToGame(String userName, String contextId);
+
+  /**
    * Создать новую игру
    *
    * @param ownerUserName
@@ -35,13 +43,6 @@ public interface GameWrapper {
           , String gameName
           , boolean hidden);
 
-  /**
-   * Подключиться к игре
-   * @param userName
-   * @param contextId
-   * @return
-   */
-  Result<Player> connectToGame(String userName, String contextId);
 
   /**
    * Получить список игровых контекстов
@@ -74,5 +75,12 @@ public interface GameWrapper {
    * @return
    */
   Result<Weapon> takeWeaponFromWarrior(String userName, String warriorId, String weaponId);
+
+  /**
+   * Уведомить, что игрок закончил расстановку и готов к игре
+   * @param userName
+   * @return
+   */
+  Result<Player> playerReady(String userName, boolean readyToPlay);
 
 }

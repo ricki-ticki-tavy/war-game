@@ -4,6 +4,7 @@ public enum GameErrors {
     UNKNOWN_EVENT_FOR_LOGGER("EV-1", "Неизвестный для логирования тип события %s")
 
   , PLAYER_UNITS_LIMIT_EXCEEDED("PL-1", "Пользователь с UID %s уже имеет максимальное кол-во воинов %s.")
+  , PLAYER_NOT_CONNECTED("PL-2", "Пользователь  %s не является участником ни одной из игр.")
 
   , WARRIOR_HANDS_NO_FREE_SLOTS("WR-1", "Руки воина имеют свободных %s мест, а оружие '%s' требует %s места")
   , WARRIOR_WEAPON_NOT_FOUND("WR-2", "Воин не имеет оружия с id '%s'")
@@ -26,8 +27,11 @@ public enum GameErrors {
   , CONTEXT_REMOVE_NOT_FOUND("CT-1", "Удаляемый контекст не существует или не активен")
   , CONTEXT_NOT_FOUND_BY_ID("CT-2", "Контекст %s не существует или уничтожен.")
   , CONTEXT_GAME_NOT_STARTED("CT-3", "игра '%s' (context %s) не была начата.")
-  , CONTEXT_DELETE_ALREADY_IN_PROGRESS("CT-3", "игра '%s' (context %s) уже находится в процессе удаления.")
-  , CONTEXT_DELETE_IN_PROGRESS("CT-3", "игра '%s' (context %s) в процессе удаления.")
+  , CONTEXT_DELETE_ALREADY_IN_PROGRESS("CT-4", "игра '%s' (context %s) уже находится в процессе удаления.")
+  , CONTEXT_IS_IN_DELETING_STATE("CT-5", "игра '%s' (context %s) в процессе удаления.")
+  , CONTEXT_IS_NOT_IN_DELETING_STATE("CT-5", "игра '%s' (context %s) не находится в процессе удаления.")
+  , CONTEXT_IN_GAME_RAN_STATE("CT-6", "игра '%s' (context %s) уже в процессе игры.")
+  , CONTEXT_NOT_IN_GAME_RAN_STATE("CT-7", "игра '%s' (context %s) еще не началась. Игроки готовятся.")
 
 
   ;

@@ -34,4 +34,10 @@ public interface GameRules {
    */
   int getRestorationMannaPointsPerTotalRound();
 
+  /**
+   * Размер юнита в пикселах
+   * @return
+   */
+  int getWarriorSize();
+
 }

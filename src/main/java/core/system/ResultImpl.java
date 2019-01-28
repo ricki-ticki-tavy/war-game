@@ -72,6 +72,14 @@ public class ResultImpl implements Result {
   }
 
   @Override
+  public Result doIfFail(Consumer consumer) {
+    if (fail){
+      consumer.accept(error);
+    }
+    return this;
+  }
+
+  @Override
   public Result map(Function consumer) {
     if (success){
       return (Result)consumer.apply(result);

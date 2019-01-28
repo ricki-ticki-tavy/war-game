@@ -132,10 +132,14 @@ public class CoreImpl implements Core {
 
   @PostConstruct
   public void init() {
-    subscribeEvent(null, this::eventLogger, WARRIOR_MOVED, PLAYER_DISCONNECTED
-            , WARRIOR_ADDED, WEAPON_TAKEN, WEAPON_TRY_TO_DROP, WEAPON_DROPED
+    subscribeEvent(null, this::eventLogger
+            , PLAYER_LOGGED_IN, PLAYER_CONNECTED, PLAYER_DISCONNECTED, PLAYER_RECONNECTED
+            , PLAYER_CHANGED_ITS_READY_TO_PLAY_STATUS
             , GAME_CONTEXT_CREATED, GAME_CONTEXT_CREATE, GAME_CONTEXT_LOAD_MAP, GAME_CONTEXT_REMOVED
-            , PLAYER_LOGGED_IN, PLAYER_CONNECTED, PLAYER_DISCONNECTED, PLAYER_RECONNECTED);
+            , GAME_CONTEXT_GAME_HAS_BEGAN
+            , WARRIOR_ADDED, WEAPON_TAKEN, WEAPON_TRY_TO_DROP, WEAPON_DROPED, WARRIOR_MOVED
+
+            );
 
     registerWarriorBaseClass(Skeleton.CLASS_NAME, Skeleton.class);
     registerWarriorBaseClass(Viking.CLASS_NAME, Viking.class);

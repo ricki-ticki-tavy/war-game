@@ -21,6 +21,15 @@ import java.util.function.Consumer;
 public interface Context {
 
   /**
+   * Подписаться на событие
+   *
+   * @param eventTypes
+   * @param consumer
+   * @return
+   */
+  String subscribeEvent(Consumer<Event> consumer, EventType... eventTypes);
+
+  /**
    * UUID контекста (сессии)
    *
    * @return
@@ -49,7 +58,27 @@ public interface Context {
   Result<List<String>> getFrozenListOfPlayers();
 
   /**
-   * Игра уже началась и добавление новых игроков не возможно
+   * Успех, если текущий статус игры совпадает с переданным
+   * @return
+   */
+  Result<Context> ifGameRan(boolean state);
+
+  /**
+   * Успех, если текущий статус игры совпадает с переданным
+   * @return
+   */
+  Result<Context> ifGameDeleting(boolean state);
+
+  /**
+   * Проверка допустимости новых координат воина
+   * @param warrior
+   * @param newCoords
+   * @return
+   */
+  Result<Context> ifNewWarriorSCoordinatesAreAvailable(Warrior warrior, Coords newCoords);
+
+  /**
+   * возвращает текущий статус игры
    * @return
    */
   boolean isGameRan();
@@ -125,7 +154,7 @@ public interface Context {
   Result disconnectPlayer(Player player);
 
   /**
-   * Создать воина на карте
+   * Создать воина на карте при начальной расстановке
    *
    * @param baseWarriorClass
    * @return
@@ -148,12 +177,11 @@ public interface Context {
   GameRules getGameRules();
 
   /**
-   * Подписаться на событие
-   *
-   * @param eventTypes
-   * @param consumer
+   * Установить признак готовности
+   * @param player
+   * @param readyToGame
    * @return
    */
-  String subscribeEvent(Consumer<Event> consumer, EventType... eventTypes);
+  Result<Player> setPlayerReadyToGameState(Player player, boolean readyToGame);
 
 }
