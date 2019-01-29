@@ -12,8 +12,6 @@ import api.game.map.Player;
 import api.game.map.metadata.GameRules;
 import api.game.wraper.GameWrapper;
 import core.entity.map.GameRulesImpl;
-import core.game.integration.test.InnerTest1;
-import core.game.integration.test.InnerTest2;
 import core.system.ResultImpl;
 import core.system.event.EventImpl;
 import org.slf4j.Logger;
@@ -22,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-
 import java.util.List;
 
 @Component
@@ -38,11 +35,11 @@ public class GameWrapperImpl implements GameWrapper {
 
   @PostConstruct
   public void testGame() {
-    logger.info("Запуск внутреннего теста...");
-    new InnerTest1().test(this);
-    logger.info("1)   ПЕРВЫЙ ВНУТРЕННИЙ ТЕСТ ПРОЙДЕН");
-    new InnerTest2().test(this);
-    logger.info("2)   ВТОРОЙ ВНУТРЕННИЙ ТЕСТ ПРОЙДЕН");
+//    logger.info("Запуск внутреннего теста...");
+//    new InnerTest1().test(this);
+//    logger.info("1)   ПЕРВЫЙ ВНУТРЕННИЙ ТЕСТ ПРОЙДЕН");
+//    new InnerTest2().test(this);
+//    logger.info("2)   ВТОРОЙ ВНУТРЕННИЙ ТЕСТ ПРОЙДЕН");
   }
   //===================================================================================================
 

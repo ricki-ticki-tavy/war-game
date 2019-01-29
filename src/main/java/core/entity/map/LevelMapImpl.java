@@ -216,7 +216,13 @@ public class LevelMapImpl implements LevelMap {
   @Override
   public Result<Warrior> moveWarriorTo(Player player, String warriorId, Coords newCoords) {
     // если режим расстановки, то ограничиваем место положения фигур регионом расстановки для данного игрока;
-    return null; // TODO реализовать
+    if (context.isGameRan()){
+      // идет игра
+    } else {
+      return player.findWarriorById(warriorId)
+              .map(warrior -> null);
+    }
+return null;
   }
   //===================================================================================================
 

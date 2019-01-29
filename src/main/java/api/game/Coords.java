@@ -5,7 +5,7 @@ import org.apache.logging.log4j.util.Strings;
 /**
  * Координаты
  */
-public class Coords {
+public class Coords{
   private int x, y;
 
   public Coords(int x, int y){
@@ -29,6 +29,10 @@ public class Coords {
   @Override
   public boolean equals(Object obj) {
     return obj instanceof Coords && this.x == ((Coords)obj).x && this.y == ((Coords)obj).y;
+  }
+
+  public boolean equals(int x, int y) {
+    return this.x == x && this.y == y;
   }
 
   @Override

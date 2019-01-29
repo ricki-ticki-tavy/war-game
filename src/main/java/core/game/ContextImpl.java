@@ -342,7 +342,7 @@ public class ContextImpl implements Context {
   /**
    * возвращает имеет ли возможность текущий игрок двигать определенный юнит
    */
-  private Result<Warrior> ifUserCanUseWarriorAtThisTurn(Warrior warrior) {
+  private Result<Warrior> ifUserCanMoveWarriorAtThisTurn(Warrior warrior) {
     // если игра не запущена, то может
     return ifGameRan(false)
             .map(context -> ResultImpl.success(warrior))
