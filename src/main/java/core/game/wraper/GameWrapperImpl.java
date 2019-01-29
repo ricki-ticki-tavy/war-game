@@ -1,10 +1,9 @@
-package core.game;
+package core.game.wraper;
 
 import api.core.Context;
 import api.core.Core;
 import api.core.Result;
 import api.entity.warrior.Warrior;
-import api.entity.warrior.WarriorBaseClass;
 import api.entity.weapon.Weapon;
 import api.enums.EventType;
 import api.game.Coords;
@@ -13,11 +12,6 @@ import api.game.map.Player;
 import api.game.map.metadata.GameRules;
 import api.game.wraper.GameWrapper;
 import core.entity.map.GameRulesImpl;
-import core.entity.warrior.Skeleton;
-import core.entity.warrior.Viking;
-import core.entity.weapon.Bow;
-import core.entity.weapon.ShortSword;
-import core.entity.weapon.Sword;
 import core.game.integration.test.InnerTest1;
 import core.game.integration.test.InnerTest2;
 import core.system.ResultImpl;
@@ -26,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.Assert;
 
 import javax.annotation.PostConstruct;
 
@@ -140,7 +133,7 @@ public class GameWrapperImpl implements GameWrapper {
   @Override
   public Result<Player> getGetPlayerOwnsTheRound(String contextId) {
     return core.findGameContextByUID(contextId)
-            .map(fineContext -> fineContext.getPlayerOwnsTheRound());
+            .map(fineContext -> fineContext.getPlayerOwnsTheTurn());
   }
   //===================================================================================================
 

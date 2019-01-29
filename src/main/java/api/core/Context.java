@@ -70,6 +70,14 @@ public interface Context {
   Result<Context> ifGameDeleting(boolean state);
 
   /**
+   * Проверка допустимости новых координат воина
+   * @param warrior
+   * @param newCoords
+   * @return
+   */
+  Result<Context> ifNewWarriorSCoordinatesAreAvailable(Warrior warrior, Coords newCoords);
+
+  /**
    * возвращает текущий статус игры
    * @return
    */
@@ -194,6 +202,7 @@ public interface Context {
 
   /**
    * Найти пользователя в контексте
+   *
    * @param userName
    * @return
    */
@@ -201,10 +210,19 @@ public interface Context {
 
   /**
    * Получить игрока, который сейчас ходит
+   *
    * @return
    */
-  Result<Player> getPlayerOwnsTheRound();
+  Result<Player> getPlayerOwnsTheTurn();
 
+
+  /**
+   * проверяет может ли ходящий сейчас игрок переместить данный юнит. Проверка права игрока ходить, контексты и прочее
+   * перед этим вызовом уже должно быть проверено.
+   *
+   * @param warrior
+   */
+  Result<Warrior> ifUnitCanMove(Warrior warrior);
 
 
 }
