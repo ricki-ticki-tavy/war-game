@@ -14,8 +14,13 @@ public enum LifeTimeUnit {
 
   private String title;
   private EventType eventType;
+
   public String getTitle(){
     return title;
+  }
+
+  public EventType getEventType(){
+    return eventType;
   }
 
   private LifeTimeUnit(String title, EventType eventType){

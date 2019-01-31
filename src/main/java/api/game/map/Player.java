@@ -138,4 +138,16 @@ public interface Player extends BaseEntityHeader{
    */
   Result<Influencer> addInfluenceToWarrior(String warriorId, Modifier modifier, Object source, LifeTimeUnit lifeTimeUnit, int lifeTime);
 
+//  /**
+//   * Удалить влияние у юнита
+//   * @param influencer
+//   * @return
+//   */
+//  Result<Influencer> removeInfluencerFromWarrior(String warriorId, Influencer influencer);
+
+//  /**
+//   * Получить список оказываемых влияний на юнит
+//   * @return
+//   */
+//  Result<List<Influencer>> getWarriorSInfluencers();
 }

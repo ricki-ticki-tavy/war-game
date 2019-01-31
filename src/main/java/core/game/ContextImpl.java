@@ -3,6 +3,7 @@ package core.game;
 import api.core.Context;
 import api.core.Core;
 import api.core.Result;
+import api.entity.warrior.Influencer;
 import api.entity.warrior.Warrior;
 import api.enums.EventType;
 import api.game.Coords;
@@ -216,6 +217,12 @@ public class ContextImpl implements Context {
   }
   //===================================================================================================
 
+  @Override
+  public Result<Context> unsubscribeEvent(String consumerId, EventType... eventTypes) {
+    return core.unsubscribeEvent(this, consumerId, eventTypes);
+  }
+  //===================================================================================================
+
   public Result<Context> ifGameRan(boolean state) {
     return isGameRan() == state ? ResultImpl.success(this) : ResultImpl.fail(
             state
@@ -395,9 +402,16 @@ public class ContextImpl implements Context {
 
   @Override
   public Result<Player> nextTurn(String userName) {
-    return             ifGameRan(true)
-            .map(fineContext ->  fineContext.findUserByName(userName))
+    return ifGameRan(true)
+            .map(fineContext -> fineContext.findUserByName(userName))
             .map(player -> getLevelMap().nextTurn(player));
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<List<Influencer>> getWarriorSInfluencers(String userName, String warriorId) {
+    return findUserByName(userName)
+            .map(player -> getLevelMap().getWarriorSInfluencers(player, warriorId));
   }
   //===================================================================================================
 }

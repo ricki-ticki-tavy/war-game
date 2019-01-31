@@ -30,6 +30,8 @@ public enum EventType {
   , WARRIOR_SUMMONED("В игре '%s' (контекст '%s') игроком '%s' призван воин '%s' с '%s' очками жизни")
   , WARRIOR_MOVED("В игре '%s' игрок '%s' переместил юнит '%s' на координаты '%s'")
   , WARRIOR_REMOVED("В игре '%s' (контекст '%s') игроком '%s' удален воин '%s' (id %s)")
+  , WARRIOR_INFLUENCER_ADDED("В игре '%s' (контекст '%s') игроку '%s' добавлено влияние '%s' (id %s)")
+  , WARRIOR_INFLUENCER_REMOVED("В игре '%s' (контекст '%s') у игрока '%s' снято влияние '%s' (id %s)")
 
   , WEAPON_TAKEN("В игре '%s' игрок '%s' снарядил юнит '%s' (id '%s') оружием '%s'. %s")
   , WEAPON_TRY_TO_DROP("В игре '%s' игрок '%s' попытался убрать у юнита '%s' (id '%s') оружие id '%s'. %s")
@@ -41,6 +43,7 @@ public enum EventType {
   , GAME_CONTEXT_REMOVED("Удаление контекста игры '%s' (владелец '%s'). %s")
   , GAME_CONTEXT_GAME_HAS_BEGAN("Игра '%s' (id '%s') началась по готовности всех игроков. В игре %s игрока(ов)")
 
+  ,
   ;
 
   private String caption;

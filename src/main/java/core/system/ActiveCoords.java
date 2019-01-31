@@ -76,6 +76,7 @@ public class ActiveCoords extends Coords {
   }
   //===================================================================================================
 
+  // TODO перенести в LevelMap или увязать с контекстом 
   /**
    * Попытка перемещения юнита на новую координату
    *
@@ -94,7 +95,7 @@ public class ActiveCoords extends Coords {
     final int quadObjectSize = objectSize * objectSize;
     final Coords testCoords = new Coords(newCoords);
     return otherObjects.stream()
-            .filter(hasCoordinates -> quadObjectSize < calcQuadOfWayLength(hasCoordinates.getCoords(), testCoords))
+            .filter(hasCoordinates -> quadObjectSize > calcQuadOfWayLength(hasCoordinates.getCoords(), testCoords))
             .findFirst()
             .map(hasCoordinates -> ResultImpl.fail(new GameError("", "")))
             .orElse(ResultImpl.success(testCoords));

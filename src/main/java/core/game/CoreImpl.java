@@ -61,6 +61,8 @@ public class CoreImpl implements Core {
 
   @Autowired
   EventLogger gameEventLogger;
+  //===================================================================================================
+  //===================================================================================================
 
   /**
    * Зарегистрировать базовый класс воина
@@ -71,6 +73,7 @@ public class CoreImpl implements Core {
   private void registerWarriorBaseClass(String className, Class<? extends WarriorBaseClass> warriorBaseClass) {
     registeredWarriorBaseClasses.put(className, warriorBaseClass);
   }
+  //===================================================================================================
 
   /**
    * Зарегистрировать базовый класс оружия
@@ -81,7 +84,7 @@ public class CoreImpl implements Core {
   private void registerWeaponClass(String className, Class<? extends Weapon> weaponClass) {
     registeredWeaponClasses.put(className, weaponClass);
   }
-
+  //===================================================================================================
 
   @Override
   public Result<Context> createGameContext(Player gameCreator, GameRules gameRules
@@ -99,6 +102,7 @@ public class CoreImpl implements Core {
                       return ResultImpl.success(createdCtx);
                     })));
   }
+  //===================================================================================================
 
   @Override
   public Result<Context> findGameContextByUID(String contextId) {
@@ -106,6 +110,7 @@ public class CoreImpl implements Core {
             .map(foundContext -> ResultImpl.success(foundContext))
             .orElse(ResultImpl.fail(CONTEXT_NOT_FOUND_BY_ID.getError(contextId)));
   }
+  //===================================================================================================
 
   @Override
   public Result<Context> removeGameContext(String contextId) {
@@ -129,15 +134,17 @@ public class CoreImpl implements Core {
               return result;
             });
   }
+  //===================================================================================================
 
   @PostConstruct
   public void init() {
     subscribeEvent(null, this::eventLogger
             , PLAYER_LOGGED_IN, PLAYER_CONNECTED, PLAYER_DISCONNECTED, PLAYER_RECONNECTED
-            , PLAYER_CHANGED_ITS_READY_TO_PLAY_STATUS
+            , PLAYER_CHANGED_ITS_READY_TO_PLAY_STATUS, PLAYER_TAKE_TURN, PLAYER_LOOSE_TURN
             , GAME_CONTEXT_CREATED, GAME_CONTEXT_CREATE, GAME_CONTEXT_LOAD_MAP, GAME_CONTEXT_REMOVED
             , GAME_CONTEXT_GAME_HAS_BEGAN
             , WARRIOR_ADDED, WEAPON_TAKEN, WEAPON_TRY_TO_DROP, WEAPON_DROPED, WARRIOR_MOVED
+            , WARRIOR_INFLUENCER_ADDED, WARRIOR_INFLUENCER_REMOVED
 
             );
 
@@ -148,12 +155,14 @@ public class CoreImpl implements Core {
     registerWeaponClass(ShortSword.CLASS_NAME, ShortSword.class);
     registerWeaponClass(Sword.CLASS_NAME, Sword.class);
   }
+  //===================================================================================================
 
   @Override
   //TODO
   public int getRandom(int min, int max) {
     return 0;
   }
+  //===================================================================================================
 
   /**
    * Отправить сообщения в отпределенный контекст
@@ -167,19 +176,15 @@ public class CoreImpl implements Core {
                             .ifPresent(uidToConsumerMap -> uidToConsumerMap.values().stream()
                                     .forEach(gameEventConsumer -> gameEventConsumer.accept(event)))));
   }
+  //===================================================================================================
 
-  /**
-   * Событие сначала обрабатывается обработчиками привязанными к контексту, п потом без привязки к контексту,
-   *
-   * @param event
-   * @return
-   */
   @Override
   public Event fireEvent(Event event) {
     fireEventInContext(event.getSourceContext(), event);
     fireEventInContext(NULL_GAME_CONTEXT, event);
     return event;
   }
+  //===================================================================================================
 
   @Override
   public String subscribeEvent(Context context, Consumer<Event> consumer, EventType... eventTypes) {
@@ -199,10 +204,27 @@ public class CoreImpl implements Core {
     });
     return consumerUID;
   }
+  //===================================================================================================
+
+  @Override
+  public Result<Context> unsubscribeEvent(Context context, String consumerId, EventType... eventTypes) {
+    Map<EventType, Map<String, Consumer<Event>>> contextConsumers = eventConsumers.get(context);
+    if (contextConsumers != null){
+      Arrays.stream(eventTypes).forEach(eventType -> {
+        Map<String, Consumer<Event>> consumersOfEvent = contextConsumers.get(eventType);
+        if (consumersOfEvent != null) {
+          consumersOfEvent.remove(consumerId);
+        }
+      });
+    }
+    return ResultImpl.success(context);
+  }
+  //===================================================================================================
 
   private void eventLogger(Event event) {
     gameEventLogger.logGameEvent(event);
   }
+  //===================================================================================================
 
   @Override
   public Result loginPlayer(String playerName) {
@@ -211,6 +233,7 @@ public class CoreImpl implements Core {
     fireEvent(new EventImpl(null, null, PLAYER_LOGGED_IN, new EventDataContainer(player, result), null));
     return result;
   }
+  //===================================================================================================
 
   @Override
   public Result<Player> findUserByName(String playerName) {
@@ -218,21 +241,25 @@ public class CoreImpl implements Core {
             .map(player -> ResultImpl.success(player))
             .orElse(ResultImpl.fail(USER_NOT_LOGGED_IN.getError(playerName)));
   }
+  //===================================================================================================
 
   @Override
   public List<Context> getContextList() {
     return new ArrayList(contextMap.values());
   }
+  //===================================================================================================
 
   @Override
   public Result<List<String>> getBaseWarriorClasses() {
     return ResultImpl.success(new ArrayList(registeredWarriorBaseClasses.keySet()));
   }
+  //===================================================================================================
 
   @Override
   public Result<List<String>> getWeaponClasses() {
     return ResultImpl.success(new ArrayList(registeredWeaponClasses.keySet()));
   }
+  //===================================================================================================
 
   @Override
   public Result<Class<? extends WarriorBaseClass>> findWarriorBaseClassByName(String className) {
@@ -240,6 +267,7 @@ public class CoreImpl implements Core {
             .map(clazz -> ResultImpl.success(clazz))
             .orElse(ResultImpl.fail(WARRIOR_BASE_CLASS_NOT_FOUND_BY_NAME.getError(className)));
   }
+  //===================================================================================================
 
   @Override
   public Result<Class<? extends Weapon>> findWeaponByName(String weaponClassName) {
@@ -247,4 +275,5 @@ public class CoreImpl implements Core {
             .map(clazz -> ResultImpl.success(clazz))
             .orElse(ResultImpl.fail(WEAPON_BASE_CLASS_NOT_FOUND_BY_NAME.getError(weaponClassName)));
   }
+  //===================================================================================================
 }

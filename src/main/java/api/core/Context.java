@@ -1,5 +1,6 @@
 package api.core;
 
+import api.entity.warrior.Influencer;
 import api.entity.warrior.Warrior;
 import api.entity.warrior.WarriorBaseClass;
 import api.enums.EventType;
@@ -28,6 +29,15 @@ public interface Context {
    * @return
    */
   String subscribeEvent(Consumer<Event> consumer, EventType... eventTypes);
+
+  /**
+   * Отписаться от события
+   *
+   * @param consumerId
+   * @param eventTypes
+   * @return
+   */
+  Result<Context> unsubscribeEvent(String consumerId, EventType... eventTypes);
 
   /**
    * UUID контекста (сессии)
@@ -238,5 +248,11 @@ public interface Context {
    * @return
    */
   Result<Player> nextTurn(String userName);
+
+  /**
+   * Получить список оказываемых влияний на юнит
+   * @return
+   */
+  Result<List<Influencer>> getWarriorSInfluencers(String userName, String warriorId);
 
 }

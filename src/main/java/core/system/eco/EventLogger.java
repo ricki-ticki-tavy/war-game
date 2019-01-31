@@ -2,6 +2,7 @@ package core.system.eco;
 
 import api.core.Context;
 import api.core.Result;
+import api.entity.warrior.Influencer;
 import api.entity.warrior.Warrior;
 import api.entity.weapon.Weapon;
 import api.game.Event;
@@ -101,6 +102,24 @@ public class EventLogger {
                 , event.getSource(Warrior.class).getOwner().getTitle()
                 , event.getSource(Warrior.class).getWarriorBaseClass().getTitle()
                 , event.getSource(Warrior.class).getId()));
+        break;
+      }
+      case WARRIOR_INFLUENCER_ADDED: {
+        //   "В игре '%s' (контекст '%s') игроку '%s' добавлено влияние '%s' (id %s)"
+        logger.info(event.getEventType().getFormattedMessage(event.getSourceContext().getGameName()
+                , event.getSourceContext().getContextId()
+                , event.getSource(Influencer.class).getTargetWarrior().getTitle()
+                , event.getSource(Influencer.class).getTitle()
+                , event.getSource(Influencer.class).getId()));
+        break;
+      }
+      case WARRIOR_INFLUENCER_REMOVED: {
+        //   "В игре '%s' (контекст '%s') у игрока '%s' снято влияние '%s' (id %s)"
+        logger.info(event.getEventType().getFormattedMessage(event.getSourceContext().getGameName()
+                , event.getSourceContext().getContextId()
+                , event.getSource(Influencer.class).getTargetWarrior().getTitle()
+                , event.getSource(Influencer.class).getTitle()
+                , event.getSource(Influencer.class).getId()));
         break;
       }
       case WEAPON_TAKEN: {

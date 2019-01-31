@@ -205,6 +205,27 @@ public class WarriorImpl implements Warrior {
   public Result<Influencer> addInfluenceToWarrior(Modifier modifier, Object source, LifeTimeUnit lifeTimeUnit, int lifeTime) {
     Influencer influencer = new InfluencerImpl(this, modifier, source, lifeTimeUnit, lifeTime);
     influencers.put(influencer.getId(), influencer);
+    getOwner().findContext().getResult().fireGameEvent(null, WARRIOR_INFLUENCER_ADDED
+            , new EventDataContainer(influencer, this), null);
+    return ResultImpl.success(influencer);
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<List<Influencer>> getWarriorSInfluencers() {
+    return ResultImpl.success(new ArrayList<>(influencers.values()));
+  }
+  //===================================================================================================
+
+  // TODO
+  @Override
+  public Result<Influencer> removeInfluencerFromWarrior(Influencer influencer, boolean silent) {
+    influencer.unsubscribe();
+    influencers.remove(influencer.getId());
+    if (!silent){
+      getOwner().findContext().getResult().fireGameEvent(null, WARRIOR_INFLUENCER_REMOVED
+              , new EventDataContainer(influencer, this), null);
+    }
     return ResultImpl.success(influencer);
   }
   //===================================================================================================

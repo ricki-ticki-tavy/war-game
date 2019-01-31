@@ -3,6 +3,7 @@ package core.game.wraper;
 import api.core.Context;
 import api.core.Core;
 import api.core.Result;
+import api.entity.warrior.Influencer;
 import api.entity.warrior.Warrior;
 import api.entity.weapon.Weapon;
 import api.enums.EventType;
@@ -185,6 +186,14 @@ public class GameWrapperImpl implements GameWrapper {
             .map(context -> context.ifGameDeleting(false))
             .map(fineContext -> fineContext.nextTurn(userName))
             .logIfError(logger);
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<List<Influencer>> getWarriorSInfluencers(String contextId, String userName, String warriorId) {
+    return core.findGameContextByUID(contextId)
+            .map(context -> context.ifGameDeleting(false))
+            .map(context -> context.getWarriorSInfluencers(userName, warriorId));
   }
   //===================================================================================================
 

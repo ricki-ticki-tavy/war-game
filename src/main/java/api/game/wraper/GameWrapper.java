@@ -3,6 +3,7 @@ package api.game.wraper;
 import api.core.Context;
 import api.core.Core;
 import api.core.Result;
+import api.entity.warrior.Influencer;
 import api.entity.warrior.Warrior;
 import api.entity.weapon.Weapon;
 import api.game.Coords;
@@ -138,6 +139,13 @@ public interface GameWrapper {
    * @return
    */
   Result<Player> nextTurn(String contextId, String userName);
+
+  /**
+   * Получить список оказываемых влияний на юнит
+   * @return
+   */
+  Result<List<Influencer>> getWarriorSInfluencers(String contextId, String userName, String warriorId);
+
 
   Core getCore();
 }

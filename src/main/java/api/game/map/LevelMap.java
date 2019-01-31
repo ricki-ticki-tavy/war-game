@@ -213,6 +213,10 @@ public interface LevelMap {
    */
   Result<Influencer> addInfluenceToWarrior(Player player, String warriorId, Modifier modifier, Object source, LifeTimeUnit lifeTimeUnit, int lifeTime);
 
-
+  /**
+   * Получить список оказываемых влияний на юнит
+   * @return
+   */
+  Result<List<Influencer>> getWarriorSInfluencers(Player player, String warriorId);
 
 }

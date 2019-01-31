@@ -92,4 +92,17 @@ public interface Warrior extends BaseEntityHeader, HasCoordinates{
    */
   Result<Influencer> addInfluenceToWarrior(Modifier modifier, Object source, LifeTimeUnit lifeTimeUnit, int lifeTime);
 
+  /**
+   * Получить список оказываемых влияний на юнит
+   * @return
+   */
+  Result<List<Influencer>> getWarriorSInfluencers();
+
+  /**
+   * Удалить влияние у юнита
+   * @param influencer
+   * @return
+   */
+  Result<Influencer> removeInfluencerFromWarrior(Influencer influencer, boolean silent);
+
 }

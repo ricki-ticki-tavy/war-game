@@ -42,6 +42,7 @@ public interface Core {
 
   /**
    * Отправить сообщение о событии
+   * Событие сначала обрабатывается обработчиками привязанными к контексту, п потом без привязки к контексту,
    *
    * @param event
    * @return
@@ -57,6 +58,16 @@ public interface Core {
    * @return
    */
   String subscribeEvent(Context context, Consumer<Event> consumer, EventType... eventTypes);
+
+  /**
+   * Отписаться от события
+   *
+   * @param context    контекст, в рамках которого интересует данное событие. Если null, то по всем контекстам
+   * @param consumerId
+   * @param eventTypes
+   * @return
+   */
+  Result<Context> unsubscribeEvent(Context context, String consumerId, EventType... eventTypes);
 
   /**
    * подключить к игре игрока.

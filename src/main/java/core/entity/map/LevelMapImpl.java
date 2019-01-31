@@ -287,6 +287,13 @@ public class LevelMapImpl implements LevelMap {
   //===================================================================================================
 
   @Override
+  public Result<List<Influencer>> getWarriorSInfluencers(Player player, String warriorId) {
+    return player.findWarriorById(warriorId)
+            .map(warrior -> warrior.getWarriorSInfluencers());
+  }
+  //===================================================================================================
+
+  @Override
   public Result<Player> nextTurn(Player player) {
     return
             // проверим этот ли игрок сейчас владеет ходом
