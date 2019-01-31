@@ -23,6 +23,7 @@ public interface WarriorSBaseAttributes {
 
   /**
    * задать максимальное кол-во очков здоровья
+   *
    * @param maxHealth
    * @return
    */
@@ -30,6 +31,7 @@ public interface WarriorSBaseAttributes {
 
   /**
    * возвращает очки магии
+   *
    * @return
    */
   int getManna();
@@ -44,6 +46,7 @@ public interface WarriorSBaseAttributes {
 
   /**
    * Задать максимальное кол-во очков магии
+   *
    * @param maxManna
    * @return
    */
@@ -57,6 +60,7 @@ public interface WarriorSBaseAttributes {
 
   /**
    * задать класс брони
+   *
    * @param armorClass
    * @return
    */
@@ -70,10 +74,11 @@ public interface WarriorSBaseAttributes {
 
   /**
    * Задать коррекцию к цене за перемещение. Прибавляется к цене, рассчитанной исходя из класса брони воина
+   *
    * @param deltaCostMove
    * @return
    */
-  WarriorSBaseAttributes setDeltaCostMove(int deltaCostMove);
+  WarriorSBaseAttributes setDeltaCostMove(Integer deltaCostMove);
 
   /**
    * Кол-во очков применения способностей за ход
@@ -82,6 +87,7 @@ public interface WarriorSBaseAttributes {
 
   /**
    * кол-во очков применения способностей. На ход
+   *
    * @param abilityActionPoints
    * @return
    */
@@ -94,6 +100,7 @@ public interface WarriorSBaseAttributes {
 
   /**
    * Максимальное кол-во очков применения способностей. На ход
+   *
    * @param maxAbilityActionPoints
    * @return
    */
@@ -101,12 +108,14 @@ public interface WarriorSBaseAttributes {
 
   /**
    * Очки обычных действий на ход
+   *
    * @return
    */
   int getActionPoints();
 
   /**
    * Задать очки обычных действий на ход
+   *
    * @param actionPoints
    * @return
    */
@@ -114,6 +123,7 @@ public interface WarriorSBaseAttributes {
 
   /**
    * Изменить кол-во очков действия
+   *
    * @param deltaActionPoints
    * @return
    */
@@ -121,12 +131,14 @@ public interface WarriorSBaseAttributes {
 
   /**
    * Получить максимальное кол-во очков действия на ход
+   *
    * @return
    */
   int getMaxActionPoints();
 
   /**
    * Задать максимальное количество очков действия на ход
+   *
    * @param maxActionPoints
    * @return
    */
@@ -134,7 +146,73 @@ public interface WarriorSBaseAttributes {
 
   /**
    * Получить кол-во рук
+   *
    * @return
    */
   int getHandsCount();
+
+  /**
+   * Указывает можно ли призывать этого воина
+   *
+   * @return
+   */
+  boolean isSummonable();
+
+  /**
+   * получить максимальное кол-во очков жизни
+   *
+   * @return
+   */
+  int getMaxHealth();
+
+  /**
+   * получить максимальное кол-во очков магии
+   *
+   * @return
+   */
+  int getMaxManna();
+
+  /**
+   * получить удачу при атаке ближнего боя
+   *
+   * @return
+   */
+  int getLuckMeleeAtack();
+
+  /**
+   * получить удачу при атаке дальнего боя
+   *
+   * @return
+   */
+  int getLuckRangeAtack();
+
+  /**
+   * получить удачу при защите
+   *
+   * @return
+   */
+  int getLuckDefense();
+
+  /**
+   * получить максимальное кол-во очков действия на зищиту
+   * @return
+   */
+  int getMaxDefenseActionPoints();
+
+  WarriorSBaseAttributes setMaxDefenseActionPoints(int maxDefenseActionPoints);
+
+  WarriorSBaseAttributes setHealth(int health);
+
+  WarriorSBaseAttributes setManna(int manna);
+
+  WarriorSBaseAttributes setHandsCount(int handsCount);
+
+  WarriorSBaseAttributes setLuckMeleeAtack(int luckMeleeAtack);
+
+  WarriorSBaseAttributes setLuckRangeAtack(int luckRangeAtack);
+
+  WarriorSBaseAttributes setLuckDefense(int luckDefense);
+
+  WarriorSBaseAttributes setSummonable(boolean summonable);
+
 }

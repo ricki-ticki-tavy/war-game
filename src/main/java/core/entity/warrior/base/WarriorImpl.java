@@ -2,10 +2,10 @@ package core.entity.warrior.base;
 
 import api.core.Context;
 import api.core.Result;
-import api.entity.warrior.Warrior;
-import api.entity.warrior.WarriorBaseClass;
-import api.entity.warrior.WarriorSHand;
+import api.entity.ability.Modifier;
+import api.entity.warrior.*;
 import api.entity.weapon.Weapon;
+import api.enums.LifeTimeUnit;
 import api.game.Coords;
 import api.game.EventDataContainer;
 import api.game.map.Player;
@@ -24,49 +24,61 @@ import static api.enums.EventType.*;
 import static core.system.error.GameErrors.WARRIOR_HANDS_NO_FREE_SLOTS;
 import static core.system.error.GameErrors.WARRIOR_WEAPON_NOT_FOUND;
 
+// TODO добавить поддержку ограничения оружия по допустимому списку
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class WarriorImpl implements Warrior {
 
   protected Map<Integer, WarriorSHand> hands;
   protected WarriorBaseClass warriorBaseClass;
-  protected Coords coords = null;
+  protected Coords coords;
   protected final String id = UUID.randomUUID().toString();
   protected String title;
   protected boolean summoned;
   protected Context gameContext;
-  protected Player player;
+  protected Player owner;
+  protected WarriorSBaseAttributes attributes;
+  protected Map<String, Influencer> influencers = new ConcurrentHashMap<>(50);
 
   @Autowired
   private BeanFactory beanFactory;
+  //===================================================================================================
+  //===================================================================================================
+  //===================================================================================================
 
-  public WarriorImpl(Context gameContext, Player player, WarriorBaseClass warriorBaseClass, String title, boolean summoned) {
+  public WarriorImpl(Context gameContext, Player owner, WarriorBaseClass warriorBaseClass, String title, Coords coords, boolean summoned) {
     this.warriorBaseClass = warriorBaseClass;
+    this.attributes = warriorBaseClass.getBaseAttributes().clone();
     this.title = title;
     this.summoned = summoned;
     this.gameContext = gameContext;
-    this.player = player;
+    this.owner = owner;
+    this.coords = new Coords(coords);
     int handsCount = warriorBaseClass.getHandsCount();
     hands = new ConcurrentHashMap(2);
     while (handsCount-- > 0) {
       hands.put(hands.size(), new WarriorSHandImpl());
     }
   }
+  //===================================================================================================
 
   @Override
   public WarriorBaseClass getWarriorBaseClass() {
     return warriorBaseClass;
   }
+  //===================================================================================================
 
   @Override
   public boolean isSummoned() {
     return summoned;
   }
+  //===================================================================================================
 
   @Override
   public List<WarriorSHand> getHands() {
     return new LinkedList(hands.values());
   }
+  //===================================================================================================
 
   @Override
   public List<Weapon> getWeapons() {
@@ -76,39 +88,45 @@ public class WarriorImpl implements Warrior {
 
     return new ArrayList<>(weaponSet);
   }
+  //===================================================================================================
 
   @Override
   public String getId() {
     return id;
   }
+  //===================================================================================================
 
   @Override
   public String getTitle() {
     return title;
   }
+  //===================================================================================================
 
   @Override
   public String getDescription() {
     return "";
   }
+  //===================================================================================================
 
   @Override
   public Result<Warrior> moveTo(Coords coords) {
     this.coords = new Coords(coords);
     Result result = ResultImpl.success(this);
-    gameContext.fireGameEvent(null, WARRIOR_MOVED, new EventDataContainer(this, result), null);
     return result;
   }
+  //===================================================================================================
 
   @Override
   public Player getOwner() {
-    return player;
+    return owner;
   }
+  //===================================================================================================
 
   @Override
   public Coords getCoords() {
     return new Coords(this.coords);
   }
+  //===================================================================================================
 
   @Override
   public Result takeWeapon(Class<? extends Weapon> weaponClass) {
@@ -139,9 +157,10 @@ public class WarriorImpl implements Warrior {
       gameContext.fireGameEvent(null, WEAPON_TAKEN, new EventDataContainer(this, weapon, result), null);
     }
   }
+  //===================================================================================================
 
   @Override
-  public Result dropWeapon(String weaponInstanceId) {
+  public Result<Weapon> dropWeapon(String weaponInstanceId) {
     Result result = hands.values().stream().filter(hand -> hand.hasWeapon(weaponInstanceId)).findFirst()
             .map(warriorSHand -> ResultImpl.success(warriorSHand.removeWeapon(weaponInstanceId)))
             .orElse(ResultImpl.fail(WARRIOR_WEAPON_NOT_FOUND.getError(weaponInstanceId)));
@@ -153,4 +172,41 @@ public class WarriorImpl implements Warrior {
 
     return result;
   }
+  //===================================================================================================
+
+  @Override
+  public Result<WarriorSBaseAttributes> getAttributes() {
+    return ResultImpl.success(attributes);
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Warrior> prepareToDefensePhase() {
+    // подтянем базовые атрибуты
+    attributes.setAbilityActionPoints(attributes.getMaxAbilityActionPoints());
+    attributes.setActionPoints(attributes.getMaxDefenseActionPoints());
+    attributes.setLuckMeleeAtack(getWarriorBaseClass().getBaseAttributes().getLuckMeleeAtack());
+    attributes.setLuckRangeAtack(getWarriorBaseClass().getBaseAttributes().getLuckRangeAtack());
+    attributes.setLuckDefense(getWarriorBaseClass().getBaseAttributes().getLuckDefense());
+
+    // TODO соберем все влияния, что наложены на воина.
+    // сначала соберем его личные способности
+    return null;
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Warrior> prepareToAttackPhase() {
+    return null;
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Influencer> addInfluenceToWarrior(Modifier modifier, Object source, LifeTimeUnit lifeTimeUnit, int lifeTime) {
+    Influencer influencer = new InfluencerImpl(this, modifier, source, lifeTimeUnit, lifeTime);
+    influencers.put(influencer.getId(), influencer);
+    return ResultImpl.success(influencer);
+  }
+  //===================================================================================================
+
 }

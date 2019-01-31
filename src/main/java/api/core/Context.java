@@ -159,8 +159,33 @@ public interface Context {
    * @param baseWarriorClass
    * @return
    */
-  Result<Warrior> createWarrior(Player player, Class<? extends WarriorBaseClass> baseWarriorClass, Coords coords);
+  Result<Warrior> createWarrior(String userName, String baseWarriorClass, Coords coords);
 
+  /**
+   * Переместить юнит на новые координаты
+   * @param userName
+   * @param warriorId
+   * @param newCoords
+   * @return
+   */
+  Result<Warrior> moveWarriorTo(String userName, String warriorId, Coords newCoords);
+
+  /**
+   * Возвращает координаты,куда можно переместить перемещаемого юнита, исходя из того, куда его хотят переместить
+   * @param userName
+   * @param warriorId
+   * @param coords
+   * @return
+   */
+  Result<Coords> whatIfMoveWarriorTo(String userName, String warriorId, Coords coords);
+
+  /**
+   * Удалить юнит игроком
+   * @param userName
+   * @param warriorId
+   * @return
+   */
+  Result<Warrior> removeWarrior(String userName, String warriorId);
 
   /**
    * Получить пользователя - создателя игры
@@ -183,5 +208,35 @@ public interface Context {
    * @return
    */
   Result<Player> setPlayerReadyToGameState(Player player, boolean readyToGame);
+
+  /**
+   * Найти пользователя в контексте
+   *
+   * @param userName
+   * @return
+   */
+  Result<Player> findUserByName(String userName);
+
+  /**
+   * Получить игрока, который сейчас ходит
+   *
+   * @return
+   */
+  Result<Player> getPlayerOwnsTheTurn();
+
+  /**
+   * проверяет может ли ходящий сейчас игрок переместить данный юнит. Проверка права игрока ходить, контексты и прочее
+   * перед этим вызовом уже должно быть проверено.
+   *
+   * @param warrior
+   */
+  Result<Warrior> ifUnitCanMove(Warrior warrior);
+
+  /**
+   * Передача хода следующему игроку
+   * @param userName
+   * @return
+   */
+  Result<Player> nextTurn(String userName);
 
 }

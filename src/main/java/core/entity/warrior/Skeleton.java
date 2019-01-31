@@ -27,7 +27,8 @@ public class Skeleton extends AbstractBaseWarriorClass {
             .setMaxAbilityActionPoints(1)
             .setArmorClass(ArmorClassEnum.ARMOR_1)
             .setDeltaCostMove(0)
-    );
+            .setMaxDefenseActionPoints(60)
+            .setSummonable(true));
 
     setSupportedWeaponClasses(Stream.of(
             ShortSword.class

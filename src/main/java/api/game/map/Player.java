@@ -2,8 +2,13 @@ package api.game.map;
 
 import api.core.Context;
 import api.core.Result;
+import api.entity.ability.Modifier;
 import api.entity.base.BaseEntityHeader;
+import api.entity.warrior.Influencer;
 import api.entity.warrior.Warrior;
+import api.entity.warrior.WarriorBaseClass;
+import api.enums.LifeTimeUnit;
+import api.game.Coords;
 import api.game.Rectangle;
 
 import java.util.List;
@@ -15,10 +20,11 @@ public interface Player extends BaseEntityHeader{
 
   /**
    * Добавить в коллекцию воина
-   * @param warrior
+   * @param coords
+   * @param warriorBaseClassName
    * @return
    */
-  Result<Warrior> addWarrior(Warrior warrior);
+  Result<Warrior> createWarrior(String warriorBaseClassName, Coords coords);
 
   /**
    *  Вернуть всех воинов
@@ -78,5 +84,58 @@ public interface Player extends BaseEntityHeader{
    * @return
    */
   boolean isReadyToPlay();
+
+  /**
+   * Переместить юнит на новые координаты
+   * @param warriorId
+   * @param newCoords
+   * @return
+   */
+  Result<Warrior> moveWarriorTo(String warriorId, Coords newCoords);
+
+  /**
+   * очищает воинов, артефакты и прочее у игрока
+   * @return
+   */
+  Result<Player> clear();
+
+  /**
+   * Переместить юнит на новые координаты
+   * @param player
+   * @param warriorId
+   * @param newCoords
+   * @return
+   */
+  Result<Warrior> moveWarriorTo(Player player, String warriorId, Coords newCoords);
+
+  /**
+   * Удалить юнит игроком
+   * @param warriorId
+   * @return
+   */
+  Result<Warrior> removeWarrior(String warriorId);
+
+
+  /**
+   * Подготовка воина перед ходом игрока. Восстановление различных параметров до нормальных значений
+   * @return
+   */
+  Result<Player> prepareToAttackPhase();
+
+  /**
+   * Подготовка параметров юнита к фазе защиты. То есть когда ход игрока-владельца юнита закончен и ход переходит
+   * к следующему игроку
+   * @return
+   */
+  Result<Player> prepareToDefensePhase();
+
+  /**
+   * добавить влияние юниту
+   * @param modifier
+   * @param lifeTimeUnit
+   * @param lifeTime
+   * @return
+   */
+  Result<Influencer> addInfluenceToWarrior(String warriorId, Modifier modifier, Object source, LifeTimeUnit lifeTimeUnit, int lifeTime);
 
 }

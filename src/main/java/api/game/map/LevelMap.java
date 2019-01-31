@@ -2,10 +2,15 @@ package api.game.map;
 
 import api.core.Context;
 import api.core.Result;
+import api.entity.ability.Modifier;
+import api.entity.warrior.Influencer;
 import api.entity.warrior.Warrior;
+import api.enums.LifeTimeUnit;
 import api.game.Coords;
 import api.game.Rectangle;
 import api.game.map.metadata.LevelMapMetaDataXml;
+import core.game.GameProcessData;
+import core.system.ActiveCoords;
 
 import java.util.List;
 
@@ -50,6 +55,17 @@ public interface LevelMap {
   int getHeightInUnits();
 
   /**
+   * Вернуть данные, связанные с процессом игры
+   * @return
+   */
+  GameProcessData getGameProcessData();
+
+  /**
+   * Выполнить приготовления, связанные с
+   */
+  void beginGame();
+
+  /**
    * Получить список воинов в окружности заданным радиусом
    * @param center координата центра
    * @param radius радиус окружности. 0 - все воины
@@ -60,11 +76,39 @@ public interface LevelMap {
   /**
    * Добавить воина в заданные координаты заданному игроку
    * @param player
+   * @param warriorBaseClassName
    * @param coords
-   * @param warrior
    * @return
    */
-  Result<Warrior> addWarrior(Player player, Coords coords, Warrior warrior);
+  Result<Warrior> createWarrior(Player player, String warriorBaseClassName, Coords coords);
+
+  /**
+   * Переместить юнит на новые координаты
+   * @param player
+   * @param warriorId
+   * @param newCoords
+   * @return
+   */
+  Result<Coords> moveWarriorTo(Player player, String warriorId, Coords newCoords);
+
+  /**
+   * Возвращает координаты,куда можно переместить перемещаемого юнита, исходя из того, куда его хотят переместить
+   * @param player
+   * @param warriorId
+   * @param coords
+   * @return
+   */
+  Result<? extends Coords> whatIfMoveWarriorTo(Player player,  String warriorId, Coords coords);
+
+  /**
+   * Удалить юнит игроком
+   * @param player
+   * @param warriorId
+   * @return
+   */
+  Result<Warrior> removeWarrior(Player player, String warriorId);
+
+
 
   /**
    * Добавить игрока в игру
@@ -110,8 +154,65 @@ public interface LevelMap {
   boolean isLoaded();
 
   /**
-   * Готова ликарта к игре. То естьвсе игроки есть и все фигуры
+   * Проверка допустимости новых координат воина
+   * @param warrior
+   * @param newCoords
    * @return
    */
-  boolean isReady();
+  Result<Context> ifNewWarriorSCoordinatesAreAvailable(Warrior warrior, Coords newCoords);
+
+  /**
+   * Возвращает количество оставшихся очков действия у юнита. Для получения этого значение функцией используется
+   * таблица юнитов которыми делались действия в этом ходу. Если движение юнита можно откатить, то возвращается
+   * кол-во очков из самого юнита, а если откат невозможен, то из очков действия, оставшихся у юнита вычитаются
+   * очки, затраченные на передвижение и хранящиеся в таблице юнитов, которыми выполнялись действия.
+   * @param warrior
+   * @return
+   */
+   int getWarriorSActionPoints(Warrior warrior, boolean forMove);
+
+  /**
+   * Возвращает цену за перемещение на единицу длины для данного юнита с учетом всех его влияний, классов брони
+   * и прочего
+   * @param warrior
+   * @return
+   */
+   int getWarriorSMoveCost(Warrior warrior);
+
+//  /**
+//   * Возвращает класс брони за перемещение на единицу длины для данного юнита с учетом всех его влияний, классов брони
+//   * и прочего
+//   * @param warrior
+//   * @return
+//   */
+//   int getWarriorSArmor(Warrior warrior);
+//
+  /**
+   * Возвращает координаты для юнита. Для получения координат этой функцией используется таблица юнитов
+   * которыми делались действия в этом ходу. Если движение юнита можно откатить, то возвращаются его
+   * координаты на которые можно сделать откат, если нельзя откатить или юнита нет в таблице, то берется
+   * оригинальное значение координат
+   * @param warrior
+   * @return
+   */
+   Result<ActiveCoords> getWarriorSOriginCoords(Warrior warrior);
+
+  /**
+   * Передача хода следующему игроку
+   * @param player  сменяемый игрок. Тот, кто передает ход следующему
+   * @return
+   */
+  Result<Player> nextTurn(Player player);
+
+  /**
+   * добавить влияние юниту
+   * @param modifier
+   * @param lifeTimeUnit
+   * @param lifeTime
+   * @return
+   */
+  Result<Influencer> addInfluenceToWarrior(Player player, String warriorId, Modifier modifier, Object source, LifeTimeUnit lifeTimeUnit, int lifeTime);
+
+
+
 }

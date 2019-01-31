@@ -28,6 +28,8 @@ public class Viking extends AbstractBaseWarriorClass {
             .setMaxAbilityActionPoints(1)
             .setArmorClass(ArmorClassEnum.ARMOR_1)
             .setDeltaCostMove(0)
+            .setMaxDefenseActionPoints(60)
+            .setSummonable(false)
     );
 
     setSupportedWeaponClasses(Stream.of(

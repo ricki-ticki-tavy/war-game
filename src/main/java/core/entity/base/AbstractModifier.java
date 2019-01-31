@@ -7,14 +7,13 @@ import api.enums.TargetTypeEnum;
 
 public abstract class AbstractModifier implements Modifier {
 
-  protected Context context;
-
   protected TargetTypeEnum target;
   protected String title;
   protected String description;
   protected AttributeEnum attribute;
   protected int probability;
   protected int minValue, maxValue;
+  protected Context context;
 
   @Override
   public TargetTypeEnum getTarget() {
@@ -73,6 +72,12 @@ public abstract class AbstractModifier implements Modifier {
     this.minValue = minValue;
     this.maxValue = maxValue;
     this.probability = probability;
+    this.context = context;
+  }
+
+  @Override
+  public Context getContext() {
+    return context;
   }
 
   public AbstractModifier(){}

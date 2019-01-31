@@ -7,8 +7,6 @@ public enum EventType {
   ON_PLAYER_ROUND("При ходе игрока")
   , ALWAYS("Всегда")
   , ROUND_FULL("игровой круг")
-  , ROUND_START("в начале хода игрока")
-  , ROUND_END("в конце хода игрока")
 
   , ATTACK_MELEE_AFTER("После каждого рукопашного удара при атаке")
   , ATTACK_MELEE_BEFORE("Перед каждым рукопашным ударом при атаке")
@@ -17,18 +15,21 @@ public enum EventType {
   , ATTACK_AFTER_EVERY_BIT("После каждого удара при атаке")
   , ATTACK_BEFORE_EVERY_BIT("Перед каждым ударом при атаке")
 
-  , DEFENCE_AFTER("Перед защитой")
-  , DEFENCE_BEFORE("После защиты")
+  , DEFENSE_AFTER("Перед защитой")
+  , DEFENSE_BEFORE("После защиты")
 
   , PLAYER_LOGGED_IN("Вход игрока %s. %s")
   , PLAYER_CONNECTED("Игрок '%s' присоединился к игре (контекст '%s'). Теперь в игре %s игроков из %s. %s")
   , PLAYER_RECONNECTED("Игрок '%s' повторно подключился к игре (контекст '%s'). В игре %s игроков из %s")
   , PLAYER_DISCONNECTED("Игрок '%s' покинул игру (контекст '%s'). Теперь в игре %s игроков из %s. %s")
-  , PLAYER_CHANGED_ITS_READY_TO_PLAY_STATUS("Игрок '%s' в игре %s (контекст '%s') сообщил о %a. %s")
+  , PLAYER_CHANGED_ITS_READY_TO_PLAY_STATUS("Игрок '%s' в игре %s (контекст '%s') сообщил о %s.")
+  , PLAYER_LOOSE_TURN("Игрок '%s' в игре %s (контекст '%s') завершил ход.")
+  , PLAYER_TAKE_TURN("Игрок '%s' в игре %s (контекст '%s') получил ход")
 
   , WARRIOR_ADDED("В игре '%s' (контекст '%s') игроком '%s' добавлен воин '%s'")
   , WARRIOR_SUMMONED("В игре '%s' (контекст '%s') игроком '%s' призван воин '%s' с '%s' очками жизни")
   , WARRIOR_MOVED("В игре '%s' игрок '%s' переместил юнит '%s' на координаты '%s'")
+  , WARRIOR_REMOVED("В игре '%s' (контекст '%s') игроком '%s' удален воин '%s' (id %s)")
 
   , WEAPON_TAKEN("В игре '%s' игрок '%s' снарядил юнит '%s' (id '%s') оружием '%s'. %s")
   , WEAPON_TRY_TO_DROP("В игре '%s' игрок '%s' попытался убрать у юнита '%s' (id '%s') оружие id '%s'. %s")

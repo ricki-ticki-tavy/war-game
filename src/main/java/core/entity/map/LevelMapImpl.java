@@ -2,17 +2,22 @@ package core.entity.map;
 
 import api.core.Context;
 import api.core.Result;
+import api.entity.ability.Modifier;
+import api.entity.warrior.HasCoordinates;
+import api.entity.warrior.Influencer;
 import api.entity.warrior.Warrior;
-import api.enums.EventType;
+import api.enums.LifeTimeUnit;
 import api.game.Coords;
-import api.game.Event;
 import api.game.EventDataContainer;
 import api.game.Rectangle;
 import api.game.map.LevelMap;
 import api.game.map.Player;
 import api.game.map.metadata.LevelMapMetaDataXml;
+import core.game.GameProcessData;
+import core.system.ActiveCoords;
 import core.system.ResultImpl;
 import core.system.error.GameErrors;
+import core.system.game.WarriorHeapElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanFactory;
@@ -21,15 +26,13 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 
-import static api.enums.EventType.PLAYER_CONNECTED;
-import static api.enums.EventType.PLAYER_RECONNECTED;
-import static api.enums.EventType.PLAYER_DISCONNECTED;
-import static core.system.error.GameErrors.USER_CONNECT_TO_CONTEXT_TOO_MANY_USERS;
-import static core.system.error.GameErrors.USER_DISCONNECT_NOT_CONNECTED;
+import static api.enums.EventType.*;
+import static core.system.error.GameErrors.*;
 
 /**
  * Игровая карта
@@ -50,20 +53,48 @@ public class LevelMapImpl implements LevelMap {
   private Map<String, Player> players;
   private Context context;
   private boolean loaded = false;
-  private volatile AtomicBoolean ready = new AtomicBoolean(false);
+
+  private GameProcessData gameProcessData;
 
   @Autowired
   BeanFactory beanFactory;
+
+  //===================================================================================================
+  //===================================================================================================
+
+  @Override
+  public void beginGame() {
+    gameProcessData = new GameProcessData();
+    // сохраним список пользователей, начавших игру
+    getPlayers().stream()
+            .forEach(player -> {
+              gameProcessData.frozenListOfPlayers.put(gameProcessData.frozenListOfPlayers.size(), player);
+              // всех подготовим к защите
+              player.prepareToDefensePhase();
+            });
+    // первого игрока готовим к атаке
+    gameProcessData.getPlayerOwnsThisTurn()
+            .map(player -> player.prepareToAttackPhase());
+  }
+
+  //===================================================================================================
+  @Override
+  public GameProcessData getGameProcessData() {
+    return gameProcessData;
+  }
+  //===================================================================================================
 
   @Override
   public String getName() {
     return name;
   }
+  //===================================================================================================
 
   @Override
   public String getDescription() {
     return description;
   }
+  //===================================================================================================
 
   @Override
   public void init(Context gameContext, LevelMapMetaDataXml levelMapMetaData) {
@@ -84,46 +115,51 @@ public class LevelMapImpl implements LevelMap {
 
     players = new ConcurrentHashMap<>(maxPlayersCount);
 
-    context.subscribeEvent(this::checkForReady, EventType.WARRIOR_ADDED, EventType.PLAYER_DISCONNECTED);
-
     loaded = true;
     logger.info("map initializing succeed \"" + levelMapMetaData.name + "\" in context " + gameContext.getContextId());
   }
+  //===================================================================================================
 
   @Override
   public List<Rectangle> getPlayerStartZone(String playerId) {
     return playerStartZones;
   }
+  //===================================================================================================
 
   @Override
   public int getMaxPlayerCount() {
     return maxPlayersCount;
   }
+  //===================================================================================================
 
   @Override
   public int getWidthInUnits() {
     return width;
   }
+  //===================================================================================================
 
   @Override
   public int getHeightInUnits() {
     return height;
   }
+  //===================================================================================================
 
   @Override
   public List<Warrior> getWarriors(Coords center, int radius) {
     return null;
   }
+  //===================================================================================================
 
   @Override
-  public Result<Warrior> addWarrior(Player player, Coords coords, Warrior warrior) {
+  public Result<Warrior> createWarrior(Player player, String warriorBaseClassName, Coords coords) {
     if (player.getWarriors().size() >= context.getGameRules().getMaxStartCreaturePerPlayer()) {
       return ResultImpl.fail(GameErrors.PLAYER_UNITS_LIMIT_EXCEEDED.getError(player.getTitle()
               , String.valueOf(context.getGameRules().getMaxStartCreaturePerPlayer())));
     }
-    return player.addWarrior(warrior)
-            .map(addedWarrior -> addedWarrior.moveTo(coords));
+    // TODO сделать проверку координат
+    return player.createWarrior(warriorBaseClassName, coords);
   }
+  //===================================================================================================
 
   @Override
   public Result connectPlayer(Player player) {
@@ -134,6 +170,7 @@ public class LevelMapImpl implements LevelMap {
       context.fireGameEvent(null, PLAYER_RECONNECTED, new EventDataContainer(player, result), null);
     } else {
       if (maxPlayersCount >= players.size()) {
+        player.clear();
         if ((result = player.replaceContext(context)).isSuccess()) {
           players.put(player.getId(), player);
           player.setStartZone(playerStartZones.get(players.size() - 1));
@@ -144,9 +181,9 @@ public class LevelMapImpl implements LevelMap {
       }
       context.fireGameEvent(null, PLAYER_CONNECTED, new EventDataContainer(player, result), null);
     }
-
     return result;
   }
+  //===================================================================================================
 
   @Override
   public Result disconnectPlayer(Player player) {
@@ -170,36 +207,149 @@ public class LevelMapImpl implements LevelMap {
     }
     return result;
   }
+  //===================================================================================================
 
   @Override
   public List<Player> getPlayers() {
     return new LinkedList(players.values());
   }
+  //===================================================================================================
 
   @Override
   public int getSimpleUnitSize() {
     return simpleUnitSize;
   }
+  //===================================================================================================
 
   @Override
   public Player getPlayer(String playerId) {
     return players.get(playerId);
   }
+  //===================================================================================================
 
   @Override
   public boolean isLoaded() {
     return loaded;
   }
+  //===================================================================================================
 
   @Override
-  public boolean isReady() {
-    return ready.get();
+  public Result<Warrior> removeWarrior(Player player, String warriorId) {
+    return player.removeWarrior(warriorId);
   }
+  //===================================================================================================
 
-  private void checkForReady(Event event) {
-    ready.set(players.size() == maxPlayersCount
-            && players.values().stream()
-            .reduce(true, (rd, player) -> rd &= player.getWarriors().size() == context.getGameRules().getMaxStartCreaturePerPlayer()
-                    , (rd2, rd3) -> rd2));
+  @Override
+  public Result<Coords> moveWarriorTo(Player player, String warriorId, Coords newCoords) {
+    return player.findWarriorById(warriorId)
+            .map(warrior -> whatIfMoveWarriorTo(player, warriorId, newCoords)
+                    .map(coords -> {
+                      // если юнита нет среди тех, которые были затронуты в этот ход, то добавить в этот список
+                      gameProcessData.playerTransactionalData.computeIfAbsent(warrior.getId()
+                              , id -> new WarriorHeapElement(warrior));
+                      // кинем сообщение, что юнит перемещен
+                      Result result = warrior.moveTo(coords).map(movedWarrior -> ResultImpl.success(movedWarrior.getCoords()));
+                      context.fireGameEvent(null, WARRIOR_MOVED
+                              , new EventDataContainer(this, result), null);
+                      return result;
+                    }));
   }
+  //===================================================================================================
+
+  @Override
+  public Result<Coords> whatIfMoveWarriorTo(Player player, String warriorId, Coords coords) {
+    return player.findWarriorById(warriorId)
+            .map(warrior -> innerWhatIfMoveWarriorTo(player, warrior, coords));
+  }
+  //===================================================================================================
+
+  public Result<ActiveCoords> getWarriorSOriginCoords(Warrior warrior) {
+    WarriorHeapElement warriorHeapElement = gameProcessData.playerTransactionalData.get(warrior.getId());
+    return warriorHeapElement == null || warriorHeapElement.isMoveLocked() || !warriorHeapElement.isRollbackAvailable()
+            ? ResultImpl.success(new ActiveCoords(warrior.getCoords()))
+            : ResultImpl.success(warriorHeapElement.getOriginalCoords());
+  }
+  //===================================================================================================
+
+  public Result<Player> ifPlayerIsTurnOwner(Player player) {
+    return gameProcessData.getPlayerOwnsThisTurn()
+            .map(playerOwnedThisTurn -> player == playerOwnedThisTurn
+                    ? ResultImpl.success(player)
+                    : ResultImpl.fail(PLAYER_CAN_T_PASS_THE_TURN_PLAYER_IS_NOT_TURN_OWNER.getError(
+                    player.getId(), context.getGameName(), context.getContextId(), playerOwnedThisTurn.getId())));
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Influencer> addInfluenceToWarrior(Player player, String warriorId, Modifier modifier, Object source, LifeTimeUnit lifeTimeUnit, int lifeTime) {
+    return player.addInfluenceToWarrior(warriorId, modifier, source, lifeTimeUnit, lifeTime);
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Player> nextTurn(Player player) {
+    return
+            // проверим этот ли игрок сейчас владеет ходом
+            ifPlayerIsTurnOwner(player)
+                    // переведем в защиту уходящего игрока
+                    .map(finePlayer -> finePlayer.prepareToDefensePhase())
+                    // сменим игрока
+                    .map(oldPlayer -> gameProcessData.switchToNextPlayerTurn())
+                    .map(newPlayer -> {
+                      // зачистить транзакционные данные игрока
+                      gameProcessData.playerTransactionalData.clear();
+                      // подготовим нового игрока к ходу
+                      return newPlayer.prepareToAttackPhase();
+                    });
+  }
+  //===================================================================================================
+
+  public int getWarriorSActionPoints(Warrior warrior, boolean forMove) {
+    WarriorHeapElement warriorHeapElement;
+    return forMove  // для перемещения (либо у юнита остатки после атаки и прочего, либо он свежак)
+            // он свежак. Им еще не действовали в этом ходу
+            || (warriorHeapElement = gameProcessData.playerTransactionalData.get(warrior.getId())) == null
+            // им действовали но он еще может выполнять перемещение в этом ходу
+            || !warriorHeapElement.isMoveLocked()
+            // им действовали но есть возможности откатиться
+            || warriorHeapElement.isRollbackAvailable()
+            ? warrior.getWarriorBaseClass().getBaseAttributes().getActionPoints()
+            // для нанесения атаки
+            : (warrior.getWarriorBaseClass().getBaseAttributes().getActionPoints() - warriorHeapElement.getTreatedActionPointsForMove());
+  }
+  //===================================================================================================
+
+  @Override
+  public int getWarriorSMoveCost(Warrior warrior) {
+    // TODO реализовать
+    return 8;
+
+  }
+  //===================================================================================================
+
+  private List<HasCoordinates> getAllUnits() {
+    return null; // TODO реализовать
+  }
+  //===================================================================================================
+
+  private Result<Coords> innerWhatIfMoveWarriorTo(Player player, Warrior warrior, Coords coords) {
+    // режим расстановки. ставим не выходя за периметр
+    return getWarriorSOriginCoords(warrior) // получаем координаты от которых будем двигаться
+            .map(activeCoords -> activeCoords.tryToMove(coords, getAllUnits(), context.getGameRules().getWarriorSize()
+                    // очки действия, оставшиеся в данном ходу для перемещения
+                    , getWarriorSActionPoints(warrior, true)
+                            // делим на стоимость
+                            * simpleUnitSize / getWarriorSMoveCost(warrior)
+                    , context.isGameRan() ? null : player.getStartZone()));
+  }
+  //===================================================================================================
+
+  // TODO not implemented. !!!!!!!   correct it
+  @Override
+  public Result<Context> ifNewWarriorSCoordinatesAreAvailable(Warrior warrior, Coords newCoords) {
+    return ResultImpl.success(this);
+  }
+  //===================================================================================================
+
+
 }
