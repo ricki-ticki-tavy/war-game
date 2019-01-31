@@ -392,7 +392,7 @@ public class ContextImpl implements Context {
   public Result<Player> getPlayerOwnsTheTurn() {
     return ifGameDeleting(false)
             .map(context -> context.ifGameRan(true))
-            .map(context -> ResultImpl.success(gameProcessData.frozenListOfPlayers.get(gameProcessData.indexOfPlayerOwnsTheTurn)));
+            .map(context -> getLevelMap().getGameProcessData().getPlayerOwnsTheThisTurn());
   }
   //===================================================================================================
 
@@ -407,7 +407,9 @@ public class ContextImpl implements Context {
 
   @Override
   public Result<Player> nextTurn(String userName) {
-    return null;
+    return             ifGameRan(true)
+            .map(fineContext ->  fineContext.findUserByName(userName))
+            .map(player -> getLevelMap().nextTurn(player));
   }
   //===================================================================================================
 }

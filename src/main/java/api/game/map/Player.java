@@ -113,5 +113,17 @@ public interface Player extends BaseEntityHeader{
   Result<Warrior> removeWarrior(String warriorId);
 
 
+  /**
+   * Подготовка воина перед ходом игрока. Восстановление различных параметров до нормальных значений
+   * @return
+   */
+  Result<Player> prepareToAttackPhase();
+
+  /**
+   * Подготовка параметров юнита к фазе защиты. То есть когда ход игрока-владельца юнита закончен и ход переходит
+   * к следующему игроку
+   * @return
+   */
+  Result<Player> prepareToDefensePhase();
 
 }

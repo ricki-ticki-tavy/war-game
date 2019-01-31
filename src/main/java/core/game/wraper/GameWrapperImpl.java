@@ -78,7 +78,7 @@ public class GameWrapperImpl implements GameWrapper {
     return core.findUserByName(userName)
             .map(foundUser -> core.findGameContextByUID(contextId)
                     .map(foundContext -> foundContext.connectPlayer(foundUser))
-                    .map(ctx -> (Result<Player>)ResultImpl.success(foundUser)))
+                    .map(ctx -> (Result<Player>) ResultImpl.success(foundUser)))
             .logIfError(logger);
   }
   //===================================================================================================
@@ -182,7 +182,8 @@ public class GameWrapperImpl implements GameWrapper {
   @Override
   public Result<Player> nextTurn(String contextId, String userName) {
     return core.findGameContextByUID(contextId)
-            .map(context -> context.nextTurn(userName))
+            .map(context -> context.ifGameDeleting(false))
+            .map(fineContext -> fineContext.nextTurn(userName))
             .logIfError(logger);
   }
   //===================================================================================================

@@ -8,6 +8,8 @@ public enum GameErrors {
   , PLAYER_NOT_CONNECTED("PL-2", "Пользователь  %s не является участником ни одной из игр.")
   , PLAYER_IS_NOT_OWENER_OF_THIS_ROUND("PL-3", "Пользователь  %s пытается выполнить действие не в свой ход %s")
   , PLAYER_UNIT_MOVES_ON_THIS_TURN_ARE_EXCEEDED("PL-4", "Пользователь  %s выполнил ход всеми допустимыми фигурками (%s).")
+  , PLAYER_CAN_T_PASS_THE_TURN_PLAYER_IS_NOT_TURN_OWNER("PL-5", "Пользователь  %s игра %s (id %s) не может передать ход дальше так как не его ход. Сейчас ход игрока %s")
+
   , WARRIOR_HANDS_NO_FREE_SLOTS("WR-1", "Руки воина имеют свободных %s мест, а оружие '%s' требует %s места")
   , WARRIOR_WEAPON_NOT_FOUND("WR-2", "Воин не имеет оружия с id '%s'")
   , WARRIOR_BASE_ATTRS_IS_FINAL("WR-3", "Воину уже назначены базовыеатрибуты. Переопределение не возможно")

@@ -75,7 +75,8 @@ public interface Warrior extends BaseEntityHeader, HasCoordinates{
   Result<Warrior> prepareToAttackPhase();
 
   /**
-   * Подготовка параметров юнита к фазе защиты. То есть когда ход игрока-владельца юнита закончен и ход
+   * Подготовка параметров юнита к фазе защиты. То есть когда ход игрока-владельца юнита закончен и ход переходит
+   * к следующему игроку
    * @return
    */
   Result<Warrior> prepareToDefensePhase();

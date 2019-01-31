@@ -30,9 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static api.enums.EventType.*;
-import static core.system.error.GameErrors.USER_CONNECT_TO_CONTEXT_TOO_MANY_USERS;
-import static core.system.error.GameErrors.USER_DISCONNECT_NOT_CONNECTED;
-import static core.system.error.GameErrors.USER_IS_READY_TO_PLAY;
+import static core.system.error.GameErrors.*;
 
 /**
  * Игровая карта
@@ -264,6 +262,25 @@ public class LevelMapImpl implements LevelMap {
   }
   //===================================================================================================
 
+  @Override
+  public Result<Player> nextTurn(Player player) {
+    return
+            // проверим этот ли игрок сейчас владеет ходом
+            gameProcessData.getPlayerOwnsTheThisTurn()
+                    // переведем в готовность для отражения атак
+                    .map(playerOwnedThisTurn -> player == playerOwnedThisTurn
+                            ? (Result<Player>) ResultImpl.success(player)
+                            : ResultImpl.fail(PLAYER_CAN_T_PASS_THE_TURN_PLAYER_IS_NOT_TURN_OWNER.getError(
+                            player.getId(), context.getGameName(), context.getContextId(), playerOwnedThisTurn.getId())))
+                    // переведем в защиту уходящего игрока
+                    .map(finePlayer -> finePlayer.prepareToDefensePhase())
+                    // сменим игрока
+                    .map(oldPlayer -> gameProcessData.switchToNextPlayerTurn())
+                    // подготовим нового игрока к ходу
+                    .map(newPlayer -> newPlayer.prepareToAttackPhase());
+  }
+  //===================================================================================================
+
   public int getWarriorSActionPoints(Warrior warrior, boolean forMove) {
     WarriorHeapElement warriorHeapElement;
     return forMove  // для перемещения (либо у юнита остатки после атаки и прочего, либо он свежак)
@@ -310,7 +327,6 @@ public class LevelMapImpl implements LevelMap {
     return ResultImpl.success(this);
   }
   //===================================================================================================
-
 
 
 }
