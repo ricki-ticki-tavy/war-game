@@ -4,6 +4,7 @@ import api.core.Context;
 import api.core.Result;
 import api.entity.warrior.Warrior;
 import api.entity.warrior.WarriorBaseClass;
+import api.entity.warrior.WarriorSBaseAttributes;
 import api.entity.warrior.WarriorSHand;
 import api.entity.weapon.Weapon;
 import api.game.Coords;
@@ -36,12 +37,17 @@ public class WarriorImpl implements Warrior {
   protected boolean summoned;
   protected Context gameContext;
   protected Player owner;
+  protected WarriorSBaseAttributes attributes;
 
   @Autowired
   private BeanFactory beanFactory;
+  //===================================================================================================
+  //===================================================================================================
+  //===================================================================================================
 
   public WarriorImpl(Context gameContext, Player owner, WarriorBaseClass warriorBaseClass, String title, Coords coords, boolean summoned) {
     this.warriorBaseClass = warriorBaseClass;
+    this.attributes = warriorBaseClass.getBaseAttributes().clone();
     this.title = title;
     this.summoned = summoned;
     this.gameContext = gameContext;
@@ -53,21 +59,25 @@ public class WarriorImpl implements Warrior {
       hands.put(hands.size(), new WarriorSHandImpl());
     }
   }
+  //===================================================================================================
 
   @Override
   public WarriorBaseClass getWarriorBaseClass() {
     return warriorBaseClass;
   }
+  //===================================================================================================
 
   @Override
   public boolean isSummoned() {
     return summoned;
   }
+  //===================================================================================================
 
   @Override
   public List<WarriorSHand> getHands() {
     return new LinkedList(hands.values());
   }
+  //===================================================================================================
 
   @Override
   public List<Weapon> getWeapons() {
@@ -77,39 +87,45 @@ public class WarriorImpl implements Warrior {
 
     return new ArrayList<>(weaponSet);
   }
+  //===================================================================================================
 
   @Override
   public String getId() {
     return id;
   }
+  //===================================================================================================
 
   @Override
   public String getTitle() {
     return title;
   }
+  //===================================================================================================
 
   @Override
   public String getDescription() {
     return "";
   }
+  //===================================================================================================
 
   @Override
   public Result<Warrior> moveTo(Coords coords) {
     this.coords = new Coords(coords);
     Result result = ResultImpl.success(this);
-    gameContext.fireGameEvent(null, WARRIOR_MOVED, new EventDataContainer(this, result), null);
     return result;
   }
+  //===================================================================================================
 
   @Override
   public Player getOwner() {
     return owner;
   }
+  //===================================================================================================
 
   @Override
   public Coords getCoords() {
     return new Coords(this.coords);
   }
+  //===================================================================================================
 
   @Override
   public Result takeWeapon(Class<? extends Weapon> weaponClass) {
@@ -140,9 +156,10 @@ public class WarriorImpl implements Warrior {
       gameContext.fireGameEvent(null, WEAPON_TAKEN, new EventDataContainer(this, weapon, result), null);
     }
   }
+  //===================================================================================================
 
   @Override
-  public Result dropWeapon(String weaponInstanceId) {
+  public Result<Weapon> dropWeapon(String weaponInstanceId) {
     Result result = hands.values().stream().filter(hand -> hand.hasWeapon(weaponInstanceId)).findFirst()
             .map(warriorSHand -> ResultImpl.success(warriorSHand.removeWeapon(weaponInstanceId)))
             .orElse(ResultImpl.fail(WARRIOR_WEAPON_NOT_FOUND.getError(weaponInstanceId)));
@@ -154,4 +171,14 @@ public class WarriorImpl implements Warrior {
 
     return result;
   }
+  //===================================================================================================
+
+  @Override
+  public Result<WarriorSBaseAttributes> getAttributes() {
+    return ResultImpl.success(attributes);
+  }
+  //===================================================================================================
+
+  //===================================================================================================
+
 }

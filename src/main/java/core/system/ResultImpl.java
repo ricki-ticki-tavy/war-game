@@ -6,6 +6,8 @@ import core.system.error.GameError;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import org.slf4j.Logger;
+
 
 /**
  * Класс результата действия
@@ -106,6 +108,14 @@ public class ResultImpl implements Result {
     } else {
       return "НЕТ СТАТУСА";
     }
+  }
+
+  @Override
+  public Result logIfError(Logger logger) {
+    if (fail){
+      logger.error(error.getMessage());
+    }
+    return this;
   }
 
   @Override

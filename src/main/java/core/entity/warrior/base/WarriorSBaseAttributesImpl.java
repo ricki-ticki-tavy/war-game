@@ -8,28 +8,28 @@ import api.enums.ArmorClassEnum;
  */
 public class WarriorSBaseAttributesImpl implements WarriorSBaseAttributes {
 
-  int health;
-  int maxHealth;
+  private int health;
+  private int maxHealth;
 
-  int manna;
-  int maxManna;
+  private int manna;
+  private int maxManna;
 
-  ArmorClassEnum armorClass;
-  Integer deltaCostMove;
+  private ArmorClassEnum armorClass;
+  private Integer deltaCostMove;
 
-  int abilityActionPoints;
-  int maxAbilityActionPoints;
+  private int abilityActionPoints;
+  private int maxAbilityActionPoints;
 
-  int actionPoints;
-  int maxActionPoints;
+  private int actionPoints;
+  private int maxActionPoints;
 
-  int handsCount;
+  private int handsCount;
 
-  int luckMeleeAtack;
-  int luckRangeAtack;
-  int luckDefence;
+  private int luckMeleeAtack;
+  private int luckRangeAtack;
+  private int luckDefence;
 
-  boolean summonable;
+  private boolean summonable;
 
   /**
    * ВОзвращает очки здоровья
@@ -192,7 +192,10 @@ public class WarriorSBaseAttributesImpl implements WarriorSBaseAttributes {
             , maxManna, manna
             , armorClass, deltaCostMove,
             maxAbilityActionPoints, abilityActionPoints,
-            maxActionPoints, actionPoints, handsCount, summonable);
+            maxActionPoints, actionPoints, handsCount, summonable)
+            .setLuckDefence(luckDefence)
+            .setLuckMeleeAtack(luckMeleeAtack)
+            .setLuckRangeAtack(luckRangeAtack);
   }
 
   @Override
@@ -207,6 +210,61 @@ public class WarriorSBaseAttributesImpl implements WarriorSBaseAttributes {
 
   public WarriorSBaseAttributesImpl setSummonable(boolean summonable) {
     this.summonable = summonable;
+    return this;
+  }
+
+  public int getMaxHealth() {
+    return maxHealth;
+  }
+
+  public int getMaxManna() {
+    return maxManna;
+  }
+
+  public int getLuckMeleeAtack() {
+    return luckMeleeAtack;
+  }
+
+  public int getLuckRangeAtack() {
+    return luckRangeAtack;
+  }
+
+  public int getLuckDefence() {
+    return luckDefence;
+  }
+
+  public WarriorSBaseAttributesImpl setHealth(int health) {
+    this.health = health;
+    return this;
+  }
+
+  public WarriorSBaseAttributesImpl setManna(int manna) {
+    this.manna = manna;
+    return this;
+  }
+
+  public WarriorSBaseAttributesImpl setDeltaCostMove(Integer deltaCostMove) {
+    this.deltaCostMove = deltaCostMove;
+    return this;
+  }
+
+  public WarriorSBaseAttributesImpl setHandsCount(int handsCount) {
+    this.handsCount = handsCount;
+    return this;
+  }
+
+  public WarriorSBaseAttributesImpl setLuckMeleeAtack(int luckMeleeAtack) {
+    this.luckMeleeAtack = luckMeleeAtack;
+    return this;
+  }
+
+  public WarriorSBaseAttributesImpl setLuckRangeAtack(int luckRangeAtack) {
+    this.luckRangeAtack = luckRangeAtack;
+    return this;
+  }
+
+  public WarriorSBaseAttributesImpl setLuckDefence(int luckDefence) {
+    this.luckDefence = luckDefence;
     return this;
   }
 }

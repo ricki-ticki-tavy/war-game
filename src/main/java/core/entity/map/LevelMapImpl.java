@@ -2,6 +2,7 @@ package core.entity.map;
 
 import api.core.Context;
 import api.core.Result;
+import api.entity.warrior.HasCoordinates;
 import api.entity.warrior.Warrior;
 import api.enums.EventType;
 import api.game.Coords;
@@ -11,8 +12,11 @@ import api.game.Rectangle;
 import api.game.map.LevelMap;
 import api.game.map.Player;
 import api.game.map.metadata.LevelMapMetaDataXml;
+import core.game.GameProcessData;
+import core.system.ActiveCoords;
 import core.system.ResultImpl;
 import core.system.error.GameErrors;
+import core.system.game.WarriorHeapElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanFactory;
@@ -25,9 +29,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static api.enums.EventType.PLAYER_CONNECTED;
-import static api.enums.EventType.PLAYER_RECONNECTED;
-import static api.enums.EventType.PLAYER_DISCONNECTED;
+import static api.enums.EventType.*;
 import static core.system.error.GameErrors.USER_CONNECT_TO_CONTEXT_TOO_MANY_USERS;
 import static core.system.error.GameErrors.USER_DISCONNECT_NOT_CONNECTED;
 import static core.system.error.GameErrors.USER_IS_READY_TO_PLAY;
@@ -52,10 +54,27 @@ public class LevelMapImpl implements LevelMap {
   private Context context;
   private boolean loaded = false;
 
+  private GameProcessData gameProcessData;
+
   @Autowired
   BeanFactory beanFactory;
 
   //===================================================================================================
+  //===================================================================================================
+
+  @Override
+  public void beginGame() {
+    gameProcessData = new GameProcessData();
+    // сохраним список пользователей, начавших игру
+    getPlayers().stream()
+            .forEach(player -> gameProcessData.frozenListOfPlayers.put(gameProcessData.frozenListOfPlayers.size(), player));
+  }
+
+  //===================================================================================================
+  @Override
+  public GameProcessData getGameProcessData() {
+    return gameProcessData;
+  }
   //===================================================================================================
 
   @Override
@@ -214,15 +233,74 @@ public class LevelMapImpl implements LevelMap {
   //===================================================================================================
 
   @Override
-  public Result<Warrior> moveWarriorTo(Player player, String warriorId, Coords newCoords) {
-    // если режим расстановки, то ограничиваем место положения фигур регионом расстановки для данного игрока;
-    if (context.isGameRan()){
-      // идет игра
-    } else {
-      return player.findWarriorById(warriorId)
-              .map(warrior -> null);
-    }
-return null;
+  public Result<Coords> moveWarriorTo(Player player, String warriorId, Coords newCoords) {
+    return player.findWarriorById(warriorId)
+            .map(warrior -> whatIfMoveWarriorTo(player, warriorId, newCoords)
+                    .map(coords -> {
+                      // если юнита нет среди тех, которые были затронуты в этот ход, то добавить в этот список
+                      gameProcessData.playerTransactionalData.computeIfAbsent(warrior.getId()
+                              , id -> new WarriorHeapElement(warrior));
+                      // кинем сообщение, что юнит перемещен
+                      Result result = warrior.moveTo(coords).map(movedWarrior -> ResultImpl.success(movedWarrior.getCoords()));
+                      context.fireGameEvent(null, WARRIOR_MOVED
+                              , new EventDataContainer(this, result), null);
+                      return result;
+                    }));
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Coords> whatIfMoveWarriorTo(Player player, String warriorId, Coords coords) {
+    return player.findWarriorById(warriorId)
+            .map(warrior -> innerWhatIfMoveWarriorTo(player, warrior, coords));
+  }
+  //===================================================================================================
+
+  public Result<ActiveCoords> getWarriorSOriginCoords(Warrior warrior) {
+    WarriorHeapElement warriorHeapElement = gameProcessData.playerTransactionalData.get(warrior.getId());
+    return warriorHeapElement == null || warriorHeapElement.isMoveLocked() || !warriorHeapElement.isRollbackAvailable()
+            ? ResultImpl.success(new ActiveCoords(warrior.getCoords()))
+            : ResultImpl.success(warriorHeapElement.getOriginalCoords());
+  }
+  //===================================================================================================
+
+  public int getWarriorSActionPoints(Warrior warrior, boolean forMove) {
+    WarriorHeapElement warriorHeapElement;
+    return forMove  // для перемещения (либо у юнита остатки после атаки и прочего, либо он свежак)
+            // он свежак. Им еще не действовали в этом ходу
+            || (warriorHeapElement = gameProcessData.playerTransactionalData.get(warrior.getId())) == null
+            // им действовали но он еще может выполнять перемещение в этом ходу
+            || !warriorHeapElement.isMoveLocked()
+            // им действовали но есть возможности откатиться
+            || warriorHeapElement.isRollbackAvailable()
+            ? warrior.getWarriorBaseClass().getBaseAttributes().getActionPoints()
+            // для нанесения атаки
+            : (warrior.getWarriorBaseClass().getBaseAttributes().getActionPoints() - warriorHeapElement.getTreatedActionPointsForMove());
+  }
+  //===================================================================================================
+
+  @Override
+  public int getWarriorSMoveCost(Warrior warrior) {
+    // TODO реализовать
+    return 8;
+
+  }
+  //===================================================================================================
+
+  private List<HasCoordinates> getAllUnits() {
+    return null; // TODO реализовать
+  }
+  //===================================================================================================
+
+  private Result<Coords> innerWhatIfMoveWarriorTo(Player player, Warrior warrior, Coords coords) {
+    // режим расстановки. ставим не выходя за периметр
+    return getWarriorSOriginCoords(warrior) // получаем координаты от которых будем двигаться
+            .map(activeCoords -> activeCoords.tryToMove(coords, getAllUnits(), context.getGameRules().getWarriorSize()
+                    // очки действия, оставшиеся в данном ходу для перемещения
+                    , getWarriorSActionPoints(warrior, true)
+                            // делим на стоимость
+                            * simpleUnitSize / getWarriorSMoveCost(warrior)
+                    , context.isGameRan() ? null : player.getStartZone()));
   }
   //===================================================================================================
 
@@ -232,6 +310,7 @@ return null;
     return ResultImpl.success(this);
   }
   //===================================================================================================
+
 
 
 }

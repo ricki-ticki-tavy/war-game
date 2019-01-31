@@ -69,6 +69,16 @@ public interface GameWrapper {
   Result<Warrior> moveWarriorTo(String contextId, String userName, String warriorId, Coords coords);
 
   /**
+   * Возвращает координаты,куда можно переместить перемещаемого юнита, исходя из того, куда его хотят переместить
+   * @param contextId
+   * @param userName
+   * @param warriorId
+   * @param coords
+   * @return
+   */
+  Result<Coords> whatIfMoveWarriorTo(String contextId, String userName, String warriorId, Coords coords);
+
+  /**
    * Вооружить воина предметом
    * @param userName
    * @param warriorId
@@ -120,6 +130,14 @@ public interface GameWrapper {
    * @return
    */
   Result<List<String>> getWeaponClasses();
+
+  /**
+   * Передача хода следующему игроку
+   * @param contextId
+   * @param userName
+   * @return
+   */
+  Result<Player> nextTurn(String contextId, String userName);
 
   Core getCore();
 }

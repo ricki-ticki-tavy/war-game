@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * Класс воина на карте
  */
-public interface Warrior extends BaseEntityHeader{
+public interface Warrior extends BaseEntityHeader, HasCoordinates{
   /**
    * Получить базовый класс
    * @return
@@ -49,23 +49,36 @@ public interface Warrior extends BaseEntityHeader{
   Player getOwner();
 
   /**
-   * Получить координаты юнита
-   * @return
-   */
-  Coords getCoords();
-
-
-  /**
    * Взять в руку оружие
    * @param weaponClass
    * @return
    */
-  Result takeWeapon(Class<? extends Weapon> weaponClass);
+  Result<Weapon> takeWeapon(Class<? extends Weapon> weaponClass);
 
   /**
    * Бросить оружие. Передается id экземпляра оружия, которое надо бросить
    * @param weaponInstanceId
    * @return
    */
-  Result dropWeapon(String weaponInstanceId);
+  Result<Weapon> dropWeapon(String weaponInstanceId);
+
+  /**
+   * Получить значения атрибутов этого юнита
+   * @return
+   */
+  Result<WarriorSBaseAttributes> getAttributes();
+
+  /**
+   * Подготовка воина перед ходом игрока. Восстановление различных параметров до нормальных значений
+   * @return
+   */
+  Result<Warrior> prepareToAttackPhase();
+
+  /**
+   * Подготовка параметров юнита к фазе защиты. То есть когда ход игрока-владельца юнита закончен и ход
+   * @return
+   */
+  Result<Warrior> prepareToDefensePhase();
+
+
 }

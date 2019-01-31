@@ -1,11 +1,14 @@
 package core.system;
 
 import api.core.Result;
+import api.entity.warrior.HasCoordinates;
 import api.game.Coords;
 import api.game.Rectangle;
+import core.system.error.GameError;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.List;
 
 /**
  * Класс для обсчета доступнсти перемещений, являющийся, по сути, сам координатой
@@ -67,6 +70,34 @@ public class ActiveCoords extends Coords {
   }
   //===================================================================================================
 
-//  public Result<Coords> tryToMove
+  private int calcQuadOfWayLength(Coords pointFrom, Coords pointTo) {
+    return (pointFrom.getX() - pointTo.getX()) * (pointFrom.getX() - pointTo.getX())
+            + (pointFrom.getY() - pointTo.getY()) * (pointFrom.getY() - pointTo.getY());
+  }
+  //===================================================================================================
+
+  /**
+   * Попытка перемещения юнита на новую координату
+   *
+   * @param newCoords
+   * @param otherObjects
+   * @param objectSize
+   * @param maxWayLengthInPixels - максимальная дальность перемещения в "пикселах"
+   * @param perimeter
+   * @return
+   */
+  public Result<Coords> tryToMove(Coords newCoords, List<HasCoordinates> otherObjects, int objectSize, int maxWayLengthInPixels, Rectangle perimeter) {
+    if (perimeter != null) {
+      newCoords = (Coords) tryMoveToWithPerimeter(newCoords, perimeter);
+    }
+
+    final int quadObjectSize = objectSize * objectSize;
+    final Coords testCoords = new Coords(newCoords);
+    return otherObjects.stream()
+            .filter(hasCoordinates -> quadObjectSize < calcQuadOfWayLength(hasCoordinates.getCoords(), testCoords))
+            .findFirst()
+            .map(hasCoordinates -> ResultImpl.fail(new GameError("", "")))
+            .orElse(ResultImpl.success(testCoords));
+  }
   //===================================================================================================
 }

@@ -12,12 +12,14 @@ public class WarriorHeapElement {
   private ActiveCoords originalCoords;
   private boolean moveLocked;
   private boolean rollbackAvailable;
+  private int treatedActionPointsForMove;
 
   public WarriorHeapElement(Warrior warrior){
     this.warrior = warrior;
     this.moveLocked = false;
     this.originalCoords = new ActiveCoords(warrior.getCoords());
     this.rollbackAvailable = true;
+    this.treatedActionPointsForMove = 0;
   }
 
   /**
@@ -69,5 +71,18 @@ public class WarriorHeapElement {
    */
   public boolean isRollbackAvailable() {
     return rollbackAvailable;
+  }
+
+  /**
+   * Кол-во потраенных на перемещение единиц действия. Имеет смысл только до тех пор, пока можно выполнить откат
+   * перемещения.
+   * @return
+   */
+  public int getTreatedActionPointsForMove() {
+    return treatedActionPointsForMove;
+  }
+
+  public void setTreatedActionPointsForMove(int treatedActionPointsForMove) {
+    this.treatedActionPointsForMove = treatedActionPointsForMove;
   }
 }

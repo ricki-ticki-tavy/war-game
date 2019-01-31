@@ -144,4 +144,49 @@ public interface WarriorSBaseAttributes {
    */
   boolean isSummonable();
 
-}
+  /**
+   * получить максимальное кол-во очков жизни
+   * @return
+   */
+  int getMaxHealth();
+
+  /**
+   * получить максимальное кол-во очков магии
+   * @return
+   */
+  int getMaxManna();
+
+  /**
+   * получить удачу при атаке ближнего боя
+   * @return
+   */
+  int getLuckMeleeAtack();
+
+  /**
+   * получить удачу при атаке дальнего боя
+   * @return
+   */
+  int getLuckRangeAtack();
+
+  /**
+   * получить удачу при защите
+   * @return
+   */
+  int getLuckDefence();
+
+  WarriorSBaseAttributes setHealth(int health);
+
+  WarriorSBaseAttributes setManna(int manna);
+
+  WarriorSBaseAttributes setDeltaCostMove(Integer deltaCostMove);
+
+  WarriorSBaseAttributes setHandsCount(int handsCount);
+
+  WarriorSBaseAttributes setLuckMeleeAtack(int luckMeleeAtack);
+
+  WarriorSBaseAttributes setLuckRangeAtack(int luckRangeAtack);
+
+  WarriorSBaseAttributes setLuckDefence(int luckDefence);
+
+
+  }

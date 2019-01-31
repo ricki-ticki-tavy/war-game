@@ -6,6 +6,8 @@ import api.entity.warrior.Warrior;
 import api.game.Coords;
 import api.game.Rectangle;
 import api.game.map.metadata.LevelMapMetaDataXml;
+import core.game.GameProcessData;
+import core.system.ActiveCoords;
 
 import java.util.List;
 
@@ -50,6 +52,17 @@ public interface LevelMap {
   int getHeightInUnits();
 
   /**
+   * Вернуть данные, связанные с процессом игры
+   * @return
+   */
+  GameProcessData getGameProcessData();
+
+  /**
+   * Выполнить приготовления, связанные с
+   */
+  void beginGame();
+
+  /**
    * Получить список воинов в окружности заданным радиусом
    * @param center координата центра
    * @param radius радиус окружности. 0 - все воины
@@ -73,7 +86,16 @@ public interface LevelMap {
    * @param newCoords
    * @return
    */
-  Result<Warrior> moveWarriorTo(Player player, String warriorId, Coords newCoords);
+  Result<Coords> moveWarriorTo(Player player, String warriorId, Coords newCoords);
+
+  /**
+   * Возвращает координаты,куда можно переместить перемещаемого юнита, исходя из того, куда его хотят переместить
+   * @param player
+   * @param warriorId
+   * @param coords
+   * @return
+   */
+  Result<? extends Coords> whatIfMoveWarriorTo(Player player,  String warriorId, Coords coords);
 
   /**
    * Удалить юнит игроком
@@ -136,7 +158,42 @@ public interface LevelMap {
    */
   Result<Context> ifNewWarriorSCoordinatesAreAvailable(Warrior warrior, Coords newCoords);
 
+  /**
+   * Возвращает количество оставшихся очков действия у юнита. Для получения этого значение функцией используется
+   * таблица юнитов которыми делались действия в этом ходу. Если движение юнита можно откатить, то возвращается
+   * кол-во очков из самого юнита, а если откат невозможен, то из очков действия, оставшихся у юнита вычитаются
+   * очки, затраченные на передвижение и хранящиеся в таблице юнитов, которыми выполнялись действия.
+   * @param warrior
+   * @return
+   */
+   int getWarriorSActionPoints(Warrior warrior, boolean forMove);
 
+  /**
+   * Возвращает цену за перемещение на единицу длины для данного юнита с учетом всех его влияний, классов брони
+   * и прочего
+   * @param warrior
+   * @return
+   */
+   int getWarriorSMoveCost(Warrior warrior);
 
+//  /**
+//   * Возвращает класс брони за перемещение на единицу длины для данного юнита с учетом всех его влияний, классов брони
+//   * и прочего
+//   * @param warrior
+//   * @return
+//   */
+//   int getWarriorSArmor(Warrior warrior);
+//
+  /**
+   * Возвращает координаты для юнита. Для получения координат этой функцией используется таблица юнитов
+   * которыми делались действия в этом ходу. Если движение юнита можно откатить, то возвращаются его
+   * координаты на которые можно сделать откат, если нельзя откатить или юнита нет в таблице, то берется
+   * оригинальное значение координат
+   * @param warrior
+   * @return
+   */
+   Result<ActiveCoords> getWarriorSOriginCoords(Warrior warrior);
+
+  void
 
 }

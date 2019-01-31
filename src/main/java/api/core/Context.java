@@ -171,6 +171,15 @@ public interface Context {
   Result<Warrior> moveWarriorTo(String userName, String warriorId, Coords newCoords);
 
   /**
+   * Возвращает координаты,куда можно переместить перемещаемого юнита, исходя из того, куда его хотят переместить
+   * @param userName
+   * @param warriorId
+   * @param coords
+   * @return
+   */
+  Result<Coords> whatIfMoveWarriorTo(String userName, String warriorId, Coords coords);
+
+  /**
    * Удалить юнит игроком
    * @param userName
    * @param warriorId
@@ -224,5 +233,11 @@ public interface Context {
    */
   Result<Warrior> ifUnitCanMove(Warrior warrior);
 
+  /**
+   * Передача хода следующему игроку
+   * @param userName
+   * @return
+   */
+  Result<Player> nextTurn(String userName);
 
 }

@@ -63,8 +63,6 @@ public class ContextImpl implements Context {
   private AtomicBoolean gameRan = new AtomicBoolean(false);
   protected AtomicBoolean deleting = new AtomicBoolean(false);
 
-  private GameProcessData gameProcessData;
-
   //===================================================================================================
   //===================================================================================================
 
@@ -76,7 +74,8 @@ public class ContextImpl implements Context {
   @Override
   public Result<List<String>> getFrozenListOfPlayers() {
     return gameRan.get()
-            ? ResultImpl.success(gameProcessData.frozenListOfPlayers.values().stream().map(player -> player.getId()).collect(Collectors.toList()))
+            ? ResultImpl.success(getLevelMap().getGameProcessData().frozenListOfPlayers.values().stream()
+            .map(player -> player.getId()).collect(Collectors.toList()))
             : ResultImpl.fail(CONTEXT_GAME_NOT_STARTED.getError(getGameName(), getContextId()));
   }
   //===================================================================================================
@@ -259,9 +258,7 @@ public class ContextImpl implements Context {
    */
   private Result<Context> beginGame() {
     gameRan.set(true);
-    gameProcessData = new GameProcessData();
-    // сохраним список пользователей, начавших игру
-    getLevelMap().getPlayers().stream().forEach(player -> gameProcessData.frozenListOfPlayers.put(gameProcessData.frozenListOfPlayers.size(), player));
+    getLevelMap().beginGame();
     Result result = ResultImpl.success(this);
     fireGameEvent(null, GAME_CONTEXT_GAME_HAS_BEGAN, new EventDataContainer(this, result), null);
     return result;
@@ -294,12 +291,13 @@ public class ContextImpl implements Context {
   }
 
   // TODO пополняется
+
   /**
    * Передать ход следующему игроку
    */
   private void nextPlayerRound() {
     // зачистить транзакционные данные игрока
-    gameProcessData.playerTransactionalData.clear();
+    getLevelMap().getGameProcessData().playerTransactionalData.clear();
   }
   //===================================================================================================
 
@@ -313,9 +311,9 @@ public class ContextImpl implements Context {
     Result result;
     // если нет этого юнита в списке юнитов, уже задействованных в данном ходе и в нем еще есть место, то можно ходить
     // новыйм юнитом
-    WarriorHeapElement warriorHeapElement = gameProcessData.playerTransactionalData.get(warrior.getId());
+    WarriorHeapElement warriorHeapElement = getLevelMap().getGameProcessData().playerTransactionalData.get(warrior.getId());
     if (warriorHeapElement == null) {
-      result = gameProcessData.playerTransactionalData.size() < getLevelMap().getMaxPlayerCount()
+      result = getLevelMap().getGameProcessData().playerTransactionalData.size() < getLevelMap().getMaxPlayerCount()
               // это новый юнит в данном ходу, но двигать его можно
               ? ResultImpl.success(warrior)
               : ResultImpl.fail(PLAYER_UNIT_MOVES_ON_THIS_TURN_ARE_EXCEEDED.getError(warrior.getOwner().getId(), String.valueOf(getLevelMap().getMaxPlayerCount())));
@@ -365,10 +363,20 @@ public class ContextImpl implements Context {
                     // если игра запущена, то двигать фигуры можно только в свой ход
                     .map(player -> !fineContext.isGameRan() || getPlayerOwnsTheTurn() == player
                             ? getLevelMap().moveWarriorTo(player, warriorId, coords)
+                            : ResultImpl.fail(PLAYER_IS_NOT_OWENER_OF_THIS_ROUND.getError(userName, "перемещение юнита " + warriorId))))
+            ;
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Coords> whatIfMoveWarriorTo(String userName, String warriorId, Coords coords) {
+    return ifGameDeleting(false)
+            .map(fineContext -> fineContext.findUserByName(userName)
+                    // если игра запущена, то двигать фигуры можно только в свой ход
+                    .map(player -> !fineContext.isGameRan() || getPlayerOwnsTheTurn() == player
+                            ? getLevelMap().whatIfMoveWarriorTo(player, warriorId, coords)
                             : ResultImpl.fail(PLAYER_IS_NOT_OWENER_OF_THIS_ROUND.getError(userName, "перемещение юнита " + warriorId))));
   }
-
-
   //===================================================================================================
 
   // TODO перевести все поиски пользователя на этот метод
@@ -395,6 +403,11 @@ public class ContextImpl implements Context {
             .map(context -> context.findUserByName(userName)
                     .map(player -> context.getLevelMap().removeWarrior(player, warriorId)));
   }
+  //===================================================================================================
 
+  @Override
+  public Result<Player> nextTurn(String userName) {
+    return null;
+  }
   //===================================================================================================
 }
