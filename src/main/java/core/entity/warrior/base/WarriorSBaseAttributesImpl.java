@@ -22,12 +22,13 @@ public class WarriorSBaseAttributesImpl implements WarriorSBaseAttributes {
 
   private int actionPoints;
   private int maxActionPoints;
+  private int maxDefenseActionPoints;
 
   private int handsCount;
 
   private int luckMeleeAtack;
   private int luckRangeAtack;
-  private int luckDefence;
+  private int luckDefense;
 
   private boolean summonable;
 
@@ -110,6 +111,17 @@ public class WarriorSBaseAttributesImpl implements WarriorSBaseAttributes {
     return this;
   }
 
+  @Override
+  public int getMaxDefenseActionPoints() {
+    return maxDefenseActionPoints;
+  }
+
+  @Override
+  public WarriorSBaseAttributesImpl setMaxDefenseActionPoints(int maxDefenseActionPoints) {
+    this.maxDefenseActionPoints = maxDefenseActionPoints;
+    return this;
+  }
+
   /**
    * Кол-во очков применения способностей за ход
    */
@@ -157,7 +169,7 @@ public class WarriorSBaseAttributesImpl implements WarriorSBaseAttributes {
           , int maxManna, int manna
           , ArmorClassEnum armorClass, int deltaCostMove
           , int maxAbilityActionPoints, int abilityActionPoints
-          , int maxActionPoints, int actionPoints,
+          , int maxActionPoints, int maxDefenseActionPoints, int actionPoints,
           int handsCount, boolean summonable) {
     this.health = health;
     this.maxHealth = maxHealth;
@@ -168,9 +180,10 @@ public class WarriorSBaseAttributesImpl implements WarriorSBaseAttributes {
     this.maxAbilityActionPoints = maxAbilityActionPoints;
     this.abilityActionPoints = abilityActionPoints;
     this.maxActionPoints = maxActionPoints;
+    this.maxDefenseActionPoints = maxDefenseActionPoints;
     this.actionPoints = actionPoints;
     this.handsCount = handsCount;
-    this.summonable = true;
+    this.summonable = summonable;
   }
 
   public WarriorSBaseAttributesImpl(
@@ -192,8 +205,8 @@ public class WarriorSBaseAttributesImpl implements WarriorSBaseAttributes {
             , maxManna, manna
             , armorClass, deltaCostMove,
             maxAbilityActionPoints, abilityActionPoints,
-            maxActionPoints, actionPoints, handsCount, summonable)
-            .setLuckDefence(luckDefence)
+            maxActionPoints, maxDefenseActionPoints, actionPoints, handsCount, summonable)
+            .setLuckDefense(luckDefense)
             .setLuckMeleeAtack(luckMeleeAtack)
             .setLuckRangeAtack(luckRangeAtack);
   }
@@ -229,8 +242,8 @@ public class WarriorSBaseAttributesImpl implements WarriorSBaseAttributes {
     return luckRangeAtack;
   }
 
-  public int getLuckDefence() {
-    return luckDefence;
+  public int getLuckDefense() {
+    return luckDefense;
   }
 
   public WarriorSBaseAttributesImpl setHealth(int health) {
@@ -263,8 +276,11 @@ public class WarriorSBaseAttributesImpl implements WarriorSBaseAttributes {
     return this;
   }
 
-  public WarriorSBaseAttributesImpl setLuckDefence(int luckDefence) {
-    this.luckDefence = luckDefence;
+  public WarriorSBaseAttributesImpl setLuckDefense(int luckDefense) {
+    this.luckDefense = luckDefense;
     return this;
   }
+
+
+
 }

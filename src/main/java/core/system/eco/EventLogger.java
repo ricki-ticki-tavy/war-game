@@ -17,8 +17,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class EventLogger {
-  private static final Logger logger = LoggerFactory.getLogger(CoreImpl.class);
-
   public Event logGameEvent(Event event) {
     switch (event.getEventType()) {
       case PLAYER_LOGGED_IN: {
@@ -55,11 +53,27 @@ public class EventLogger {
         break;
       }
       case PLAYER_CHANGED_ITS_READY_TO_PLAY_STATUS: {
-        // "Игрок '%s' в игре %s (контекст '%s') сообщил о %a."
+        // "Игрок '%s' в игре %s (контекст '%s') сообщил о %s."
         logger.info(event.getEventType().getFormattedMessage(
                 event.getSource(Player.class).getTitle()
                 , event.getSourceContext().getGameName()
                 , event.getSource(Player.class).isReadyToPlay() ? "готовности" : "продолжении подготовки"));
+        break;
+      }
+      case PLAYER_LOOSE_TURN: {
+        //"Игрок '%s' в игре %s (контекст '%s') завершил ход."
+        logger.info(event.getEventType().getFormattedMessage(
+                event.getSource(Player.class).getTitle()
+                , event.getSourceContext().getGameName()
+                , event.getSourceContext().getContextId()));
+        break;
+      }
+      case PLAYER_TAKE_TURN: {
+        //"Игрок '%s' в игре %s (контекст '%s') получил ход"
+        logger.info(event.getEventType().getFormattedMessage(
+                event.getSource(Player.class).getTitle()
+                , event.getSourceContext().getGameName()
+                , event.getSourceContext().getContextId()));
         break;
       }
       case WARRIOR_ADDED: {
@@ -164,4 +178,6 @@ public class EventLogger {
     }
     return event;
   }
+
+  private static final Logger logger = LoggerFactory.getLogger(CoreImpl.class);
 }

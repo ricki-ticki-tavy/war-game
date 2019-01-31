@@ -1,5 +1,6 @@
 package api.entity.ability;
 
+import api.core.Context;
 import api.enums.AttributeEnum;
 import api.enums.TargetTypeEnum;
 
@@ -56,4 +57,9 @@ public interface Modifier {
    */
   int getMaxValue();
 
+  /**
+   * Возвращает контекст
+   * @return
+   */
+  Context getContext();
 }

@@ -30,7 +30,7 @@ public class GameProcessData {
   public final Map<String, WarriorHeapElement> playerTransactionalData = new ConcurrentHashMap<>(10);
 
 
-  public Result<Player> getPlayerOwnsTheThisTurn(){
+  public Result<Player> getPlayerOwnsThisTurn(){
     return ResultImpl.success(frozenListOfPlayers.get(indexOfPlayerOwnsTheTurn));
   }
 
@@ -55,7 +55,7 @@ public class GameProcessData {
     if (indexOfPlayerOwnsTheTurn.incrementAndGet() >= frozenListOfPlayers.size()) {
       indexOfPlayerOwnsTheTurn.set(0);
     }
-    return getPlayerOwnsTheThisTurn();
+    return getPlayerOwnsThisTurn();
   }
 
 }

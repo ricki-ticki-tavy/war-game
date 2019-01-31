@@ -2,7 +2,10 @@ package api.game.map;
 
 import api.core.Context;
 import api.core.Result;
+import api.entity.ability.Modifier;
+import api.entity.warrior.Influencer;
 import api.entity.warrior.Warrior;
+import api.enums.LifeTimeUnit;
 import api.game.Coords;
 import api.game.Rectangle;
 import api.game.map.metadata.LevelMapMetaDataXml;
@@ -200,6 +203,16 @@ public interface LevelMap {
    * @return
    */
   Result<Player> nextTurn(Player player);
+
+  /**
+   * добавить влияние юниту
+   * @param modifier
+   * @param lifeTimeUnit
+   * @param lifeTime
+   * @return
+   */
+  Result<Influencer> addInfluenceToWarrior(Player player, String warriorId, Modifier modifier, Object source, LifeTimeUnit lifeTimeUnit, int lifeTime);
+
 
 
 }

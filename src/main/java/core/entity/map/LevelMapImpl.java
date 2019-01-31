@@ -2,11 +2,12 @@ package core.entity.map;
 
 import api.core.Context;
 import api.core.Result;
+import api.entity.ability.Modifier;
 import api.entity.warrior.HasCoordinates;
+import api.entity.warrior.Influencer;
 import api.entity.warrior.Warrior;
-import api.enums.EventType;
+import api.enums.LifeTimeUnit;
 import api.game.Coords;
-import api.game.Event;
 import api.game.EventDataContainer;
 import api.game.Rectangle;
 import api.game.map.LevelMap;
@@ -25,9 +26,10 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static api.enums.EventType.*;
 import static core.system.error.GameErrors.*;
@@ -65,7 +67,14 @@ public class LevelMapImpl implements LevelMap {
     gameProcessData = new GameProcessData();
     // сохраним список пользователей, начавших игру
     getPlayers().stream()
-            .forEach(player -> gameProcessData.frozenListOfPlayers.put(gameProcessData.frozenListOfPlayers.size(), player));
+            .forEach(player -> {
+              gameProcessData.frozenListOfPlayers.put(gameProcessData.frozenListOfPlayers.size(), player);
+              // всех подготовим к защите
+              player.prepareToDefensePhase();
+            });
+    // первого игрока готовим к атаке
+    gameProcessData.getPlayerOwnsThisTurn()
+            .map(player -> player.prepareToAttackPhase());
   }
 
   //===================================================================================================
@@ -262,22 +271,36 @@ public class LevelMapImpl implements LevelMap {
   }
   //===================================================================================================
 
+  public Result<Player> ifPlayerIsTurnOwner(Player player) {
+    return gameProcessData.getPlayerOwnsThisTurn()
+            .map(playerOwnedThisTurn -> player == playerOwnedThisTurn
+                    ? ResultImpl.success(player)
+                    : ResultImpl.fail(PLAYER_CAN_T_PASS_THE_TURN_PLAYER_IS_NOT_TURN_OWNER.getError(
+                    player.getId(), context.getGameName(), context.getContextId(), playerOwnedThisTurn.getId())));
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Influencer> addInfluenceToWarrior(Player player, String warriorId, Modifier modifier, Object source, LifeTimeUnit lifeTimeUnit, int lifeTime) {
+    return player.addInfluenceToWarrior(warriorId, modifier, source, lifeTimeUnit, lifeTime);
+  }
+  //===================================================================================================
+
   @Override
   public Result<Player> nextTurn(Player player) {
     return
             // проверим этот ли игрок сейчас владеет ходом
-            gameProcessData.getPlayerOwnsTheThisTurn()
-                    // переведем в готовность для отражения атак
-                    .map(playerOwnedThisTurn -> player == playerOwnedThisTurn
-                            ? (Result<Player>) ResultImpl.success(player)
-                            : ResultImpl.fail(PLAYER_CAN_T_PASS_THE_TURN_PLAYER_IS_NOT_TURN_OWNER.getError(
-                            player.getId(), context.getGameName(), context.getContextId(), playerOwnedThisTurn.getId())))
+            ifPlayerIsTurnOwner(player)
                     // переведем в защиту уходящего игрока
                     .map(finePlayer -> finePlayer.prepareToDefensePhase())
                     // сменим игрока
                     .map(oldPlayer -> gameProcessData.switchToNextPlayerTurn())
-                    // подготовим нового игрока к ходу
-                    .map(newPlayer -> newPlayer.prepareToAttackPhase());
+                    .map(newPlayer -> {
+                      // зачистить транзакционные данные игрока
+                      gameProcessData.playerTransactionalData.clear();
+                      // подготовим нового игрока к ходу
+                      return newPlayer.prepareToAttackPhase();
+                    });
   }
   //===================================================================================================
 

@@ -21,7 +21,7 @@ public enum GameErrors {
   , WEAPON_BASE_CLASS_NOT_FOUND_BY_NAME("WP-1", "Класс оружия с именем %s не существует")
 
   , MAP_LOAD_ERROR("M-1", "Ошибка загрузки карты: %s")
-  , MAP_IS_NOT_LOADED("M-1", "Карта не загружена")
+  , MAP_IS_NOT_LOADED("M-2", "Карта не загружена")
 
   , USER_CONNECT_TO_CONTEXT_TOO_MANY_USERS("U-1", "Не удалось подключить пользователя к игре. Все слоты заняты")
   , USER_CONNECT_TO_CONTEXT_GAME_RUNNING("U-2", "Не удалось подключить пользователя к игре. Игра уже идет")
@@ -37,9 +37,9 @@ public enum GameErrors {
   , CONTEXT_GAME_NOT_STARTED("CT-3", "игра '%s' (context %s) не была начата.")
   , CONTEXT_DELETE_ALREADY_IN_PROGRESS("CT-4", "игра '%s' (context %s) уже находится в процессе удаления.")
   , CONTEXT_IS_IN_DELETING_STATE("CT-5", "игра '%s' (context %s) в процессе удаления.")
-  , CONTEXT_IS_NOT_IN_DELETING_STATE("CT-5", "игра '%s' (context %s) не находится в процессе удаления.")
-  , CONTEXT_IN_GAME_RAN_STATE("CT-6", "игра '%s' (context %s) уже в процессе игры.")
-  , CONTEXT_NOT_IN_GAME_RAN_STATE("CT-7", "игра '%s' (context %s) еще не началась. Игроки готовятся.")
+  , CONTEXT_IS_NOT_IN_DELETING_STATE("CT-6", "игра '%s' (context %s) не находится в процессе удаления.")
+  , CONTEXT_IN_GAME_RAN_STATE("CT-7", "игра '%s' (context %s) уже в процессе игры.")
+  , CONTEXT_NOT_IN_GAME_RAN_STATE("CT-8", "игра '%s' (context %s) еще не началась. Игроки готовятся.")
 
   , SYSTEM_NOT_REALIZED("NR-1", "Метод %s не реализован.")
 

@@ -30,7 +30,6 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.InputStream;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -289,18 +288,7 @@ public class ContextImpl implements Context {
   public Result<Context> ifNewWarriorSCoordinatesAreAvailable(Warrior warrior, Coords newCoords) {
     return ResultImpl.success(this);
   }
-
-  // TODO пополняется
-
-  /**
-   * Передать ход следующему игроку
-   */
-  private void nextPlayerRound() {
-    // зачистить транзакционные данные игрока
-    getLevelMap().getGameProcessData().playerTransactionalData.clear();
-  }
   //===================================================================================================
-
 
   /**
    * проверяет может ли ходящий сейчас игрок переместить данный юнит
@@ -392,7 +380,7 @@ public class ContextImpl implements Context {
   public Result<Player> getPlayerOwnsTheTurn() {
     return ifGameDeleting(false)
             .map(context -> context.ifGameRan(true))
-            .map(context -> getLevelMap().getGameProcessData().getPlayerOwnsTheThisTurn());
+            .map(context -> getLevelMap().getGameProcessData().getPlayerOwnsThisTurn());
   }
   //===================================================================================================
 

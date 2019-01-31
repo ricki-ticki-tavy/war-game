@@ -20,12 +20,14 @@ public class ResultImpl implements Result {
 
   protected ResultImpl setFail(GameError error){
     this.fail = true;
+    this.success = false;
     this.error = error;
     return this;
   }
 
   protected ResultImpl setSuccess(Object result){
     this.success = true;
+    this.fail = false;
     this.result = result;
     return this;
   }

@@ -1,8 +1,10 @@
 package api.entity.warrior;
 
 import api.core.Result;
+import api.entity.ability.Modifier;
 import api.entity.base.BaseEntityHeader;
 import api.entity.weapon.Weapon;
+import api.enums.LifeTimeUnit;
 import api.game.Coords;
 import api.game.map.Player;
 
@@ -81,5 +83,13 @@ public interface Warrior extends BaseEntityHeader, HasCoordinates{
    */
   Result<Warrior> prepareToDefensePhase();
 
+  /**
+   * добавить влияние юниту
+   * @param modifier
+   * @param lifeTimeUnit
+   * @param lifeTime
+   * @return
+   */
+  Result<Influencer> addInfluenceToWarrior(Modifier modifier, Object source, LifeTimeUnit lifeTimeUnit, int lifeTime);
 
 }

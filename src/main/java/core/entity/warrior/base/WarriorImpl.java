@@ -2,11 +2,10 @@ package core.entity.warrior.base;
 
 import api.core.Context;
 import api.core.Result;
-import api.entity.warrior.Warrior;
-import api.entity.warrior.WarriorBaseClass;
-import api.entity.warrior.WarriorSBaseAttributes;
-import api.entity.warrior.WarriorSHand;
+import api.entity.ability.Modifier;
+import api.entity.warrior.*;
 import api.entity.weapon.Weapon;
+import api.enums.LifeTimeUnit;
 import api.game.Coords;
 import api.game.EventDataContainer;
 import api.game.map.Player;
@@ -25,6 +24,7 @@ import static api.enums.EventType.*;
 import static core.system.error.GameErrors.WARRIOR_HANDS_NO_FREE_SLOTS;
 import static core.system.error.GameErrors.WARRIOR_WEAPON_NOT_FOUND;
 
+// TODO добавить поддержку ограничения оружия по допустимому списку
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class WarriorImpl implements Warrior {
@@ -38,6 +38,7 @@ public class WarriorImpl implements Warrior {
   protected Context gameContext;
   protected Player owner;
   protected WarriorSBaseAttributes attributes;
+  protected Map<String, Influencer> influencers = new ConcurrentHashMap<>(50);
 
   @Autowired
   private BeanFactory beanFactory;
@@ -179,6 +180,33 @@ public class WarriorImpl implements Warrior {
   }
   //===================================================================================================
 
+  @Override
+  public Result<Warrior> prepareToDefensePhase() {
+    // подтянем базовые атрибуты
+    attributes.setAbilityActionPoints(attributes.getMaxAbilityActionPoints());
+    attributes.setActionPoints(attributes.getMaxDefenseActionPoints());
+    attributes.setLuckMeleeAtack(getWarriorBaseClass().getBaseAttributes().getLuckMeleeAtack());
+    attributes.setLuckRangeAtack(getWarriorBaseClass().getBaseAttributes().getLuckRangeAtack());
+    attributes.setLuckDefense(getWarriorBaseClass().getBaseAttributes().getLuckDefense());
+
+    // TODO соберем все влияния, что наложены на воина.
+    // сначала соберем его личные способности
+    return null;
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Warrior> prepareToAttackPhase() {
+    return null;
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Influencer> addInfluenceToWarrior(Modifier modifier, Object source, LifeTimeUnit lifeTimeUnit, int lifeTime) {
+    Influencer influencer = new InfluencerImpl(this, modifier, source, lifeTimeUnit, lifeTime);
+    influencers.put(influencer.getId(), influencer);
+    return ResultImpl.success(influencer);
+  }
   //===================================================================================================
 
 }

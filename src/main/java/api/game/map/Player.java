@@ -2,9 +2,12 @@ package api.game.map;
 
 import api.core.Context;
 import api.core.Result;
+import api.entity.ability.Modifier;
 import api.entity.base.BaseEntityHeader;
+import api.entity.warrior.Influencer;
 import api.entity.warrior.Warrior;
 import api.entity.warrior.WarriorBaseClass;
+import api.enums.LifeTimeUnit;
 import api.game.Coords;
 import api.game.Rectangle;
 
@@ -125,5 +128,14 @@ public interface Player extends BaseEntityHeader{
    * @return
    */
   Result<Player> prepareToDefensePhase();
+
+  /**
+   * добавить влияние юниту
+   * @param modifier
+   * @param lifeTimeUnit
+   * @param lifeTime
+   * @return
+   */
+  Result<Influencer> addInfluenceToWarrior(String warriorId, Modifier modifier, Object source, LifeTimeUnit lifeTimeUnit, int lifeTime);
 
 }
