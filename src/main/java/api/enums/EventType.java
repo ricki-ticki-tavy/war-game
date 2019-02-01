@@ -4,8 +4,7 @@ package api.enums;
  * Тип срабатывания триггера
  */
 public enum EventType {
-  ON_PLAYER_ROUND("При ходе игрока")
-  , ALWAYS("Всегда")
+  ALWAYS("Всегда")
   , ROUND_FULL("В игре %s (id %s) завершился игровой круг")
 
   , ATTACK_MELEE_AFTER("После каждого рукопашного удара при атаке")

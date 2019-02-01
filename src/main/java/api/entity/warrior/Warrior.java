@@ -7,6 +7,7 @@ import api.entity.weapon.Weapon;
 import api.enums.LifeTimeUnit;
 import api.game.Coords;
 import api.game.map.Player;
+import core.system.ActiveCoords;
 
 import java.util.List;
 
@@ -118,6 +119,58 @@ public interface Warrior extends BaseEntityHeader, HasCoordinates {
    * @return
    */
   Result<Influencer> removeInfluencerFromWarrior(Influencer influencer, boolean silent);
+
+  /**
+   * Возвращает количество оставшихся очков действия у юнита. Для получения этого значение функцией используется
+   * таблица юнитов которыми делались действия в этом ходу. Если движение юнита можно откатить, то возвращается
+   * кол-во очков из самого юнита, а если откат невозможен, то из очков действия, оставшихся у юнита вычитаются
+   * очки, затраченные на передвижение и хранящиеся в таблице юнитов, которыми выполнялись действия.
+   * @param forMove
+   * @return
+   */
+  int getWarriorSActionPoints(boolean forMove);
+
+  /**
+   * Получить его координаты ДО начала движения в данном ходу
+   * @return
+   */
+  ActiveCoords getOriginalCoords();
+
+  /**
+   * признак можно ли вернуть юнит на его начальные позиции и отказаться от его использования в данном худе, чтобы
+   * выполнить действия другим юнитом
+   * @return
+   */
+  boolean isMoveLocked();
+
+  /**
+   * Зафиксировать юнит на этом месте и заблокировать дальнейшую возможность движения. Это должно происходить при
+   * любом действии юнита, кроме перемещения. Данный признак может, однако, скидываться некоторыми способностями,
+   * давая после атаки возможность переместиться
+   */
+  void lockMove();
+
+  /**
+   * заблокировать возможность отката перемещения юнита. Это должно происходить при
+   * любом действии юнита, кроме перемещения.
+   */
+  void lockRollback();
+
+  /**
+   * Указывает можно ли откатить перемещение юнита в данном ходе. Это возможно, пока он не начал применять что-либо кроме
+   * перемещения
+   * @return
+   */
+  boolean isRollbackAvailable();
+
+  /**
+   * Кол-во потраенных на перемещение единиц действия. Имеет смысл только до тех пор, пока можно выполнить откат
+   * перемещения.
+   * @return
+   */
+  int getTreatedActionPointsForMove();
+
+  void setTreatedActionPointsForMove(int treatedActionPointsForMove);
 
 
 }

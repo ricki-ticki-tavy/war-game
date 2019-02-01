@@ -10,6 +10,7 @@ import api.enums.PlayerPhaseType;
 import api.game.Coords;
 import api.game.EventDataContainer;
 import api.game.map.Player;
+import core.system.ActiveCoords;
 import core.system.ResultImpl;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,12 @@ public class WarriorImpl implements Warrior {
   protected Player owner;
   protected WarriorSBaseAttributes attributes;
   protected Map<String, Influencer> influencers = new ConcurrentHashMap<>(50);
+
+  private ActiveCoords originalCoords;
+  private boolean moveLocked;
+  private boolean rollbackAvailable;
+  private int treatedActionPointsForMove;
+
 
   @Autowired
   private BeanFactory beanFactory;
@@ -206,6 +213,14 @@ public class WarriorImpl implements Warrior {
     attributes.setLuckRangeAtack(getWarriorBaseClass().getBaseAttributes().getLuckRangeAtack());
     attributes.setLuckDefense(getWarriorBaseClass().getBaseAttributes().getLuckDefense());
     attributes.setDeltaCostMove(getWarriorBaseClass().getBaseAttributes().getDeltaCostMove());
+    // движение не заблокировано
+    moveLocked = false;
+    // на перемещение не использованио ничего
+    treatedActionPointsForMove = 0;
+    // возврат в начальную координату возможен
+    rollbackAvailable = true;
+    // начальные координаты
+    originalCoords = new ActiveCoords(coords);
   }
   //===================================================================================================
 
@@ -253,10 +268,10 @@ public class WarriorImpl implements Warrior {
   //===================================================================================================
 
   /**
-   * Удаление
+   * Удаление влияния
    *
    * @param influencer
-   * @param silent
+   * @param silent        не отправлять уведомления о действии
    */
   void innerRemoveInfluencerFromWarrior(Influencer influencer, boolean silent) {
     influencers.remove(influencer.getId());
@@ -272,6 +287,61 @@ public class WarriorImpl implements Warrior {
     influencer.removeFromWarrior(silent);
     innerRemoveInfluencerFromWarrior(influencer, silent);
     return ResultImpl.success(influencer);
+  }
+  //===================================================================================================
+
+  public int getWarriorSActionPoints(boolean forMove) {
+    return forMove  // для перемещения (либо у юнита остатки после атаки и прочего, либо он свежак)
+            // он свежак. Им еще не действовали в этом ходу
+            || !isMoveLocked()
+            // им действовали но есть возможности откатиться
+            || isRollbackAvailable()
+            // для движения
+            ? attributes.getActionPoints()
+            // для нанесения атаки
+            : (attributes.getActionPoints() - treatedActionPointsForMove);
+  }
+  //===================================================================================================
+
+  @Override
+  public ActiveCoords getOriginalCoords() {
+    return originalCoords;
+  }
+  //===================================================================================================
+
+  @Override
+  public boolean isMoveLocked() {
+    return moveLocked;
+  }
+  //===================================================================================================
+
+  @Override
+  public void lockMove() {
+    this.moveLocked = true;
+  }
+  //===================================================================================================
+
+  @Override
+  public void lockRollback() {
+    this.rollbackAvailable = false;
+  }
+  //===================================================================================================
+
+  @Override
+  public boolean isRollbackAvailable() {
+    return rollbackAvailable;
+  }
+  //===================================================================================================
+
+  @Override
+  public int getTreatedActionPointsForMove() {
+    return treatedActionPointsForMove;
+  }
+  //===================================================================================================
+
+  @Override
+  public void setTreatedActionPointsForMove(int treatedActionPointsForMove) {
+    this.treatedActionPointsForMove = treatedActionPointsForMove;
   }
   //===================================================================================================
 

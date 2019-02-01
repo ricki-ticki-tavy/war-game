@@ -1,10 +1,8 @@
 package core.game;
 
 
-import api.core.Result;
+import api.entity.warrior.Warrior;
 import api.game.map.Player;
-import core.system.ResultImpl;
-import core.system.game.WarriorHeapElement;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,6 +25,8 @@ public class GameProcessData {
 
   public final Map<Integer, Player> frozenListOfPlayers = new ConcurrentHashMap<>(5);
 
-  public final Map<String, WarriorHeapElement> playerTransactionalData = new ConcurrentHashMap<>(10);
+  public final Map<String, Warrior> playerTransactionalData = new ConcurrentHashMap<>(10);
+
+  public final Map<String, Warrior> allWarriorsOnMap = new ConcurrentHashMap<>(100);
 
 }

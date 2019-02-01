@@ -16,7 +16,6 @@ import api.game.map.metadata.LevelMapMetaDataXml;
 import core.system.ResultImpl;
 import core.system.error.GameError;
 import core.system.event.EventImpl;
-import core.system.game.WarriorHeapElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -305,15 +304,15 @@ public class ContextImpl implements Context {
     Result result;
     // если нет этого юнита в списке юнитов, уже задействованных в данном ходе и в нем еще есть место, то можно ходить
     // новыйм юнитом
-    WarriorHeapElement warriorHeapElement = getLevelMap().getGameProcessData().playerTransactionalData.get(warrior.getId());
-    if (warriorHeapElement == null) {
+    Warrior touchedWarrior = getLevelMap().getGameProcessData().playerTransactionalData.get(warrior.getId());
+    if (touchedWarrior == null) {
       result = getLevelMap().getGameProcessData().playerTransactionalData.size() < getLevelMap().getMaxPlayerCount()
               // это новый юнит в данном ходу, но двигать его можно
               ? ResultImpl.success(warrior)
               : ResultImpl.fail(PLAYER_UNIT_MOVES_ON_THIS_TURN_ARE_EXCEEDED.getError(warrior.getOwner().getId(), String.valueOf(getLevelMap().getMaxPlayerCount())));
     } else {
       // юнит уже в списке тех, что делали движение  данном ходе
-      result = warriorHeapElement.isMoveLocked()
+      result = touchedWarrior.isMoveLocked()
               // новые координаты воина уже заморожены и не могут быть отменены
               // Воин %s (id %s) игрока %s в игре %s (id %s) не может более выполнить перемещение в данном ходе
               ? ResultImpl
