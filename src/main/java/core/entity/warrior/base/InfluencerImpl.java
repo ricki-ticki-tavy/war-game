@@ -1,11 +1,13 @@
 package core.entity.warrior.base;
 
+import api.core.Result;
 import api.entity.ability.Modifier;
 import api.entity.warrior.Influencer;
 import api.entity.warrior.Warrior;
 import api.enums.EventType;
 import api.enums.LifeTimeUnit;
 import api.game.Event;
+import core.system.ResultImpl;
 
 import java.util.UUID;
 
@@ -57,7 +59,7 @@ public class InfluencerImpl implements Influencer {
   }
   //===================================================================================================
 
-  /**
+  /** TODO добавить собственно действие по изменению некоторых атрибутов, как здоровье, магия и т.п., если оно есть
    * срабатывает когда наступает событие, по которому измеряется время жизни
    *
    * @param event
@@ -79,12 +81,19 @@ public class InfluencerImpl implements Influencer {
   }
   //===================================================================================================
 
-  @Override
-  public void unsubscribe() {
+  private void unsubscribe() {
     if (consumerId != null) {
       targetWarrior.getOwner().findContext().getResult().unsubscribeEvent(consumerId, lifeTimeUnit.getEventType());
       consumerId = null;
     }
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Influencer> removeFromWarrior(boolean silent) {
+    unsubscribe();
+    ((WarriorImpl)targetWarrior).innerRemoveInfluencerFromWarrior(this, silent);
+    return ResultImpl.success(this);
   }
   //===================================================================================================
 

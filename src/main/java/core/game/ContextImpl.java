@@ -19,7 +19,6 @@ import core.system.event.EventImpl;
 import core.system.game.WarriorHeapElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -30,7 +29,10 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.InputStream;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -52,9 +54,6 @@ public class ContextImpl implements Context {
 
   @Autowired
   private Core core;
-
-  @Autowired
-  private BeanFactory beanFactory;
 
   private Player contextOwner;
   private GameRules gameRules;
@@ -387,7 +386,7 @@ public class ContextImpl implements Context {
   public Result<Player> getPlayerOwnsTheTurn() {
     return ifGameDeleting(false)
             .map(context -> context.ifGameRan(true))
-            .map(context -> getLevelMap().getGameProcessData().getPlayerOwnsThisTurn());
+            .map(context -> getLevelMap().getPlayerOwnsThisTurn());
   }
   //===================================================================================================
 

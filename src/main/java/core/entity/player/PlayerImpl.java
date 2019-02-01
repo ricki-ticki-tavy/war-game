@@ -5,7 +5,6 @@ import api.core.Result;
 import api.entity.ability.Modifier;
 import api.entity.warrior.Influencer;
 import api.entity.warrior.Warrior;
-import api.entity.warrior.WarriorBaseClass;
 import api.enums.LifeTimeUnit;
 import api.game.Coords;
 import api.game.EventDataContainer;
@@ -32,14 +31,14 @@ public class PlayerImpl implements Player {
   BeanFactory beanFactory;
 
   private Context context;
-  private String playerName;
+  private String userName;
   private Rectangle startZone;
   private Map<String, Warrior> warriors = new ConcurrentHashMap();
   private volatile boolean readyToPlay;
 
-  public PlayerImpl(String playerName) {
+  public PlayerImpl(String userName) {
     this.context = null;
-    this.playerName = playerName;
+    this.userName = userName;
     this.readyToPlay = false;
   }
   //===================================================================================================
@@ -74,7 +73,7 @@ public class PlayerImpl implements Player {
 
   @Override
   public String getTitle() {
-    return playerName;
+    return userName;
   }
   //===================================================================================================
 
@@ -126,7 +125,7 @@ public class PlayerImpl implements Player {
 
   @Override
   public String getId() {
-    return playerName;
+    return userName;
   }
   //===================================================================================================
 
@@ -160,11 +159,12 @@ public class PlayerImpl implements Player {
   }
   //===================================================================================================
 
+  // TODO реализовать
   @Override
   public Result<Warrior> moveWarriorTo(String warriorId, Coords newCoords) {
     return findWarriorById(warriorId)
             // ищем юнит
-            .map(warrior -> null);
+            .map(warrior -> warrior.moveWarriorTo(newCoords));
   }
   //===================================================================================================
 
@@ -177,17 +177,11 @@ public class PlayerImpl implements Player {
   }
   //===================================================================================================
 
-  @Override
-  public Result<Warrior> moveWarriorTo(Player player, String warriorId, Coords newCoords) {
-    return null;
-  }
-  //===================================================================================================
-
   private Result<Warrior> innerRemoveWarrior(Warrior warrior) {
     warriors.remove(warrior.getId());
     // отписаться ото всех событий котрые должны удалять влияния на юнит
     warrior.getWarriorSInfluencers()
-            .doIfSuccess(influencers -> influencers.stream().forEach(influencer -> influencer.unsubscribe()));
+            .doIfSuccess(influencers -> influencers.stream().forEach(influencer -> influencer.removeFromWarrior(true)));
     //  пошлем событие
     Result<Warrior> result = ResultImpl.success(warrior);
     context.fireGameEvent(null, WARRIOR_REMOVED, new EventDataContainer(warrior, result), null);
@@ -237,10 +231,4 @@ public class PlayerImpl implements Player {
   }
   //===================================================================================================
 
-//  @Override
-//  public Result<Influencer> removeInfluencerFromWarrior(String warriorId, Influencer influencer) {
-//    return findWarriorById(warriorId)
-//            .map(warrior -> warrior.removeInfluencerFromWarrior(influencer, ));
-//  }
-//  //===================================================================================================
 }

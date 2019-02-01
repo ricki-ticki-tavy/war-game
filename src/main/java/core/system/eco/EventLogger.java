@@ -20,6 +20,13 @@ import org.springframework.stereotype.Component;
 public class EventLogger {
   public Event logGameEvent(Event event) {
     switch (event.getEventType()) {
+      case ROUND_FULL: {
+        // "В игре %s (id %s) завершился игровой круг"
+        logger.info(event.getEventType().getFormattedMessage(
+                event.getSourceContext().getGameName()
+                , event.getSourceContext().getContextId()));
+        break;
+      }
       case PLAYER_LOGGED_IN: {
         // "Вход игрока %s. %s"
         logger.info(event.getEventType().getFormattedMessage(event.getSource(Player.class).getTitle()
@@ -105,21 +112,47 @@ public class EventLogger {
         break;
       }
       case WARRIOR_INFLUENCER_ADDED: {
-        //   "В игре '%s' (контекст '%s') игроку '%s' добавлено влияние '%s' (id %s)"
+        //   "В игре '%s' (контекст '%s') у игрока '%s' воину '%s' (id %s) добавлено влияние '%s' (id %s)"
         logger.info(event.getEventType().getFormattedMessage(event.getSourceContext().getGameName()
                 , event.getSourceContext().getContextId()
-                , event.getSource(Influencer.class).getTargetWarrior().getTitle()
+                , event.getSource(Influencer.class).getTargetWarrior().getOwner().getId()
+                , event.getSource(Influencer.class).getTargetWarrior().getWarriorBaseClass().getTitle()
+                , event.getSource(Influencer.class).getTargetWarrior().getId()
                 , event.getSource(Influencer.class).getTitle()
                 , event.getSource(Influencer.class).getId()));
         break;
       }
       case WARRIOR_INFLUENCER_REMOVED: {
-        //   "В игре '%s' (контекст '%s') у игрока '%s' снято влияние '%s' (id %s)"
+        //   "В игре '%s' (контекст '%s') у игрока '%s' с воина '%s' (id %s) снято влияние '%s' (id %s)"
         logger.info(event.getEventType().getFormattedMessage(event.getSourceContext().getGameName()
                 , event.getSourceContext().getContextId()
-                , event.getSource(Influencer.class).getTargetWarrior().getTitle()
+                , event.getSource(Influencer.class).getTargetWarrior().getOwner().getId()
+                , event.getSource(Influencer.class).getTargetWarrior().getWarriorBaseClass().getTitle()
+                , event.getSource(Influencer.class).getTargetWarrior().getId()
                 , event.getSource(Influencer.class).getTitle()
                 , event.getSource(Influencer.class).getId()));
+        break;
+      }
+      case WARRIOR_PREPARED_TO_DEFENCE: {
+        //   "В игре '%s' (контекст '%s') у игрока '%s' воин '%s (%s)' (id %s) подготовился к защите"
+        logger.info(event.getEventType().getFormattedMessage(
+                event.getSourceContext().getGameName()
+                , event.getSourceContext().getContextId()
+                , event.getSource(Warrior.class).getOwner().getId()
+                , event.getSource(Warrior.class).getTitle()
+                , event.getSource(Warrior.class).getWarriorBaseClass().getTitle()
+                , event.getSource(Warrior.class).getId()));
+        break;
+      }
+      case WARRIOR_PREPARED_TO_ATTACK: {
+        //   "В игре '%s' (контекст '%s') у игрока '%s' воин '%s (%s)' (id %s) подготовился к действиям и атаке"
+        logger.info(event.getEventType().getFormattedMessage(
+                event.getSourceContext().getGameName()
+                , event.getSourceContext().getContextId()
+                , event.getSource(Warrior.class).getOwner().getId()
+                , event.getSource(Warrior.class).getTitle()
+                , event.getSource(Warrior.class).getWarriorBaseClass().getTitle()
+                , event.getSource(Warrior.class).getId()));
         break;
       }
       case WEAPON_TAKEN: {

@@ -29,33 +29,4 @@ public class GameProcessData {
 
   public final Map<String, WarriorHeapElement> playerTransactionalData = new ConcurrentHashMap<>(10);
 
-
-  public Result<Player> getPlayerOwnsThisTurn(){
-    return ResultImpl.success(frozenListOfPlayers.get(indexOfPlayerOwnsTheTurn));
-  }
-
-  public int getIndexOfPlayerOwnsTheNextTurn(){
-    int index = indexOfPlayerOwnsTheTurn.get();
-    if (++index >= frozenListOfPlayers.size()) {
-      index = 0;
-    }
-    return index;
-  }
-
-  public GameProcessData setIndexOfPlayerOwnsTheTurn(int val){
-    indexOfPlayerOwnsTheTurn.set(val);
-    return this;
-  }
-
-  /**
-   * Сделать следующего игрока по кругу текущим владельцем хода
-   * @return
-   */
-  public Result<Player> switchToNextPlayerTurn(){
-    if (indexOfPlayerOwnsTheTurn.incrementAndGet() >= frozenListOfPlayers.size()) {
-      indexOfPlayerOwnsTheTurn.set(0);
-    }
-    return getPlayerOwnsThisTurn();
-  }
-
 }

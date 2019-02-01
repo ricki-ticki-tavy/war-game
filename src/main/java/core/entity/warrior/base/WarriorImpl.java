@@ -6,6 +6,7 @@ import api.entity.ability.Modifier;
 import api.entity.warrior.*;
 import api.entity.weapon.Weapon;
 import api.enums.LifeTimeUnit;
+import api.enums.PlayerPhaseType;
 import api.game.Coords;
 import api.game.EventDataContainer;
 import api.game.map.Player;
@@ -109,7 +110,7 @@ public class WarriorImpl implements Warrior {
   //===================================================================================================
 
   @Override
-  public Result<Warrior> moveTo(Coords coords) {
+  public Result<Warrior> moveWarriorTo(Coords coords) {
     this.coords = new Coords(coords);
     Result result = ResultImpl.success(this);
     return result;
@@ -180,24 +181,58 @@ public class WarriorImpl implements Warrior {
   }
   //===================================================================================================
 
-  @Override
-  public Result<Warrior> prepareToDefensePhase() {
-    // подтянем базовые атрибуты
+  /**
+   * Применяет все влияния, оказываемые на юнит
+   *
+   * @param playerPhaseType
+   * @return
+   */
+  private Result<Warrior> applayInfluences(PlayerPhaseType playerPhaseType) {
+    // TODO соберем все влияния, что наложены на воина.
+    // сначала соберем его личные способности
+    return ResultImpl.success(this);
+
+  }
+  //===================================================================================================
+
+  /**
+   * Восстанавливает значения атрибутов, которые могут быть восстановлены на заданный режим.
+   * Например кол-во очков действия для режима хода или защиты, максимальный запас здоровья и прочее
+   */
+  private void restoreAttributesAvailableForRestoration(PlayerPhaseType playerPhaseType) {
     attributes.setAbilityActionPoints(attributes.getMaxAbilityActionPoints());
-    attributes.setActionPoints(attributes.getMaxDefenseActionPoints());
+    attributes.setActionPoints(playerPhaseType == PlayerPhaseType.PLAYER_PHASE_TYPE_ATACK ? attributes.getMaxActionPoints() : attributes.getMaxDefenseActionPoints());
     attributes.setLuckMeleeAtack(getWarriorBaseClass().getBaseAttributes().getLuckMeleeAtack());
     attributes.setLuckRangeAtack(getWarriorBaseClass().getBaseAttributes().getLuckRangeAtack());
     attributes.setLuckDefense(getWarriorBaseClass().getBaseAttributes().getLuckDefense());
+    attributes.setDeltaCostMove(getWarriorBaseClass().getBaseAttributes().getDeltaCostMove());
+  }
+  //===================================================================================================
 
-    // TODO соберем все влияния, что наложены на воина.
-    // сначала соберем его личные способности
-    return null;
+  /**
+   * Плдготовить воина к одной из двух фаз
+   *
+   * @param playerPhaseType
+   */
+  private Result<Warrior> prepareToPhase(PlayerPhaseType playerPhaseType) {
+    restoreAttributesAvailableForRestoration(playerPhaseType);
+    return applayInfluences(playerPhaseType)
+            .doIfSuccess(warrior -> warrior.getOwner().findContext()
+                    .doIfSuccess(context -> context.fireGameEvent(null
+                            , playerPhaseType == PlayerPhaseType.PLAYER_PHASE_TYPE_DEFENSE ? WARRIOR_PREPARED_TO_DEFENCE : WARRIOR_PREPARED_TO_ATTACK
+                            , new EventDataContainer(this), null)));
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Warrior> prepareToDefensePhase() {
+    return prepareToPhase(PlayerPhaseType.PLAYER_PHASE_TYPE_DEFENSE);
   }
   //===================================================================================================
 
   @Override
   public Result<Warrior> prepareToAttackPhase() {
-    return null;
+    return prepareToPhase(PlayerPhaseType.PLAYER_PHASE_TYPE_ATACK);
   }
   //===================================================================================================
 
@@ -217,15 +252,25 @@ public class WarriorImpl implements Warrior {
   }
   //===================================================================================================
 
-  // TODO
-  @Override
-  public Result<Influencer> removeInfluencerFromWarrior(Influencer influencer, boolean silent) {
-    influencer.unsubscribe();
+  /**
+   * Удаление
+   *
+   * @param influencer
+   * @param silent
+   */
+  void innerRemoveInfluencerFromWarrior(Influencer influencer, boolean silent) {
     influencers.remove(influencer.getId());
-    if (!silent){
+    if (!silent) {
       getOwner().findContext().getResult().fireGameEvent(null, WARRIOR_INFLUENCER_REMOVED
               , new EventDataContainer(influencer, this), null);
     }
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Influencer> removeInfluencerFromWarrior(Influencer influencer, boolean silent) {
+    influencer.removeFromWarrior(silent);
+    innerRemoveInfluencerFromWarrior(influencer, silent);
     return ResultImpl.success(influencer);
   }
   //===================================================================================================

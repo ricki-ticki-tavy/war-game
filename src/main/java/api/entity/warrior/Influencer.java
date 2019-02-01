@@ -1,5 +1,6 @@
 package api.entity.warrior;
 
+import api.core.Result;
 import api.entity.base.BaseEntityHeader;
 
 /**
@@ -13,7 +14,8 @@ public interface Influencer extends BaseEntityHeader {
   Warrior getTargetWarrior();
 
   /**
-   * заставить влияние отписаться ото всех событий. необходимо вызывать перед удалением
+   * Удаление влияния у юнита
+   * @return
    */
-  void unsubscribe();
+  Result<Influencer> removeFromWarrior(boolean silent);
 }

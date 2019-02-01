@@ -198,6 +198,12 @@ public interface LevelMap {
    Result<ActiveCoords> getWarriorSOriginCoords(Warrior warrior);
 
   /**
+   * Получить игрока, выполняющего ход в данное время
+   * @return
+   */
+  Result<Player> getPlayerOwnsThisTurn();
+
+  /**
    * Передача хода следующему игроку
    * @param player  сменяемый игрок. Тот, кто передает ход следующему
    * @return

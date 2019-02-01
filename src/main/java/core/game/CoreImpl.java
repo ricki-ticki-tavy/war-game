@@ -138,15 +138,8 @@ public class CoreImpl implements Core {
 
   @PostConstruct
   public void init() {
-    subscribeEvent(null, this::eventLogger
-            , PLAYER_LOGGED_IN, PLAYER_CONNECTED, PLAYER_DISCONNECTED, PLAYER_RECONNECTED
-            , PLAYER_CHANGED_ITS_READY_TO_PLAY_STATUS, PLAYER_TAKE_TURN, PLAYER_LOOSE_TURN
-            , GAME_CONTEXT_CREATED, GAME_CONTEXT_CREATE, GAME_CONTEXT_LOAD_MAP, GAME_CONTEXT_REMOVED
-            , GAME_CONTEXT_GAME_HAS_BEGAN
-            , WARRIOR_ADDED, WEAPON_TAKEN, WEAPON_TRY_TO_DROP, WEAPON_DROPED, WARRIOR_MOVED
-            , WARRIOR_INFLUENCER_ADDED, WARRIOR_INFLUENCER_REMOVED
-
-            );
+    // подпишем логер на все события. Пусть пишет по ним инфу
+    subscribeEvent(null, this::eventLogger, EventType.values());
 
     registerWarriorBaseClass(Skeleton.CLASS_NAME, Skeleton.class);
     registerWarriorBaseClass(Viking.CLASS_NAME, Viking.class);

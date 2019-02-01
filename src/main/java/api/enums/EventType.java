@@ -6,7 +6,7 @@ package api.enums;
 public enum EventType {
   ON_PLAYER_ROUND("При ходе игрока")
   , ALWAYS("Всегда")
-  , ROUND_FULL("игровой круг")
+  , ROUND_FULL("В игре %s (id %s) завершился игровой круг")
 
   , ATTACK_MELEE_AFTER("После каждого рукопашного удара при атаке")
   , ATTACK_MELEE_BEFORE("Перед каждым рукопашным ударом при атаке")
@@ -30,8 +30,10 @@ public enum EventType {
   , WARRIOR_SUMMONED("В игре '%s' (контекст '%s') игроком '%s' призван воин '%s' с '%s' очками жизни")
   , WARRIOR_MOVED("В игре '%s' игрок '%s' переместил юнит '%s' на координаты '%s'")
   , WARRIOR_REMOVED("В игре '%s' (контекст '%s') игроком '%s' удален воин '%s' (id %s)")
-  , WARRIOR_INFLUENCER_ADDED("В игре '%s' (контекст '%s') игроку '%s' добавлено влияние '%s' (id %s)")
-  , WARRIOR_INFLUENCER_REMOVED("В игре '%s' (контекст '%s') у игрока '%s' снято влияние '%s' (id %s)")
+  , WARRIOR_INFLUENCER_ADDED("В игре '%s' (контекст '%s') у игрока '%s' воину '%s' (id %s) добавлено влияние '%s' (id %s)")
+  , WARRIOR_INFLUENCER_REMOVED("В игре '%s' (контекст '%s') у игрока '%s' с воина '%s' (id %s) снято влияние '%s' (id %s)")
+  , WARRIOR_PREPARED_TO_DEFENCE("В игре '%s' (контекст '%s') у игрока '%s' воин '%s (%s)' (id %s) подготовился к защите")
+  , WARRIOR_PREPARED_TO_ATTACK("В игре '%s' (контекст '%s') у игрока '%s' воин '%s (%s)' (id %s) подготовился к действиям и атаке")
 
   , WEAPON_TAKEN("В игре '%s' игрок '%s' снарядил юнит '%s' (id '%s') оружием '%s'. %s")
   , WEAPON_TRY_TO_DROP("В игре '%s' игрок '%s' попытался убрать у юнита '%s' (id '%s') оружие id '%s'. %s")
