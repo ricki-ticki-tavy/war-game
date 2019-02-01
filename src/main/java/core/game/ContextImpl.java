@@ -356,7 +356,8 @@ public class ContextImpl implements Context {
                     // если игра запущена, то двигать фигуры можно только в свой ход
                     .map(player -> !fineContext.isGameRan() || getPlayerOwnsTheTurn() == player
                             ? getLevelMap().moveWarriorTo(player, warriorId, coords)
-                            : ResultImpl.fail(PLAYER_IS_NOT_OWENER_OF_THIS_ROUND.getError(userName, "перемещение юнита " + warriorId))))
+                            : ResultImpl.fail(PLAYER_IS_NOT_OWENER_OF_THIS_ROUND.getError(userName
+                            , "перемещение юнита " + warriorId))))
             ;
   }
   //===================================================================================================
