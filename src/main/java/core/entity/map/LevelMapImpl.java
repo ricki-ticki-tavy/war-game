@@ -62,9 +62,13 @@ public class LevelMapImpl implements LevelMap {
   //===================================================================================================
   //===================================================================================================
 
+  public LevelMapImpl(){
+    gameProcessData = new GameProcessData();
+  }
+  //===================================================================================================
+
   @Override
   public void beginGame() {
-    gameProcessData = new GameProcessData();
     // сохраним список пользователей, начавших игру
     getPlayers().stream()
             .forEach(player -> {

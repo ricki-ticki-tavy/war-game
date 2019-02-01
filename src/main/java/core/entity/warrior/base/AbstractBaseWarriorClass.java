@@ -54,7 +54,7 @@ public abstract class AbstractBaseWarriorClass implements WarriorBaseClass {
 
   @Override
   public WarriorSBaseAttributesImpl getBaseAttributes() {
-    return null;
+    return warriorSBaseAttributes;
   }
 
   @Override
