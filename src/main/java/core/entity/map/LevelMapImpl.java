@@ -242,7 +242,7 @@ public class LevelMapImpl implements LevelMap {
   //===================================================================================================
 
   @Override
-  public Result<Coords> moveWarriorTo(Player player, String warriorId, Coords newCoords) {
+  public Result<Warrior> moveWarriorTo(Player player, String warriorId, Coords newCoords) {
     return player.findWarriorById(warriorId)
             .map(warrior -> whatIfMoveWarriorTo(player, warriorId, newCoords)
                     .map(coords -> {
@@ -250,7 +250,7 @@ public class LevelMapImpl implements LevelMap {
                       gameProcessData.playerTransactionalData.computeIfAbsent(warrior.getId()
                               , id -> warrior);
                       // кинем сообщение, что юнит перемещен
-                      Result result = warrior.moveWarriorTo(coords).map(movedWarrior -> ResultImpl.success(movedWarrior.getCoords()));
+                      Result result = warrior.moveWarriorTo(coords);
                       context.fireGameEvent(null, WARRIOR_MOVED
                               , new EventDataContainer(this, result), null);
                       return result;

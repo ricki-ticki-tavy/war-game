@@ -40,4 +40,10 @@ public interface GameRules {
    */
   int getWarriorSize();
 
+  /**
+   * Кол-во фигурок, которыми можно сходить за один ход
+   * @return
+   */
+  int getMovesCountPerTurnForEachPlayer();
+
 }

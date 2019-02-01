@@ -89,7 +89,7 @@ public interface LevelMap {
    * @param newCoords
    * @return
    */
-  Result<Coords> moveWarriorTo(Player player, String warriorId, Coords newCoords);
+  Result<Warrior> moveWarriorTo(Player player, String warriorId, Coords newCoords);
 
   /**
    * Возвращает координаты,куда можно переместить перемещаемого юнита, исходя из того, куда его хотят переместить

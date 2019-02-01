@@ -70,12 +70,12 @@ public class ComplexFastMapTest {
     Player player2 = playerLoginResult2.getResult();
 
     logger.info("step " + step++);
-    GameRules rules = new GameRulesImpl(9, 2, 50, 200, 2, 600, 30);
+    GameRules rules = new GameRulesImpl(9, 2, 1, 50, 200, 2, 600, 30);
     Result<Context> createContextResult = gameWrapper.createGame("test2", rules, "level2.xml", "test-game", false);
     Assert.isTrue(createContextResult.isFail(), "Карта создана не существующим пользователем");
 
     logger.info("step " + step++);
-    rules = new GameRulesImpl(9, 2, 50, 200, 2, 600, 30);
+    rules = new GameRulesImpl(9, 2, 1, 50, 200, 2, 600, 30);
     createContextResult = gameWrapper.createGame(player.getId(), rules, "level2.xml", "test-game", false);
     Assert.isTrue(createContextResult.isSuccess(), "Карта не загружена");
     Assert.isTrue(((List<Context>) gameWrapper.getGamesList().getResult()).size() == 1, "Контекст не появился в списке контекстов");
@@ -175,7 +175,7 @@ public class ComplexFastMapTest {
     Assert.isTrue(playerResult.isSuccess(), playerResult.getError().getMessage());
     Player player2 = playerResult.getResult();
 
-    GameRules rules = new GameRulesImpl(1, 2, 50, 200, 2, 600, 30);
+    GameRules rules = new GameRulesImpl(1, 2, 1, 50, 200, 2, 600, 30);
     Result<Context> contextResult = gameWrapper.createGame(player1.getId(), rules, "level2.xml", "test-game2", false);
     Assert.isTrue(contextResult.isSuccess(), contextResult.getError().getMessage());
     Context gameContext =  contextResult.getResult();

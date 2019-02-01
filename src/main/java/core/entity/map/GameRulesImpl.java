@@ -7,6 +7,7 @@ import api.game.map.metadata.GameRules;
  */
 public class GameRulesImpl implements GameRules {
   private int maxStartCreaturePerPlayer;
+  private int movesCountPerTurnForEachPlayer;
   private int maxSummonedCreaturePerPlayer;
   private int maxPlayerRoundTime;
   private int startMannaPoints;
@@ -53,9 +54,11 @@ public class GameRulesImpl implements GameRules {
     this.restorationMannaPointsPerTotalRound = gameRules.getRestorationMannaPointsPerTotalRound();
     this.maxPlayerRoundTime = gameRules.getMaxPlayerRoundTime();
     this.warriorSize = gameRules.getWarriorSize();
+    this.movesCountPerTurnForEachPlayer = gameRules.getMovesCountPerTurnForEachPlayer();
   }
 
-  public GameRulesImpl(int maxStartCreaturePerPlayer, int maxSummonedCreaturePerPlayer, int startMannaPoints
+  public GameRulesImpl(int maxStartCreaturePerPlayer, int maxSummonedCreaturePerPlayer, int movesCountPerTurnForEachPlayer
+          , int startMannaPoints
           , int maxMannaPoints, int restorationMannaPointsPerTotalRound, int maxPlayerRoundTime, int warriorSize) {
     this.maxStartCreaturePerPlayer = maxStartCreaturePerPlayer;
     this.maxSummonedCreaturePerPlayer = maxSummonedCreaturePerPlayer;
@@ -64,5 +67,11 @@ public class GameRulesImpl implements GameRules {
     this.restorationMannaPointsPerTotalRound = restorationMannaPointsPerTotalRound;
     this.maxPlayerRoundTime = maxPlayerRoundTime;
     this.warriorSize = warriorSize;
+    this.movesCountPerTurnForEachPlayer = movesCountPerTurnForEachPlayer;
+  }
+
+  @Override
+  public int getMovesCountPerTurnForEachPlayer() {
+    return movesCountPerTurnForEachPlayer;
   }
 }

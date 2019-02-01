@@ -306,7 +306,7 @@ public class ContextImpl implements Context {
     // новыйм юнитом
     Warrior touchedWarrior = getLevelMap().getGameProcessData().playerTransactionalData.get(warrior.getId());
     if (touchedWarrior == null) {
-      result = getLevelMap().getGameProcessData().playerTransactionalData.size() < getLevelMap().getMaxPlayerCount()
+      result = getLevelMap().getGameProcessData().playerTransactionalData.size() < getGameRules().getMovesCountPerTurnForEachPlayer()
               // это новый юнит в данном ходу, но двигать его можно
               ? ResultImpl.success(warrior)
               : ResultImpl.fail(PLAYER_UNIT_MOVES_ON_THIS_TURN_ARE_EXCEEDED.getError(warrior.getOwner().getId(), String.valueOf(getLevelMap().getMaxPlayerCount())));
@@ -367,7 +367,7 @@ public class ContextImpl implements Context {
             .map(fineContext -> fineContext.findUserByName(userName)
                     // если игра запущена, то двигать фигуры можно только в свой ход
                     .map(player -> !fineContext.isGameRan() || getPlayerOwnsTheTurn() == player
-                            ? getLevelMap().whatIfMoveWarriorTo(player, warriorId, coords)
+                            ? (Result<Coords>)getLevelMap().whatIfMoveWarriorTo(player, warriorId, coords)
                             : ResultImpl.fail(PLAYER_IS_NOT_OWENER_OF_THIS_ROUND.getError(userName, "перемещение юнита " + warriorId))));
   }
   //===================================================================================================
