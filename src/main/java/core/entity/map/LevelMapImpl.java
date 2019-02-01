@@ -14,8 +14,8 @@ import api.game.map.LevelMap;
 import api.game.map.Player;
 import api.game.map.metadata.LevelMapMetaDataXml;
 import core.game.GameProcessData;
-import core.system.ActiveCoords;
 import core.system.ResultImpl;
+import core.system.error.GameError;
 import core.system.error.GameErrors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +25,8 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -62,7 +64,7 @@ public class LevelMapImpl implements LevelMap {
   //===================================================================================================
   //===================================================================================================
 
-  public LevelMapImpl(){
+  public LevelMapImpl() {
     gameProcessData = new GameProcessData();
   }
   //===================================================================================================
@@ -248,13 +250,13 @@ public class LevelMapImpl implements LevelMap {
   @Override
   public Result<Warrior> moveWarriorTo(Player player, String warriorId, Coords newCoords) {
     return player.findWarriorById(warriorId)
-            .map(warrior -> whatIfMoveWarriorTo(player, warriorId, newCoords)
+            .map(warrior -> innerWhatIfMoveWarriorTo(player, warrior, newCoords)
                     .map(coords -> {
                       // если юнита нет среди тех, которые были затронуты в этот ход, то добавить в этот список
                       gameProcessData.playerTransactionalData.computeIfAbsent(warrior.getId()
                               , id -> warrior);
                       // кинем сообщение, что юнит перемещен
-                      Result result = warrior.moveWarriorTo(coords);
+                      Result<Warrior> result = warrior.moveWarriorTo(coords);
                       context.fireGameEvent(null, WARRIOR_MOVED
                               , new EventDataContainer(this, result), null);
                       return result;
@@ -269,10 +271,11 @@ public class LevelMapImpl implements LevelMap {
   }
   //===================================================================================================
 
-  public Result<ActiveCoords> getWarriorSOriginCoords(Warrior warrior) {
+  public Result<Coords> getWarriorSOriginCoords(Warrior warrior) {
+    // ищем в списке юнитов, задействованных ы этом ходу наш юнит
     Warrior touchedWarrior = gameProcessData.playerTransactionalData.get(warrior.getId());
     return touchedWarrior == null || touchedWarrior.isMoveLocked() || !touchedWarrior.isRollbackAvailable()
-            ? ResultImpl.success(new ActiveCoords(warrior.getCoords()))
+            ? ResultImpl.success(new Coords(warrior.getCoords()))
             : ResultImpl.success(touchedWarrior.getOriginalCoords());
   }
   //===================================================================================================
@@ -300,15 +303,16 @@ public class LevelMapImpl implements LevelMap {
   //===================================================================================================
 
 
-  public Result<Player> getPlayerOwnsThisTurn(){
+  public Result<Player> getPlayerOwnsThisTurn() {
     return ResultImpl.success(gameProcessData.frozenListOfPlayers.get(gameProcessData.indexOfPlayerOwnsTheTurn));
   }//===================================================================================================
 
   /**
    * Сделать следующего игрока по кругу текущим владельцем хода
+   *
    * @return
    */
-  private Result<Player> switchToNextPlayerTurn(){
+  private Result<Player> switchToNextPlayerTurn() {
     if (gameProcessData.indexOfPlayerOwnsTheTurn.incrementAndGet() >= gameProcessData.frozenListOfPlayers.size()) {
       gameProcessData.indexOfPlayerOwnsTheTurn.set(0);
       context.fireGameEvent(null, ROUND_FULL, new EventDataContainer(this), null);
@@ -337,13 +341,13 @@ public class LevelMapImpl implements LevelMap {
 
   @Override
   public int getWarriorSMoveCost(Warrior warrior) {
-    // TODO ВОЗМОЖНО перенести в класс юнита
-    return warrior.getAttributes().getResult().getArmorClass().getMoveCost() + warrior.getAttributes().getResult().getDeltaCostMove();
+    return warrior.getWarriorSMoveCost();
   }
   //===================================================================================================
 
   /**
    * Собирает всех юнитов карты.
+   *
    * @param excludedWarrior
    * @return
    */
@@ -354,15 +358,93 @@ public class LevelMapImpl implements LevelMap {
   }
   //===================================================================================================
 
+  private int calcQuadOfWayLength(Coords pointFrom, Coords pointTo) {
+    return (pointFrom.getX() - pointTo.getX()) * (pointFrom.getX() - pointTo.getX())
+            + (pointFrom.getY() - pointTo.getY()) * (pointFrom.getY() - pointTo.getY());
+  }
+  //===================================================================================================
+
+  /**
+   * Возвращает допустимые координаты, исходя из заградительного периметра и вектора направленя
+   * от текущей координаты к новой
+   *
+   * @param from
+   * @param to
+   * @param perimeter
+   * @return
+   */
+  public Result<Coords> tryMoveToWithPerimeter(Coords from, Coords to, Rectangle perimeter) {
+    BigDecimal functionYX = to.getX() == from.getX()
+            ? BigDecimal.ZERO
+            : new BigDecimal(to.getY() - from.getY()).divide(
+            new BigDecimal(to.getX() - from.getX()), 5, RoundingMode.HALF_UP);
+    BigDecimal reverseFunctionXY = to.getY() == from.getY()
+            ? BigDecimal.ZERO
+            : new BigDecimal(to.getX() - from.getX()).divide(
+            new BigDecimal(to.getY() - from.getY()), 5, RoundingMode.HALF_UP);
+    int newX = to.getX();
+    int newY = to.getY();
+
+    if (perimeter.getTopLeftConner().getX() > newX) {
+      // точка левее левого горизонта
+      newY += functionYX.multiply(new BigDecimal(perimeter.getTopLeftConner().getX() - newX)).intValue();
+      newX = perimeter.getTopLeftConner().getX();
+    } else if (perimeter.getBottomRightConner().getX() < newX) {
+      // точка правее правого горионта
+      newY += functionYX.multiply(new BigDecimal(perimeter.getBottomRightConner().getX() - newX)).intValue();
+      newX = perimeter.getBottomRightConner().getX();
+    }
+
+    if (perimeter.getTopLeftConner().getY() > newY) {
+      // точка выше верхнего горизонта. Опустим ее до верхнего гоизонта и скорректируем ось Y
+      newX += reverseFunctionXY.multiply(new BigDecimal(perimeter.getTopLeftConner().getY() - newY)).intValue();
+      newY = perimeter.getTopLeftConner().getY();
+    } else if (perimeter.getBottomRightConner().getY() < newY) {
+      // точка ниже нижнего горионта
+      newX += reverseFunctionXY.multiply(new BigDecimal(perimeter.getBottomRightConner().getY() - newY)).intValue();
+      newY = perimeter.getBottomRightConner().getY();
+    }
+
+    return ResultImpl.success(new Coords(newX, newY));
+  }
+  //===================================================================================================
+
+  public Result<Coords> tryToMove(Warrior warrior, Coords to, int objectSize, int maxWayLengthInPixels, Rectangle perimeter) {
+    Coords from = warrior.getOriginalCoords();
+    // сначала проверим ограничение по дальности
+    int pwrVectorLength = (to.getY() - from.getY()) * (to.getY() - from.getY())
+            + (to.getX() - from.getX()) * (to.getX() - from.getX());
+    if ((maxWayLengthInPixels * maxWayLengthInPixels) < pwrVectorLength){
+      // такое расстояние недопустимо. уменьшим его, сохранив вектор
+      double coef = Math.sqrt(pwrVectorLength) / maxWayLengthInPixels;
+      to = new Coords((int)(from.getX() + (to.getX()- from.getX()) / coef)
+              , (int)(from.getY() + (to.getY()- from.getY()) / coef));
+    }
+    if (perimeter != null) {
+      to = (Coords) tryMoveToWithPerimeter(from, to, perimeter);
+    }
+
+    // проверим нет ли перекрытия
+    final int pwrObjectSize = objectSize * objectSize;
+    final Coords copyOfTo = new Coords(to);
+    return gameProcessData.allWarriorsOnMap.values().stream()
+            .filter(nextWarrior -> warrior != nextWarrior && pwrObjectSize > calcQuadOfWayLength(nextWarrior.getCoords(), copyOfTo))
+            .findFirst()
+            .map(hasCoordinates -> ResultImpl.fail(new GameError("", "")))
+            .orElse(ResultImpl.success(copyOfTo));
+  }
+  //===================================================================================================
+
   private Result<Coords> innerWhatIfMoveWarriorTo(Player player, Warrior warrior, Coords coords) {
     // режим расстановки. ставим не выходя за периметр
-    return getWarriorSOriginCoords(warrior) // получаем координаты от которых будем двигаться
-            .map(activeCoords -> activeCoords.tryToMove(coords, getAllUnitsExcludeOneThis(warrior), context.getGameRules().getWarriorSize()
+    return tryToMove(warrior, coords
+                    // размер юнита в "пикселях"
+                    , context.getGameRules().getWarriorSize()
                     // очки действия, оставшиеся в данном ходу для перемещения
                     , warrior.getWarriorSActionPoints(true)
                             // делим на стоимость
-                            * simpleUnitSize / getWarriorSMoveCost(warrior)
-                    , context.isGameRan() ? null : player.getStartZone()));
+                            * simpleUnitSize / warrior.getWarriorSMoveCost()
+                    , context.isGameRan() ? null : player.getStartZone());
   }
   //===================================================================================================
 

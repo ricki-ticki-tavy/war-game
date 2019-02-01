@@ -357,7 +357,7 @@ public class ContextImpl implements Context {
                     .map(player -> !fineContext.isGameRan() || getPlayerOwnsTheTurn() == player
                             ? getLevelMap().moveWarriorTo(player, warriorId, coords)
                             : ResultImpl.fail(PLAYER_IS_NOT_OWENER_OF_THIS_ROUND.getError(userName
-                            , "перемещение юнита " + warriorId))))
+                            , " перемещение юнита " + warriorId))))
             ;
   }
   //===================================================================================================

@@ -7,7 +7,6 @@ import api.entity.weapon.Weapon;
 import api.enums.LifeTimeUnit;
 import api.game.Coords;
 import api.game.map.Player;
-import core.system.ActiveCoords;
 
 import java.util.List;
 
@@ -134,7 +133,14 @@ public interface Warrior extends BaseEntityHeader, HasCoordinates {
    * Получить его координаты ДО начала движения в данном ходу
    * @return
    */
-  ActiveCoords getOriginalCoords();
+   Coords getOriginalCoords();
+
+  /**
+   * Возвращает цену за перемещение на единицу длины для данного юнита с учетом всех его влияний, классов брони
+   * и прочего
+   * @return
+   */
+  int getWarriorSMoveCost();
 
   /**
    * признак можно ли вернуть юнит на его начальные позиции и отказаться от его использования в данном худе, чтобы
