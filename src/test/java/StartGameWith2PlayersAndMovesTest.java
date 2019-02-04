@@ -23,10 +23,10 @@ import static core.system.error.GameErrors.SYSTEM_USER_ERROR;
  */
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {StartGameWith2PlayersTest.class})
+@SpringBootTest(classes = {StartGameWith2PlayersAndMovesTest.class})
 @ContextConfiguration(loader = AnnotationConfigContextLoader.class, classes = TestContextConfiguration.class)
-public class StartGameWith2PlayersTest extends MapPreparer {
-  private static final Logger logger = LoggerFactory.getLogger(StartGameWith2PlayersTest.class);
+public class StartGameWith2PlayersAndMovesTest extends MapPreparer {
+  private static final Logger logger = LoggerFactory.getLogger(StartGameWith2PlayersAndMovesTest.class);
 
   @Autowired
   GameWrapper gameWrapper;

@@ -3,12 +3,10 @@ import api.core.Result;
 import api.entity.warrior.Warrior;
 import api.entity.warrior.WarriorBaseClass;
 import api.entity.weapon.Weapon;
-import api.game.Coords;
 import api.game.map.Player;
 import api.game.map.metadata.GameRules;
 import api.game.wraper.GameWrapper;
 import core.entity.map.GameRulesImpl;
-import core.entity.warrior.Skeleton;
 import core.entity.warrior.Viking;
 import core.entity.weapon.Bow;
 import core.entity.weapon.ShortSword;
@@ -28,10 +26,10 @@ import java.util.List;
 
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {ComplexFastMapTest.class})
+@SpringBootTest(classes = {CreateWarriorsWeaponsUsersTest.class})
 @ContextConfiguration(loader = AnnotationConfigContextLoader.class, classes = TestContextConfiguration.class)
-public class ComplexFastMapTest {
-  private static final Logger logger = LoggerFactory.getLogger(ComplexFastMapTest.class);
+public class CreateWarriorsWeaponsUsersTest {
+  private static final Logger logger = LoggerFactory.getLogger(CreateWarriorsWeaponsUsersTest.class);
 
   @Autowired
   GameWrapper gameWrapper;
