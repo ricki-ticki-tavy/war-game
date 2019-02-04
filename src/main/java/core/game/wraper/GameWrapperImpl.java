@@ -36,11 +36,6 @@ public class GameWrapperImpl implements GameWrapper {
 
   @PostConstruct
   public void testGame() {
-//    logger.info("Запуск внутреннего теста...");
-//    new InnerTest1().test(this);
-//    logger.info("1)   ПЕРВЫЙ ВНУТРЕННИЙ ТЕСТ ПРОЙДЕН");
-//    new InnerTest2().test(this);
-//    logger.info("2)   ВТОРОЙ ВНУТРЕННИЙ ТЕСТ ПРОЙДЕН");
   }
   //===================================================================================================
 
@@ -115,6 +110,7 @@ public class GameWrapperImpl implements GameWrapper {
   }
 //===================================================================================================
 
+  // TODO перевести на параметр контекста
   @Override
   public Result<Weapon> giveWeaponToWarrior(String userName, String warriorId, String weaponClassName) {
     return core.findUserByName(userName)

@@ -10,7 +10,6 @@ import api.enums.PlayerPhaseType;
 import api.game.Coords;
 import api.game.EventDataContainer;
 import api.game.map.Player;
-import core.system.ActiveCoords;
 import core.system.ResultImpl;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +41,7 @@ public class WarriorImpl implements Warrior {
   protected WarriorSBaseAttributes attributes;
   protected Map<String, Influencer> influencers = new ConcurrentHashMap<>(50);
 
-  private ActiveCoords originalCoords;
+  private Coords originalCoords;
   private boolean moveLocked;
   private boolean rollbackAvailable;
   private int treatedActionPointsForMove;
@@ -220,7 +219,7 @@ public class WarriorImpl implements Warrior {
     // возврат в начальную координату возможен
     rollbackAvailable = true;
     // начальные координаты
-    originalCoords = new ActiveCoords(coords);
+    originalCoords = new Coords(coords);
   }
   //===================================================================================================
 
@@ -304,8 +303,15 @@ public class WarriorImpl implements Warrior {
   //===================================================================================================
 
   @Override
-  public ActiveCoords getOriginalCoords() {
+  public Coords getOriginalCoords() {
     return originalCoords;
+  }
+  //===================================================================================================
+
+  @Override
+  public int getWarriorSMoveCost() {
+    return getAttributes().getResult().getArmorClass().getMoveCost()
+            + getAttributes().getResult().getDeltaCostMove();
   }
   //===================================================================================================
 

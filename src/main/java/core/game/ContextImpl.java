@@ -274,7 +274,7 @@ public class ContextImpl implements Context {
     boolean newState =
             getLevelMap().getPlayers().size() == getLevelMap().getMaxPlayerCount()
                     && getLevelMap().getPlayers().stream().filter(foundPlayer -> foundPlayer.isReadyToPlay())
-                    .reduce(0, (acc, chg) -> acc++, (a, b) -> a + b) == getLevelMap().getMaxPlayerCount();
+                    .count() == getLevelMap().getMaxPlayerCount();
 
     // Если текущий статус игры отличен от нового, то будем его менять, если можно
     if (newState != isGameRan()) {
@@ -356,7 +356,8 @@ public class ContextImpl implements Context {
                     // если игра запущена, то двигать фигуры можно только в свой ход
                     .map(player -> !fineContext.isGameRan() || getPlayerOwnsTheTurn() == player
                             ? getLevelMap().moveWarriorTo(player, warriorId, coords)
-                            : ResultImpl.fail(PLAYER_IS_NOT_OWENER_OF_THIS_ROUND.getError(userName, "перемещение юнита " + warriorId))))
+                            : ResultImpl.fail(PLAYER_IS_NOT_OWENER_OF_THIS_ROUND.getError(userName
+                            , " перемещение юнита " + warriorId))))
             ;
   }
   //===================================================================================================

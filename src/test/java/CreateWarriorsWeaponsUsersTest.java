@@ -3,12 +3,10 @@ import api.core.Result;
 import api.entity.warrior.Warrior;
 import api.entity.warrior.WarriorBaseClass;
 import api.entity.weapon.Weapon;
-import api.game.Coords;
 import api.game.map.Player;
 import api.game.map.metadata.GameRules;
 import api.game.wraper.GameWrapper;
 import core.entity.map.GameRulesImpl;
-import core.entity.warrior.Skeleton;
 import core.entity.warrior.Viking;
 import core.entity.weapon.Bow;
 import core.entity.weapon.ShortSword;
@@ -28,16 +26,18 @@ import java.util.List;
 
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {ComplexFastMapTest.class})
+@SpringBootTest(classes = {CreateWarriorsWeaponsUsersTest.class})
 @ContextConfiguration(loader = AnnotationConfigContextLoader.class, classes = TestContextConfiguration.class)
-public class ComplexFastMapTest {
-  private static final Logger logger = LoggerFactory.getLogger(ComplexFastMapTest.class);
+public class CreateWarriorsWeaponsUsersTest {
+  private static final Logger logger = LoggerFactory.getLogger(CreateWarriorsWeaponsUsersTest.class);
 
   @Autowired
   GameWrapper gameWrapper;
 
   @Test
   public void test1() {
+    Assert.isTrue(gameWrapper.getCore().getContextList().size() == 0, "Контексты не пусты !!!");
+
     int step = 1;
     logger.info("step " + step++);
     Result<List<String>> classesResult = gameWrapper.getBaseWarriorClasses();
@@ -71,15 +71,17 @@ public class ComplexFastMapTest {
 
     logger.info("step " + step++);
     GameRules rules = new GameRulesImpl(9, 2, 1, 50, 200, 2, 600, 30);
-    Result<Context> createContextResult = gameWrapper.createGame("test2", rules, "level2.xml", "test-game", false);
+    Result<Context> createContextResult = gameWrapper.createGame("test2", rules, "testMap.xml", "test-game", false);
     Assert.isTrue(createContextResult.isFail(), "Карта создана не существующим пользователем");
 
     logger.info("step " + step++);
     rules = new GameRulesImpl(9, 2, 1, 50, 200, 2, 600, 30);
-    createContextResult = gameWrapper.createGame(player.getId(), rules, "level2.xml", "test-game", false);
+    createContextResult = gameWrapper.createGame(player.getId(), rules, "testMap.xml", "test-game", false);
     Assert.isTrue(createContextResult.isSuccess(), "Карта не загружена");
     Assert.isTrue(((List<Context>) gameWrapper.getGamesList().getResult()).size() == 1, "Контекст не появился в списке контекстов");
     Context context1 = createContextResult.getResult();
+    Assert.isTrue(gameWrapper.getCore().findGameContextByUID(context1.getContextId()).isSuccess(), "Контекст не появился в списке контекстов");
+    Assert.isTrue(context1.getLevelMap().getDescription().equals("Тестовая карта для 2-х игроков"), "Неверно загружено название карты");
 
     logger.info("step " + step++);
     Result<Context> createContextResult2 = gameWrapper.createGame(player2.getId(), rules, "level2.xml", "test-game", false);
@@ -159,44 +161,11 @@ public class ComplexFastMapTest {
     // игрок 2 имел созданную игру. После подключения к этой игре его контекст должен былудалиться
     Assert.isTrue(((List<Context>) gameWrapper.getGamesList().getResult()).size() == 1, "Старый контекст подключенного игрока не удалился как контекст владельца");
 
+//    warriorResult = gameWrapper.createWarrior()
 
     logger.info("step " + step++);
     gameWrapper.getCore().removeGameContext(context1.getContextId());
     Assert.isTrue(gameWrapper.getCore().findGameContextByUID(context1.getContextId()).isFail(), "Контекст не удален");
   }
-
-//  @Test
-  public void startPlayTest() {
-    Result<Player> playerResult = gameWrapper.login("test");
-    Assert.isTrue(playerResult.isSuccess(), playerResult.getError().getMessage());
-    Player player1 = playerResult.getResult();
-
-    playerResult = gameWrapper.login("test 2");
-    Assert.isTrue(playerResult.isSuccess(), playerResult.getError().getMessage());
-    Player player2 = playerResult.getResult();
-
-    GameRules rules = new GameRulesImpl(1, 2, 1, 50, 200, 2, 600, 30);
-    Result<Context> contextResult = gameWrapper.createGame(player1.getId(), rules, "level2.xml", "test-game2", false);
-    Assert.isTrue(contextResult.isSuccess(), contextResult.getError().getMessage());
-    Context gameContext =  contextResult.getResult();
-
-    playerResult = gameWrapper.connectToGame(player2.getId(), gameContext.getContextId());
-    Assert.isTrue(playerResult.isSuccess(), playerResult.getError().getMessage());
-    Coords player1coord = player1.getStartZone().getBottomRightConner();
-    Coords player2coord = player2.getStartZone().getBottomRightConner();
-
-    Result<Warrior> warriorResult = gameWrapper.createWarrior(gameContext.getContextId(), player1.getId(), Viking.CLASS_NAME
-            , new Coords(player1coord.getX(), player1coord.getY()));
-    Assert.isTrue(warriorResult.isSuccess(), warriorResult.getError().getMessage());
-    Warrior warrior1p1 = warriorResult.getResult();
-
-    warriorResult = gameWrapper.createWarrior(gameContext.getContextId(), player1.getId(), Skeleton.CLASS_NAME
-            , new Coords(player2coord.getX(), player2coord.getY()));
-    Warrior warrior1p2 = warriorResult.getResult();
-    Assert.isTrue(warriorResult.isSuccess(), warriorResult.getError().getMessage());
-
-
-  }
-
 
 }

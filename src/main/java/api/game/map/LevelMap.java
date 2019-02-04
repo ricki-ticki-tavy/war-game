@@ -10,7 +10,6 @@ import api.game.Coords;
 import api.game.Rectangle;
 import api.game.map.metadata.LevelMapMetaDataXml;
 import core.game.GameProcessData;
-import core.system.ActiveCoords;
 
 import java.util.List;
 
@@ -185,7 +184,7 @@ public interface LevelMap {
    * @param warrior
    * @return
    */
-   Result<ActiveCoords> getWarriorSOriginCoords(Warrior warrior);
+   Result<Coords> getWarriorSOriginCoords(Warrior warrior);
 
   /**
    * Получить игрока, выполняющего ход в данное время
@@ -215,4 +214,17 @@ public interface LevelMap {
    */
   Result<List<Influencer>> getWarriorSInfluencers(Player player, String warriorId);
 
-}
+  /**
+   * Попытка перемещения юнита на новую координату
+   *
+   * @param warrior
+   * @param to
+   * @param objectSize
+   * @param maxWayLengthInPixels - максимальная дальность перемещения в "пикселах"
+   * @param perimeter
+   * @return
+   */
+  Result<Coords> tryToMove(Warrior warrior, Coords to, int objectSize, int maxWayLengthInPixels, Rectangle perimeter);
+
+
+  }
