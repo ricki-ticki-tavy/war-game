@@ -2,6 +2,7 @@ import api.game.Coords;
 import api.game.Rectangle;
 import api.game.map.LevelMap;
 import core.entity.map.LevelMapImpl;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +15,7 @@ import org.springframework.util.Assert;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {ComplexFastMapTest.class})
 @ContextConfiguration(loader = AnnotationConfigContextLoader.class, classes = TestContextConfiguration.class)
-public class ActiveCoordsTest {
+public class MoveCheckTest {
 
   @Autowired
   LevelMap levelMap;
@@ -45,6 +46,7 @@ public class ActiveCoordsTest {
     Assert.isTrue(map.tryMoveToWithPerimeter(baseCoords, new Coords(100, 400), perimeter).getResult().equals(300, 400), "16-st failed");
 
     Assert.isTrue(map.tryMoveToWithPerimeter(baseCoords, new Coords(450, 350), perimeter).getResult().equals(450, 350), "17-st failed");
+
 
   }
 }

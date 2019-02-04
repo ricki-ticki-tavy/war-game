@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map>
+    <name>Test2players</name>
+    <description>Тестовая карта для 2-х игроков</description>
+    <simpleUnitSize>10</simpleUnitSize>
+    <width>100</width>
+    <height>100</height>
+    <maxPlayersCount>2</maxPlayersCount>
+    <playerStartZones>
+        <startZone>
+            <topLeftConner>
+                <x>0</x>
+                <y>0</y>
+            </topLeftConner>
+            <bottomRightConner>
+                <x>99</x>
+                <y>49</y>
+            </bottomRightConner>
+        </startZone>
+        <startZone>
+            <topLeftConner>
+                <x>0</x>
+                <y>50</y>
+            </topLeftConner>
+            <bottomRightConner>
+                <x>99</x>
+                <y>99</y>
+            </bottomRightConner>
+        </startZone>
+    </playerStartZones>
+</map>

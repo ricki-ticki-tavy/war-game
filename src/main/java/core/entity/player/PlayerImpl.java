@@ -218,7 +218,19 @@ public class PlayerImpl implements Player {
 
   @Override
   public Result<Player> prepareToAttackPhase() {
-    return ResultImpl.fail(SYSTEM_NOT_REALIZED.getError("prepareToAttackPhase"));
+    Result<Warrior> warriorResult;
+    // восстановим значения воинов. свои влияния воин собирает сам
+    for (Warrior warrior : warriors.values())
+      if ((warriorResult = warrior.prepareToAttackPhase()).isFail()) {
+        return (Result<Player>) ResultImpl.fail(warriorResult.getError());
+      }
+
+    // TODO применить артефакты и способности игрока
+
+    // Отправим сообщение о завершении хода
+    context.fireGameEvent(null, PLAYER_TAKES_TURN, new EventDataContainer(this), null);
+
+    return ResultImpl.success(true);
   }
   //===================================================================================================
 

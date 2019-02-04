@@ -7,7 +7,7 @@ import static api.enums.EventType.*;
  */
 public enum LifeTimeUnit {
   FULL_ROUND("игровой круг", ROUND_FULL)
-  , ROUND_START("в начале хода игрока", PLAYER_TAKE_TURN)
+  , ROUND_START("в начале хода игрока", PLAYER_TAKES_TURN)
   , ROUND_END("в конце хода игрока", PLAYER_LOOSE_TURN)
   , USING_TIMES("Разы использования", ALWAYS);
 

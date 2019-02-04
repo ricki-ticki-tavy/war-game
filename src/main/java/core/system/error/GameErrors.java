@@ -16,7 +16,7 @@ public enum GameErrors {
   , WARRIOR_BASE_CLASS_NOT_FOUND_BY_NAME("WR-4", "Класс воина с именем %s не существует")
   , WARRIOR_NOT_FOUND_AT_PLAYER_BY_NAME("WR-5", "Класс воина с id %s не существует у игрока %s")
   , WARRIOR_CAN_T_MORE_MOVE_ON_THIS_TURN("WR-6", "Воин %s (id %s) игрока %s в игре %s (id %s) не может более выполнить перемещение в данном ходе")
-  , WARRIOR_CAN_T_MOVE_TO_THIS_POINT("WR-7", "Воин %s (id %s) игрока %s в игре %s (id %s) не может переместиться на %s так как эти координаты заняты")
+  , WARRIOR_CAN_T_MOVE_TO_THIS_POINT("WR-7", "В игре %s (id %s)  воин '%s %s' (id %s) игрока %s не может переместиться на %s так как эти координаты заняты")
 
   , WEAPON_BASE_CLASS_NOT_FOUND_BY_NAME("WP-1", "Класс оружия с именем %s не существует")
 
@@ -42,6 +42,8 @@ public enum GameErrors {
   , CONTEXT_NOT_IN_GAME_RAN_STATE("CT-8", "игра '%s' (context %s) еще не началась. Игроки готовятся.")
 
   , SYSTEM_NOT_REALIZED("NR-1", "Метод %s не реализован.")
+
+  , SYSTEM_USER_ERROR("UM-1", "%s.")
 
 
 

@@ -109,14 +109,14 @@ public class LevelMapImpl implements LevelMap {
     this.name = levelMapMetaData.name;
     this.description = levelMapMetaData.description;
     this.simpleUnitSize = levelMapMetaData.simpleUnitSize;
-    this.width = levelMapMetaData.width;
-    this.height = levelMapMetaData.height;
+    this.width = levelMapMetaData.width * simpleUnitSize;
+    this.height = levelMapMetaData.height * simpleUnitSize;
     this.maxPlayersCount = levelMapMetaData.maxPlayersCount;
     playerStartZones = new LinkedList();
 
     levelMapMetaData.playerStartZones.stream().forEach(rectangle ->
-            playerStartZones.add(new Rectangle(new Coords(rectangle.topLeftConner.x, rectangle.topLeftConner.y)
-                    , new Coords(rectangle.bottomRightConner.x, rectangle.bottomRightConner.y)))
+            playerStartZones.add(new Rectangle(new Coords(rectangle.topLeftConner.x * simpleUnitSize, rectangle.topLeftConner.y * simpleUnitSize)
+                    , new Coords(rectangle.bottomRightConner.x * simpleUnitSize, rectangle.bottomRightConner.y * simpleUnitSize)))
     );
 
     players = new ConcurrentHashMap<>(maxPlayersCount);
@@ -252,13 +252,15 @@ public class LevelMapImpl implements LevelMap {
     return player.findWarriorById(warriorId)
             .map(warrior -> innerWhatIfMoveWarriorTo(player, warrior, newCoords)
                     .map(coords -> {
-                      // если юнита нет среди тех, которые были затронуты в этот ход, то добавить в этот список
-                      gameProcessData.playerTransactionalData.computeIfAbsent(warrior.getId()
-                              , id -> warrior);
+                      if (context.isGameRan()) {
+                        // если юнита нет среди тех, которые были затронуты в этот ход, то добавить в этот список
+                        gameProcessData.playerTransactionalData.computeIfAbsent(warrior.getId()
+                                , id -> warrior);
+                      }
                       // кинем сообщение, что юнит перемещен
                       Result<Warrior> result = warrior.moveWarriorTo(coords);
                       context.fireGameEvent(null, WARRIOR_MOVED
-                              , new EventDataContainer(this, result), null);
+                              , new EventDataContainer(warrior, result), null);
                       return result;
                     }));
   }
@@ -304,7 +306,7 @@ public class LevelMapImpl implements LevelMap {
 
 
   public Result<Player> getPlayerOwnsThisTurn() {
-    return ResultImpl.success(gameProcessData.frozenListOfPlayers.get(gameProcessData.indexOfPlayerOwnsTheTurn));
+    return ResultImpl.success(gameProcessData.frozenListOfPlayers.get(gameProcessData.indexOfPlayerOwnsTheTurn.get()));
   }//===================================================================================================
 
   /**
@@ -345,18 +347,18 @@ public class LevelMapImpl implements LevelMap {
   }
   //===================================================================================================
 
-  /**
-   * Собирает всех юнитов карты.
-   *
-   * @param excludedWarrior
-   * @return
-   */
-  private List<HasCoordinates> getAllUnitsExcludeOneThis(Warrior excludedWarrior) {
-    List<HasCoordinates> allWarriors = new ArrayList(gameProcessData.allWarriorsOnMap.values());
-    allWarriors.remove(excludedWarrior);
-    return allWarriors;
-  }
-  //===================================================================================================
+//  /**
+//   * Собирает всех юнитов карты.
+//   *
+//   * @param excludedWarrior
+//   * @return
+//   */
+//  private List<HasCoordinates> getAllUnitsExcludeOneThis(Warrior excludedWarrior) {
+//    List<HasCoordinates> allWarriors = new ArrayList(gameProcessData.allWarriorsOnMap.values());
+//    allWarriors.remove(excludedWarrior);
+//    return allWarriors;
+//  }
+//  //===================================================================================================
 
   private int calcQuadOfWayLength(Coords pointFrom, Coords pointTo) {
     return (pointFrom.getX() - pointTo.getX()) * (pointFrom.getX() - pointTo.getX())
@@ -410,27 +412,37 @@ public class LevelMapImpl implements LevelMap {
   //===================================================================================================
 
   public Result<Coords> tryToMove(Warrior warrior, Coords to, int objectSize, int maxWayLengthInPixels, Rectangle perimeter) {
-    Coords from = warrior.getOriginalCoords();
+    // если еще идет расстановка, то координаты юнита и есть его оригинальные координаты
+    Coords from = context.isGameRan() ? warrior.getOriginalCoords() : new Coords(warrior.getCoords());
     // сначала проверим ограничение по дальности
     int pwrVectorLength = (to.getY() - from.getY()) * (to.getY() - from.getY())
             + (to.getX() - from.getX()) * (to.getX() - from.getX());
-    if ((maxWayLengthInPixels * maxWayLengthInPixels) < pwrVectorLength){
+    if ((maxWayLengthInPixels * maxWayLengthInPixels) < pwrVectorLength) {
       // такое расстояние недопустимо. уменьшим его, сохранив вектор
       double coef = Math.sqrt(pwrVectorLength) / maxWayLengthInPixels;
-      to = new Coords((int)(from.getX() + (to.getX()- from.getX()) / coef)
-              , (int)(from.getY() + (to.getY()- from.getY()) / coef));
+      to = new Coords((int) (from.getX() + (to.getX() - from.getX()) / coef)
+              , (int) (from.getY() + (to.getY() - from.getY()) / coef));
     }
     if (perimeter != null) {
-      to = (Coords) tryMoveToWithPerimeter(from, to, perimeter);
+      to = tryMoveToWithPerimeter(from, to, perimeter).getResult();
     }
 
     // проверим нет ли перекрытия
     final int pwrObjectSize = objectSize * objectSize;
     final Coords copyOfTo = new Coords(to);
+    Coords to_ = new Coords(to);
     return gameProcessData.allWarriorsOnMap.values().stream()
             .filter(nextWarrior -> warrior != nextWarrior && pwrObjectSize > calcQuadOfWayLength(nextWarrior.getCoords(), copyOfTo))
             .findFirst()
-            .map(hasCoordinates -> ResultImpl.fail(new GameError("", "")))
+            .map(foundWarrior -> ResultImpl.fail(WARRIOR_CAN_T_MOVE_TO_THIS_POINT.getError(
+                    context.getGameName()
+                    , context.getContextId()
+                    , warrior.getTitle()
+                    , warrior.getWarriorBaseClass().getTitle()
+                    , warrior.getId()
+                    , warrior.getOwner().getId()
+                    , to_.toString()
+            )))
             .orElse(ResultImpl.success(copyOfTo));
   }
   //===================================================================================================
@@ -438,13 +450,14 @@ public class LevelMapImpl implements LevelMap {
   private Result<Coords> innerWhatIfMoveWarriorTo(Player player, Warrior warrior, Coords coords) {
     // режим расстановки. ставим не выходя за периметр
     return tryToMove(warrior, coords
-                    // размер юнита в "пикселях"
-                    , context.getGameRules().getWarriorSize()
-                    // очки действия, оставшиеся в данном ходу для перемещения
-                    , warrior.getWarriorSActionPoints(true)
-                            // делим на стоимость
-                            * simpleUnitSize / warrior.getWarriorSMoveCost()
-                    , context.isGameRan() ? null : player.getStartZone());
+            // размер юнита в "пикселях"
+            , context.getGameRules().getWarriorSize()
+            // очки действия, оставшиеся в данном ходу для перемещения
+            , context.isGameRan() ? warrior.getWarriorSActionPoints(true)
+                    // делим на стоимость
+                    * simpleUnitSize / warrior.getWarriorSMoveCost()
+                    : 10000000
+            , context.isGameRan() ? null : player.getStartZone());
   }
   //===================================================================================================
 

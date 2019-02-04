@@ -20,7 +20,7 @@ public class GameProcessData {
   public AtomicInteger indexOfPlayerOwnsTheTurn;
 
   public GameProcessData() {
-    new AtomicInteger(0);
+    indexOfPlayerOwnsTheTurn = new AtomicInteger(0);
   }
 
   public final Map<Integer, Player> frozenListOfPlayers = new ConcurrentHashMap<>(5);

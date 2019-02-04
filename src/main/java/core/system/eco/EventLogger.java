@@ -63,8 +63,9 @@ public class EventLogger {
       case PLAYER_CHANGED_ITS_READY_TO_PLAY_STATUS: {
         // "Игрок '%s' в игре %s (контекст '%s') сообщил о %s."
         logger.info(event.getEventType().getFormattedMessage(
-                event.getSource(Player.class).getTitle()
+                event.getSource(Player.class).getId()
                 , event.getSourceContext().getGameName()
+                , event.getSourceContext().getContextId()
                 , event.getSource(Player.class).isReadyToPlay() ? "готовности" : "продолжении подготовки"));
         break;
       }
@@ -76,7 +77,7 @@ public class EventLogger {
                 , event.getSourceContext().getContextId()));
         break;
       }
-      case PLAYER_TAKE_TURN: {
+      case PLAYER_TAKES_TURN: {
         //"Игрок '%s' в игре %s (контекст '%s') получил ход"
         logger.info(event.getEventType().getFormattedMessage(
                 event.getSource(Player.class).getTitle()
@@ -95,10 +96,14 @@ public class EventLogger {
         break;
       }
       case WARRIOR_MOVED: {
-        // "В игре '%s' игрок '%s' переместил юнит '%s' на координаты '%s'"
-        logger.info(event.getEventType().getFormattedMessage(event.getSourceContext().getGameName()
-                , event.getSource(Warrior.class).getOwner().getTitle()
+        // "В игре '%s' (id %s) игрок '%s' переместил юнит '%s %s' (id %s) на координаты '%s'"
+        logger.info(event.getEventType().getFormattedMessage(
+                event.getSourceContext().getGameName()
+                , event.getSourceContext().getContextId()
+                , event.getSource(Warrior.class).getOwner().getId()
                 , event.getSource(Warrior.class).getWarriorBaseClass().getTitle()
+                , event.getSource(Warrior.class).getTitle()
+                , event.getSource(Warrior.class).getId()
                 , event.getSource(Warrior.class).getCoords().toString()));
         break;
       }

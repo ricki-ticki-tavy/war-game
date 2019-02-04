@@ -274,7 +274,7 @@ public class ContextImpl implements Context {
     boolean newState =
             getLevelMap().getPlayers().size() == getLevelMap().getMaxPlayerCount()
                     && getLevelMap().getPlayers().stream().filter(foundPlayer -> foundPlayer.isReadyToPlay())
-                    .reduce(0, (acc, chg) -> acc++, (a, b) -> a + b) == getLevelMap().getMaxPlayerCount();
+                    .count() == getLevelMap().getMaxPlayerCount();
 
     // Если текущий статус игры отличен от нового, то будем его менять, если можно
     if (newState != isGameRan()) {
