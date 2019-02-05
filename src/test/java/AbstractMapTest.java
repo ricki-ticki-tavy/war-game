@@ -47,7 +47,7 @@ public abstract class AbstractMapTest {
     assertSuccess(playerResult);
     player2 = playerResult.getResult().getId();
 
-    GameRules rules = new GameRulesImpl(2, 2, 2, 50, 200, 2, 600, 30);
+    GameRules rules = new GameRulesImpl(2, 2, 1, 50, 200, 2, 600, 30);
     Result<Context> contextResult = gameWrapper.createGame(player1, rules, "testMap.xml", "test-game2", false);
     assertSuccess(contextResult);
     gameContext = contextResult.getResult().getContextId();

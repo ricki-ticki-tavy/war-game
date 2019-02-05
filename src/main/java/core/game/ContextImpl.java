@@ -295,57 +295,6 @@ public class ContextImpl implements Context {
   }
   //===================================================================================================
 
-//  /**
-//   * проверяет может ли ходящий сейчас игрок переместить данный юнит
-//   *
-//   * @param warrior
-//   */
-//  public Result<Warrior> ifUnitCanMove(String contextId, String userName, String warriorId) {
-//    ifGameDeleting(false)
-//            .map(context -> context.getLevelMap().)
-//    Result result;
-//    // если нет этого юнита в списке юнитов, уже задействованных в данном ходе и в нем еще есть место, то можно ходить
-//    // новыйм юнитом
-//    Warrior touchedWarrior = getLevelMap().getGameProcessData().playerTransactionalData.get(warrior.getId());
-//    if (touchedWarrior == null) {
-//      result = getLevelMap().getGameProcessData().playerTransactionalData.size() < getGameRules().getMovesCountPerTurnForEachPlayer()
-//              // это новый юнит в данном ходу, но двигать его можно
-//              ? ResultImpl.success(warrior)
-//              : ResultImpl.fail(PLAYER_UNIT_MOVES_ON_THIS_TURN_ARE_EXCEEDED.getError(warrior.getOwner().getId(), String.valueOf(getLevelMap().getMaxPlayerCount())));
-//    } else {
-//      // юнит уже в списке тех, что делали движение  данном ходе
-//      result = touchedWarrior.isMoveLocked()
-//              // новые координаты воина уже заморожены и не могут быть отменены
-//              // Воин %s (id %s) игрока %s в игре %s (id %s) не может более выполнить перемещение в данном ходе
-//              ? ResultImpl
-//              .fail(WARRIOR_CAN_T_MORE_MOVE_ON_THIS_TURN.getError(
-//                      warrior.getWarriorBaseClass().getTitle()
-//                      , warrior.getId()
-//                      , warrior.getOwner().getId()
-//                      , getGameName()
-//                      , getContextId()))
-//              : ResultImpl.success(warrior);
-//    }
-//    return result;
-//  }
-//  //===================================================================================================
-
-  // TODO убрать
-
-  /**
-   * возвращает имеет ли возможность текущий игрок двигать определенный юнит
-   */
-//  private Result<Warrior> ifUserCanMoveWarriorAtThisTurn(Warrior warrior) {
-//    // если игра не запущена, то может
-//    return ifGameRan(false)
-//            .map(context -> ResultImpl.success(warrior))
-//            // игра запущена. Допустимо ходить только в свой ход и только доступным юнитом
-//            .mapFail(result -> ifPlayerOwnsThisTurn(warrior.getOwner())
-//                    // проверим всеми ли юнитами, которыми допустимо, ходил игрок или есть еще ходы
-//                    .map(player -> ifUnitCanMove(warrior)));
-//  }
-//  //===================================================================================================
-//
   private Result<Player> ifPlayerOwnsThisTurn(Player player) {
     return player == getPlayerOwnsTheTurn() ? ResultImpl.success(player) : ResultImpl.fail(PLAYER_IS_NOT_OWENER_OF_THIS_ROUND.getError(player.getId(), getContextId()));
   }
@@ -356,21 +305,6 @@ public class ContextImpl implements Context {
     return ifGameDeleting(false)
             .map(fineContext -> fineContext.findUserByName(userName)
             .map(player -> fineContext.getLevelMap().moveWarriorTo(player, warriorId, coords)));
-    //    return ifGameDeleting(false)
-//            .map(fineContext -> fineContext.findUserByName(userName)
-//                    // если игра запущена, то двигать фигуры можно только в свой ход
-//                    .map(player -> {
-//                              if (fineContext.isGameRan()) {
-//                                return fineContext.ifPlayerOwnsTheTurnEqualsTo(player)
-//                                        .map(playerOwnsThisTurn -> getLevelMap().moveWarriorTo(playerOwnsThisTurn, warriorId, coords))
-//                                        .mapFail(warriorResult -> (Result<Warrior>) ResultImpl.fail(
-//                                                PLAYER_IS_NOT_OWENER_OF_THIS_ROUND.getError(userName
-//                                                        , " перемещение юнита " + warriorId)));
-//                              } else {
-//                                return getLevelMap().moveWarriorTo(player, warriorId, coords);
-//                              }
-//                            }
-//                    ));
   }
   //===================================================================================================
 

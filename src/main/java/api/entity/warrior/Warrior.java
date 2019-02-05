@@ -182,7 +182,7 @@ public interface Warrior extends BaseEntityHeader, HasCoordinates {
    * возвращает признак был ли юнит использован в этом ходе
    * @return
    */
-  boolean isSelectedAtThisTurn();
+  boolean isTouchedAtThisTurn();
 
   /**
    * Указывает можно ли откатить перемещение юнита в данном ходе. Это возможно, пока он не начал применять что-либо кроме

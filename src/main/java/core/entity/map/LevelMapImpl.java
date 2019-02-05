@@ -244,15 +244,11 @@ public class LevelMapImpl implements LevelMap {
   }
   //===================================================================================================
 
+
   protected Result<Warrior> innerMoveWarriorTo(Player player, String warriorId, Coords newCoords) {
     return player.findWarriorById(warriorId)
             .map(warrior -> innerWhatIfMoveWarriorTo(player, warrior, newCoords)
                     .map(coords -> {
-                      if (context.isGameRan()) {
-                        // если юнита нет среди тех, которые были затронуты в этот ход, то добавить в этот список
-                        gameProcessData.playerTransactionalData.computeIfAbsent(warrior.getId()
-                                , id -> warrior);
-                      }
                       // кинем сообщение, что юнит перемещен
                       Result<Warrior> result = warrior.moveWarriorTo(coords);
                       context.fireGameEvent(null, WARRIOR_MOVED
@@ -458,8 +454,15 @@ public class LevelMapImpl implements LevelMap {
   //===================================================================================================
 
   private Result<Coords> innerWhatIfMoveWarriorTo(Player player, Warrior warrior, Coords coords) {
-    // режим расстановки. ставим не выходя за периметр
-    return tryToMove(warrior, coords
+    // Если игра началась
+    return context.isGameRan()
+            // и этим юнитом не делалось движений
+            && !warrior.isTouchedAtThisTurn()
+            // и предел используемых за ход юнитов достигнут
+            && player.getWarriorsTouchedAtThisTurn().getResult().size() >= context.getGameRules().getMovesCountPerTurnForEachPlayer()
+            ? ResultImpl.fail(PLAYER_UNIT_MOVES_ON_THIS_TURN_ARE_EXCEEDED
+            .getError(warrior.getOwner().getId(), String.valueOf(context.getGameRules().getMovesCountPerTurnForEachPlayer())))
+            : tryToMove(warrior, coords
             // размер юнита в "пикселях"
             , context.getGameRules().getWarriorSize()
             // очки действия, оставшиеся в данном ходу для перемещения

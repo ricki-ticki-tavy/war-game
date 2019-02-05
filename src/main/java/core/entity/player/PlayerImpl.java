@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import static api.enums.EventType.*;
 import static core.system.error.GameErrors.*;
@@ -240,6 +241,15 @@ public class PlayerImpl implements Player {
             .map(warrior -> warrior.addInfluenceToWarrior(modifier, source, lifeTimeUnit, lifeTime))
             // добавить слушатель события
             .doIfSuccess(influencer -> {});
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<List<Warrior>> getWarriorsTouchedAtThisTurn() {
+    return ResultImpl.success(warriors.values()
+            .stream()
+            .filter(warrior -> warrior.isTouchedAtThisTurn())
+            .collect(Collectors.toList()));
   }
   //===================================================================================================
 

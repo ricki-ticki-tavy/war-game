@@ -121,6 +121,12 @@ public class StartGameWith2PlayersAndMovesTest extends AbstractMapTest {
     Assert.isTrue(warriorResult.getResult().getCoords().equals(new Coords(378, 489)), "Неверные координаты перемещения. возможно неверная стоимость перемещения");
     Assert.isTrue(warriorResult.getResult().getTreatedActionPointsForMove() == 239, "Неверно рассчитана стоимость перемещения");
 
+    // двигаем вторым юнитом первого игрока. Так как лимит 1 фигура в ход, то должен быть отказ
+    warriorResult = gameWrapper.moveWarriorTo(gameContext, player1, warrior2p1, new Coords(300, 300));
+    assertSuccess(warriorResult);
+    Assert.isTrue(warriorResult.getResult().getCoords().equals(new Coords(378, 489)), "Неверные координаты перемещения. возможно неверная стоимость перемещения");
+    Assert.isTrue(warriorResult.getResult().getTreatedActionPointsForMove() == 239, "Неверно рассчитана стоимость перемещения");
+
 
   }
 
