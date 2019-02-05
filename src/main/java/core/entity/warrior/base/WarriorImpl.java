@@ -32,7 +32,7 @@ public class WarriorImpl implements Warrior {
 
   protected Map<Integer, WarriorSHand> hands;
   protected WarriorBaseClass warriorBaseClass;
-  protected Coords coords;
+  protected volatile Coords coords;
   protected final String id = UUID.randomUUID().toString();
   protected String title;
   protected boolean summoned;
@@ -41,10 +41,12 @@ public class WarriorImpl implements Warrior {
   protected WarriorSBaseAttributes attributes;
   protected Map<String, Influencer> influencers = new ConcurrentHashMap<>(50);
 
-  private Coords originalCoords;
-  private boolean moveLocked;
-  private boolean rollbackAvailable;
-  private int treatedActionPointsForMove;
+  protected volatile boolean selectedAtThisTurn = false;
+
+  protected volatile Coords originalCoords;
+  protected volatile boolean moveLocked;
+  protected volatile boolean rollbackAvailable;
+  protected volatile int treatedActionPointsForMove;
 
 
   @Autowired
@@ -115,10 +117,43 @@ public class WarriorImpl implements Warrior {
   }
   //===================================================================================================
 
+  private Coords innerGetTranslatedToGameCoords() {
+    // если игра уже в стадии игры, а не расстановки, юнит не трогали или если не заблокирована возможность отката, то
+    // берем OriginalCoords в противном случае берем Coords
+    return getOwner().findContext().getResult().isGameRan()
+            // игра идет
+            && isRollbackAvailable() && !isMoveLocked()
+            ? originalCoords
+            : coords;
+  }
+  //===================================================================================================
+
   @Override
-  public Result<Warrior> moveWarriorTo(Coords coords) {
-    this.coords = new Coords(coords);
-    Result result = ResultImpl.success(this);
+  public Coords getTranslatedToGameCoords() {
+    return new Coords(innerGetTranslatedToGameCoords());
+  }
+  //===================================================================================================
+
+  @Override
+  public int calcMoveCost(Coords to) {
+    Coords from = innerGetTranslatedToGameCoords();
+
+    return (int) Math.round((double) getWarriorSMoveCost() * Math.sqrt((double) ((from.getX() - to.getX()) * (from.getX() - to.getX())
+            + (from.getY() - to.getY()) * (from.getY() - to.getY()))) / (double)getOwner().findContext().getResult().getLevelMap().getSimpleUnitSize());
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Warrior> moveWarriorTo(Coords to) {
+    Result result;
+//    if (!moveLocked) {
+      treatedActionPointsForMove = calcMoveCost(to);
+      selectedAtThisTurn = true;
+      this.coords = new Coords(to);
+      result = ResultImpl.success(this);
+//    } else {
+//      result = ResultImpl.fail()
+//    }
     return result;
   }
   //===================================================================================================
@@ -220,6 +255,8 @@ public class WarriorImpl implements Warrior {
     rollbackAvailable = true;
     // начальные координаты
     originalCoords = new Coords(coords);
+    // не использовался в этом ходе / защите
+    selectedAtThisTurn = false;
   }
   //===================================================================================================
 
@@ -270,7 +307,7 @@ public class WarriorImpl implements Warrior {
    * Удаление влияния
    *
    * @param influencer
-   * @param silent        не отправлять уведомления о действии
+   * @param silent     не отправлять уведомления о действии
    */
   void innerRemoveInfluencerFromWarrior(Influencer influencer, boolean silent) {
     influencers.remove(influencer.getId());
@@ -330,6 +367,19 @@ public class WarriorImpl implements Warrior {
   @Override
   public void lockRollback() {
     this.rollbackAvailable = false;
+  }
+  //===================================================================================================
+
+  @Override
+  public boolean isSelectedAtThisTurn() {
+    return selectedAtThisTurn;
+  }
+  //===================================================================================================
+
+  @Override
+  public Warrior setSelectedOnThisTurn(boolean selectedAtThisTurn) {
+    this.selectedAtThisTurn = selectedAtThisTurn;
+    return this;
   }
   //===================================================================================================
 

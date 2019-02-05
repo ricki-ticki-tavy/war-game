@@ -3,7 +3,6 @@ package core.entity.map;
 import api.core.Context;
 import api.core.Result;
 import api.entity.ability.Modifier;
-import api.entity.warrior.HasCoordinates;
 import api.entity.warrior.Influencer;
 import api.entity.warrior.Warrior;
 import api.enums.LifeTimeUnit;
@@ -15,7 +14,6 @@ import api.game.map.Player;
 import api.game.map.metadata.LevelMapMetaDataXml;
 import core.game.GameProcessData;
 import core.system.ResultImpl;
-import core.system.error.GameError;
 import core.system.error.GameErrors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +25,6 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -202,7 +199,7 @@ public class LevelMapImpl implements LevelMap {
       context.fireGameEvent(null, PLAYER_DISCONNECTED, new EventDataContainer(player, result), null);
 
       // если это создатель игры, и контекст УЖЕ не в режиме удаления, то
-      if (!context.isDeleting() && context.getContextOwner().equals(player)) {
+      if (!context.isDeleting() && context.getContextCreator().equals(player)) {
         // выкидываем всех игроков
         players.values().stream().forEach(this::disconnectPlayer);
         // Удаляем контекст
@@ -247,8 +244,7 @@ public class LevelMapImpl implements LevelMap {
   }
   //===================================================================================================
 
-  @Override
-  public Result<Warrior> moveWarriorTo(Player player, String warriorId, Coords newCoords) {
+  protected Result<Warrior> innerMoveWarriorTo(Player player, String warriorId, Coords newCoords) {
     return player.findWarriorById(warriorId)
             .map(warrior -> innerWhatIfMoveWarriorTo(player, warrior, newCoords)
                     .map(coords -> {
@@ -263,6 +259,20 @@ public class LevelMapImpl implements LevelMap {
                               , new EventDataContainer(warrior, result), null);
                       return result;
                     }));
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Warrior> moveWarriorTo(Player player, String warriorId, Coords newCoords) {
+    if (context.isGameRan()) {
+      return context.ifPlayerOwnsTheTurnEqualsTo(player)
+              .map(playerOwnsThisTurn -> innerMoveWarriorTo(playerOwnsThisTurn, warriorId, newCoords))
+              .mapFail(warriorResult -> (Result<Warrior>) ResultImpl.fail(
+                      PLAYER_IS_NOT_OWENER_OF_THIS_ROUND.getError(player.getId()
+                              , " перемещение юнита " + warriorId)));
+    } else {
+      return innerMoveWarriorTo(player, warriorId, newCoords);
+    }
   }
   //===================================================================================================
 
@@ -413,7 +423,7 @@ public class LevelMapImpl implements LevelMap {
 
   public Result<Coords> tryToMove(Warrior warrior, Coords to, int objectSize, int maxWayLengthInPixels, Rectangle perimeter) {
     // если еще идет расстановка, то координаты юнита и есть его оригинальные координаты
-    Coords from = context.isGameRan() ? warrior.getOriginalCoords() : new Coords(warrior.getCoords());
+    Coords from = warrior.getTranslatedToGameCoords();
     // сначала проверим ограничение по дальности
     int pwrVectorLength = (to.getY() - from.getY()) * (to.getY() - from.getY())
             + (to.getX() - from.getX()) * (to.getX() - from.getX());
@@ -467,6 +477,5 @@ public class LevelMapImpl implements LevelMap {
     return ResultImpl.success(this);
   }
   //===================================================================================================
-
 
 }

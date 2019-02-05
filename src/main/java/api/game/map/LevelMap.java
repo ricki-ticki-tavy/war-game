@@ -225,6 +225,4 @@ public interface LevelMap {
    * @return
    */
   Result<Coords> tryToMove(Warrior warrior, Coords to, int objectSize, int maxWayLengthInPixels, Rectangle perimeter);
-
-
-  }
+}

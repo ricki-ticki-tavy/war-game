@@ -12,6 +12,7 @@ import api.game.map.Player;
 import api.game.map.metadata.GameRules;
 import core.entity.warrior.Skeleton;
 import core.entity.warrior.Viking;
+import core.entity.warrior.Vityaz;
 import core.entity.weapon.Bow;
 import core.entity.weapon.ShortSword;
 import core.entity.weapon.Sword;
@@ -143,6 +144,7 @@ public class CoreImpl implements Core {
 
     registerWarriorBaseClass(Skeleton.CLASS_NAME, Skeleton.class);
     registerWarriorBaseClass(Viking.CLASS_NAME, Viking.class);
+    registerWarriorBaseClass(Vityaz.CLASS_NAME, Vityaz.class);
 
     registerWeaponClass(Bow.CLASS_NAME, Bow.class);
     registerWeaponClass(ShortSword.CLASS_NAME, ShortSword.class);

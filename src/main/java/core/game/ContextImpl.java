@@ -54,7 +54,7 @@ public class ContextImpl implements Context {
   @Autowired
   private Core core;
 
-  private Player contextOwner;
+  private Player contextCreator;
   private GameRules gameRules;
   private String gameName;
   private boolean hidden;
@@ -64,8 +64,8 @@ public class ContextImpl implements Context {
   //===================================================================================================
   //===================================================================================================
 
-  public ContextImpl(Player owner) {
-    this.contextOwner = owner;
+  public ContextImpl(Player creator) {
+    this.contextCreator = creator;
   }
   //===================================================================================================
 
@@ -162,7 +162,7 @@ public class ContextImpl implements Context {
         result = ResultImpl.fail(MAP_LOAD_ERROR.getError(e.getMessage() == null ? "NPE" : e.getMessage()));
       }
       fireGameEvent(null, GAME_CONTEXT_LOAD_MAP
-              , new EventDataContainer(result, contextOwner, mapMetadata == null ? gameName : mapMetadata.name, hidden)
+              , new EventDataContainer(result, contextCreator, mapMetadata == null ? gameName : mapMetadata.name, hidden)
               , null);
       return result;
     });
@@ -199,8 +199,8 @@ public class ContextImpl implements Context {
   }
   //===================================================================================================
 
-  public Player getContextOwner() {
-    return contextOwner;
+  public Player getContextCreator() {
+    return contextCreator;
   }
   //===================================================================================================
 
@@ -251,7 +251,7 @@ public class ContextImpl implements Context {
     subscribeEvent(this::checkForStartGame, PLAYER_CHANGED_ITS_READY_TO_PLAY_STATUS, PLAYER_CONNECTED
             , PLAYER_DISCONNECTED, PLAYER_RECONNECTED, GAME_CONTEXT_REMOVED);
 
-    fireGameEvent(null, GAME_CONTEXT_CREATED, new EventDataContainer(ResultImpl.success(this), getContextOwner()), null);
+    fireGameEvent(null, GAME_CONTEXT_CREATED, new EventDataContainer(ResultImpl.success(this), getContextCreator()), null);
   }
   //===================================================================================================
 
@@ -295,55 +295,57 @@ public class ContextImpl implements Context {
   }
   //===================================================================================================
 
-  /**
-   * проверяет может ли ходящий сейчас игрок переместить данный юнит
-   *
-   * @param warrior
-   */
-  public Result<Warrior> ifUnitCanMove(Warrior warrior) {
-    Result result;
-    // если нет этого юнита в списке юнитов, уже задействованных в данном ходе и в нем еще есть место, то можно ходить
-    // новыйм юнитом
-    Warrior touchedWarrior = getLevelMap().getGameProcessData().playerTransactionalData.get(warrior.getId());
-    if (touchedWarrior == null) {
-      result = getLevelMap().getGameProcessData().playerTransactionalData.size() < getGameRules().getMovesCountPerTurnForEachPlayer()
-              // это новый юнит в данном ходу, но двигать его можно
-              ? ResultImpl.success(warrior)
-              : ResultImpl.fail(PLAYER_UNIT_MOVES_ON_THIS_TURN_ARE_EXCEEDED.getError(warrior.getOwner().getId(), String.valueOf(getLevelMap().getMaxPlayerCount())));
-    } else {
-      // юнит уже в списке тех, что делали движение  данном ходе
-      result = touchedWarrior.isMoveLocked()
-              // новые координаты воина уже заморожены и не могут быть отменены
-              // Воин %s (id %s) игрока %s в игре %s (id %s) не может более выполнить перемещение в данном ходе
-              ? ResultImpl
-              .fail(WARRIOR_CAN_T_MORE_MOVE_ON_THIS_TURN.getError(
-                      warrior.getWarriorBaseClass().getTitle()
-                      , warrior.getId()
-                      , warrior.getOwner().getId()
-                      , getGameName()
-                      , getContextId()))
-              : ResultImpl.success(warrior);
-    }
-    return result;
-  }
-  //===================================================================================================
+//  /**
+//   * проверяет может ли ходящий сейчас игрок переместить данный юнит
+//   *
+//   * @param warrior
+//   */
+//  public Result<Warrior> ifUnitCanMove(String contextId, String userName, String warriorId) {
+//    ifGameDeleting(false)
+//            .map(context -> context.getLevelMap().)
+//    Result result;
+//    // если нет этого юнита в списке юнитов, уже задействованных в данном ходе и в нем еще есть место, то можно ходить
+//    // новыйм юнитом
+//    Warrior touchedWarrior = getLevelMap().getGameProcessData().playerTransactionalData.get(warrior.getId());
+//    if (touchedWarrior == null) {
+//      result = getLevelMap().getGameProcessData().playerTransactionalData.size() < getGameRules().getMovesCountPerTurnForEachPlayer()
+//              // это новый юнит в данном ходу, но двигать его можно
+//              ? ResultImpl.success(warrior)
+//              : ResultImpl.fail(PLAYER_UNIT_MOVES_ON_THIS_TURN_ARE_EXCEEDED.getError(warrior.getOwner().getId(), String.valueOf(getLevelMap().getMaxPlayerCount())));
+//    } else {
+//      // юнит уже в списке тех, что делали движение  данном ходе
+//      result = touchedWarrior.isMoveLocked()
+//              // новые координаты воина уже заморожены и не могут быть отменены
+//              // Воин %s (id %s) игрока %s в игре %s (id %s) не может более выполнить перемещение в данном ходе
+//              ? ResultImpl
+//              .fail(WARRIOR_CAN_T_MORE_MOVE_ON_THIS_TURN.getError(
+//                      warrior.getWarriorBaseClass().getTitle()
+//                      , warrior.getId()
+//                      , warrior.getOwner().getId()
+//                      , getGameName()
+//                      , getContextId()))
+//              : ResultImpl.success(warrior);
+//    }
+//    return result;
+//  }
+//  //===================================================================================================
 
-  // TODO пополняется
+  // TODO убрать
 
   /**
    * возвращает имеет ли возможность текущий игрок двигать определенный юнит
    */
-  private Result<Warrior> ifUserCanMoveWarriorAtThisTurn(Warrior warrior) {
-    // если игра не запущена, то может
-    return ifGameRan(false)
-            .map(context -> ResultImpl.success(warrior))
-            // игра запущена. Допустимо ходить только в свой ход и только доступным юнитом
-            .mapFail(result -> ifPlayerOwnsThisTurn(warrior.getOwner())
-                    // проверим всеми ли юнитами, которыми допустимо, ходил игрок или есть еще ходы
-                    .map(player -> ifUnitCanMove(warrior)));
-  }
-  //===================================================================================================
-
+//  private Result<Warrior> ifUserCanMoveWarriorAtThisTurn(Warrior warrior) {
+//    // если игра не запущена, то может
+//    return ifGameRan(false)
+//            .map(context -> ResultImpl.success(warrior))
+//            // игра запущена. Допустимо ходить только в свой ход и только доступным юнитом
+//            .mapFail(result -> ifPlayerOwnsThisTurn(warrior.getOwner())
+//                    // проверим всеми ли юнитами, которыми допустимо, ходил игрок или есть еще ходы
+//                    .map(player -> ifUnitCanMove(warrior)));
+//  }
+//  //===================================================================================================
+//
   private Result<Player> ifPlayerOwnsThisTurn(Player player) {
     return player == getPlayerOwnsTheTurn() ? ResultImpl.success(player) : ResultImpl.fail(PLAYER_IS_NOT_OWENER_OF_THIS_ROUND.getError(player.getId(), getContextId()));
   }
@@ -353,12 +355,22 @@ public class ContextImpl implements Context {
   public Result<Warrior> moveWarriorTo(String userName, String warriorId, Coords coords) {
     return ifGameDeleting(false)
             .map(fineContext -> fineContext.findUserByName(userName)
-                    // если игра запущена, то двигать фигуры можно только в свой ход
-                    .map(player -> !fineContext.isGameRan() || getPlayerOwnsTheTurn() == player
-                            ? getLevelMap().moveWarriorTo(player, warriorId, coords)
-                            : ResultImpl.fail(PLAYER_IS_NOT_OWENER_OF_THIS_ROUND.getError(userName
-                            , " перемещение юнита " + warriorId))))
-            ;
+            .map(player -> fineContext.getLevelMap().moveWarriorTo(player, warriorId, coords)));
+    //    return ifGameDeleting(false)
+//            .map(fineContext -> fineContext.findUserByName(userName)
+//                    // если игра запущена, то двигать фигуры можно только в свой ход
+//                    .map(player -> {
+//                              if (fineContext.isGameRan()) {
+//                                return fineContext.ifPlayerOwnsTheTurnEqualsTo(player)
+//                                        .map(playerOwnsThisTurn -> getLevelMap().moveWarriorTo(playerOwnsThisTurn, warriorId, coords))
+//                                        .mapFail(warriorResult -> (Result<Warrior>) ResultImpl.fail(
+//                                                PLAYER_IS_NOT_OWENER_OF_THIS_ROUND.getError(userName
+//                                                        , " перемещение юнита " + warriorId)));
+//                              } else {
+//                                return getLevelMap().moveWarriorTo(player, warriorId, coords);
+//                              }
+//                            }
+//                    ));
   }
   //===================================================================================================
 
@@ -368,7 +380,7 @@ public class ContextImpl implements Context {
             .map(fineContext -> fineContext.findUserByName(userName)
                     // если игра запущена, то двигать фигуры можно только в свой ход
                     .map(player -> !fineContext.isGameRan() || getPlayerOwnsTheTurn() == player
-                            ? (Result<Coords>)getLevelMap().whatIfMoveWarriorTo(player, warriorId, coords)
+                            ? (Result<Coords>) getLevelMap().whatIfMoveWarriorTo(player, warriorId, coords)
                             : ResultImpl.fail(PLAYER_IS_NOT_OWENER_OF_THIS_ROUND.getError(userName, "перемещение юнита " + warriorId))));
   }
   //===================================================================================================
@@ -387,6 +399,15 @@ public class ContextImpl implements Context {
     return ifGameDeleting(false)
             .map(context -> context.ifGameRan(true))
             .map(context -> getLevelMap().getPlayerOwnsThisTurn());
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Player> ifPlayerOwnsTheTurnEqualsTo(Player player) {
+    return getPlayerOwnsTheTurn()
+            .map(player1 -> player1 == player
+                    ? ResultImpl.success(player)
+                    : ResultImpl.fail(PLAYER_IS_NOT_OWENER_OF_THIS_ROUND.getError(player.getId(), "")));
   }
   //===================================================================================================
 

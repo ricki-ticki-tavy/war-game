@@ -202,7 +202,7 @@ public interface Context {
    *
    * @return
    */
-  Player getContextOwner();
+  Player getContextCreator();
 
   /**
    * Получить параметры игры
@@ -235,13 +235,20 @@ public interface Context {
   Result<Player> getPlayerOwnsTheTurn();
 
   /**
-   * проверяет может ли ходящий сейчас игрок переместить данный юнит. Проверка права игрока ходить, контексты и прочее
-   * перед этим вызовом уже должно быть проверено.
+   * Это утверждение, что переданный игрок и является ходящим сейчас
    *
-   * @param warrior
+   * @return
    */
-  Result<Warrior> ifUnitCanMove(Warrior warrior);
+  Result<Player> ifPlayerOwnsTheTurnEqualsTo(Player player);
 
+//  /**
+//   * проверяет может ли ходящий сейчас игрок переместить данный юнит. Проверка права игрока ходить, контексты и прочее
+//   * перед этим вызовом уже должно быть проверено.
+//   *
+//   * @param warrior
+//   */
+//  Result<Warrior> ifUnitCanMove(Warrior warrior);
+//
   /**
    * Передача хода следующему игроку
    * @param userName
