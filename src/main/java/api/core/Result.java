@@ -2,11 +2,11 @@ package api.core;
 
 import api.entity.base.BaseEntityHeader;
 import core.system.error.GameError;
+import core.system.error.GameErrors;
+import org.slf4j.Logger;
 
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import org.slf4j.Logger;
 
 /**
  * Класс результата действия
@@ -14,6 +14,8 @@ import org.slf4j.Logger;
 public interface Result<T> extends BaseEntityHeader{
 
   boolean isFail();
+
+  boolean isFail(GameErrors error);
 
   boolean isSuccess();
 

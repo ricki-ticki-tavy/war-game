@@ -168,14 +168,6 @@ public interface LevelMap {
    */
    int getWarriorSMoveCost(Warrior warrior);
 
-//  /**
-//   * Возвращает класс брони за перемещение на единицу длины для данного юнита с учетом всех его влияний, классов брони
-//   * и прочего
-//   * @param warrior
-//   * @return
-//   */
-//   int getWarriorSArmor(Warrior warrior);
-//
   /**
    * Возвращает координаты для юнита. Для получения координат этой функцией используется таблица юнитов
    * которыми делались действия в этом ходу. Если движение юнита можно откатить, то возвращаются его
@@ -226,5 +218,12 @@ public interface LevelMap {
    */
   Result<Coords> tryToMove(Warrior warrior, Coords to, int objectSize, int maxWayLengthInPixels, Rectangle perimeter);
 
+  /**
+   * Это утверждение, что переданный игрок и является ходящим сейчас
+   *
+   * @return
+   */
+  Result<Player> ifPlayerOwnsThisTurn(Player player, String... args);
 
-  }
+
+}

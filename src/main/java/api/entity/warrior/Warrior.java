@@ -45,9 +45,9 @@ public interface Warrior extends BaseEntityHeader, HasCoordinates {
   /**
    * Перемещает юнит в заданные координаты
    *
-   * @param coords
+   * @param to
    */
-  Result<Warrior> moveWarriorTo(Coords coords);
+  Result<Warrior> moveWarriorTo(Coords to);
 
   /**
    * Получить игрока - владельца юнита
@@ -136,10 +136,19 @@ public interface Warrior extends BaseEntityHeader, HasCoordinates {
    Coords getOriginalCoords();
 
   /**
-   * Возвращает цену за перемещение на единицу длины для данного юнита с учетом всех его влияний, классов брони
-   * и прочего
+   * Получить приведенные к игре координаты. Если юнит
    * @return
    */
+   Coords getTranslatedToGameCoords();
+
+
+  int calcMoveCost(Coords to);
+
+    /**
+     * Возвращает цену за перемещение на единицу длины для данного юнита с учетом всех его влияний, классов брони
+     * и прочего
+     * @return
+     */
   int getWarriorSMoveCost();
 
   /**
@@ -161,6 +170,19 @@ public interface Warrior extends BaseEntityHeader, HasCoordinates {
    * любом действии юнита, кроме перемещения.
    */
   void lockRollback();
+
+  /**
+   * Установить или снять отметку, что юнит использован в этом ходе
+   * @param selectedAtThisTurn
+   * @return
+   */
+  Warrior setSelectedOnThisTurn(boolean selectedAtThisTurn);
+
+  /**
+   * возвращает признак был ли юнит использован в этом ходе
+   * @return
+   */
+  boolean isTouchedAtThisTurn();
 
   /**
    * Указывает можно ли откатить перемещение юнита в данном ходе. Это возможно, пока он не начал применять что-либо кроме

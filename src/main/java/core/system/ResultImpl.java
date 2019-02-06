@@ -2,11 +2,11 @@ package core.system;
 
 import api.core.Result;
 import core.system.error.GameError;
+import core.system.error.GameErrors;
+import org.slf4j.Logger;
 
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import org.slf4j.Logger;
 
 
 /**
@@ -53,6 +53,10 @@ public class ResultImpl implements Result {
 
   public boolean isFail(){
     return  fail;
+  }
+
+  public boolean isFail(GameErrors error){
+    return  fail && error.isMatchedTo(this.error);
   }
 
   public boolean isSuccess(){

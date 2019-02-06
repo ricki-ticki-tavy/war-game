@@ -2,7 +2,6 @@ import api.game.Coords;
 import api.game.Rectangle;
 import api.game.map.LevelMap;
 import core.entity.map.LevelMapImpl;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +12,7 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.util.Assert;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {ComplexFastMapTest.class})
+@SpringBootTest(classes = {CreateWarriorsWeaponsUsersTest.class})
 @ContextConfiguration(loader = AnnotationConfigContextLoader.class, classes = TestContextConfiguration.class)
 public class MoveCheckTest {
 

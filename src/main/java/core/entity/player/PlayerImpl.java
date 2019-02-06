@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import static api.enums.EventType.*;
 import static core.system.error.GameErrors.*;
@@ -139,7 +140,11 @@ public class PlayerImpl implements Player {
   public Result<Warrior> findWarriorById(String warriorId) {
     return Optional.ofNullable(warriors.get(warriorId))
             .map(foundWarrior -> ResultImpl.success(foundWarrior))
-            .orElse(ResultImpl.fail(WARRIOR_NOT_FOUND_AT_PLAYER_BY_NAME.getError(getTitle(), warriorId)));
+            .orElse(ResultImpl.fail(WARRIOR_NOT_FOUND_AT_PLAYER_BY_NAME.getError(
+                    context.getGameName()
+                    , context.getContextId()
+                    , getId()
+                    , warriorId)));
   }
   //===================================================================================================
 
@@ -159,12 +164,23 @@ public class PlayerImpl implements Player {
   }
   //===================================================================================================
 
-  // TODO реализовать
+  // TODO этот метод должен вызываться со слоя карты. Карта не должна двигать юнит сама
   @Override
-  public Result<Warrior> moveWarriorTo(String warriorId, Coords newCoords) {
-    return findWarriorById(warriorId)
-            // ищем юнит
-            .map(warrior -> warrior.moveWarriorTo(newCoords));
+  public Result<Warrior> moveWarriorTo(Warrior warrior, Coords to) {
+    return warrior.moveWarriorTo(to);
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Warrior> ifCanMoveWarrior(Warrior warrior) {
+    return context.isGameRan()
+            // и этим юнитом не делалось движений
+            && !warrior.isTouchedAtThisTurn()
+            // и предел используемых за ход юнитов достигнут
+            && getWarriorsTouchedAtThisTurn().getResult().size() >= context.getGameRules().getMovesCountPerTurnForEachPlayer()
+            ? ResultImpl.fail(PLAYER_UNIT_MOVES_ON_THIS_TURN_ARE_EXCEEDED
+            .getError(warrior.getOwner().getId(), String.valueOf(context.getGameRules().getMovesCountPerTurnForEachPlayer())))
+            : ResultImpl.success(warrior);
   }
   //===================================================================================================
 
@@ -212,7 +228,7 @@ public class PlayerImpl implements Player {
       // Отправим сообщение о завершении хода
     context.fireGameEvent(null, PLAYER_LOOSE_TURN, new EventDataContainer(this), null);
 
-    return ResultImpl.success(true);
+    return ResultImpl.success(this);
   }
   //===================================================================================================
 
@@ -240,6 +256,15 @@ public class PlayerImpl implements Player {
             .map(warrior -> warrior.addInfluenceToWarrior(modifier, source, lifeTimeUnit, lifeTime))
             // добавить слушатель события
             .doIfSuccess(influencer -> {});
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<List<Warrior>> getWarriorsTouchedAtThisTurn() {
+    return ResultImpl.success(warriors.values()
+            .stream()
+            .filter(warrior -> warrior.isTouchedAtThisTurn())
+            .collect(Collectors.toList()));
   }
   //===================================================================================================
 

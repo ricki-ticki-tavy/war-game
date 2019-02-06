@@ -22,6 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static api.enums.EventType.*;
+import static core.system.error.GameErrors.WARRIOR_CAN_T_MORE_MOVE_ON_THIS_TURN;
 import static core.system.error.GameErrors.WARRIOR_HANDS_NO_FREE_SLOTS;
 import static core.system.error.GameErrors.WARRIOR_WEAPON_NOT_FOUND;
 
@@ -32,7 +33,7 @@ public class WarriorImpl implements Warrior {
 
   protected Map<Integer, WarriorSHand> hands;
   protected WarriorBaseClass warriorBaseClass;
-  protected Coords coords;
+  protected volatile Coords coords;
   protected final String id = UUID.randomUUID().toString();
   protected String title;
   protected boolean summoned;
@@ -41,10 +42,12 @@ public class WarriorImpl implements Warrior {
   protected WarriorSBaseAttributes attributes;
   protected Map<String, Influencer> influencers = new ConcurrentHashMap<>(50);
 
-  private Coords originalCoords;
-  private boolean moveLocked;
-  private boolean rollbackAvailable;
-  private int treatedActionPointsForMove;
+  protected volatile boolean touchedAtThisTurn = false;
+
+  protected volatile Coords originalCoords;
+  protected volatile boolean moveLocked;
+  protected volatile boolean rollbackAvailable;
+  protected volatile int treatedActionPointsForMove;
 
 
   @Autowired
@@ -115,10 +118,51 @@ public class WarriorImpl implements Warrior {
   }
   //===================================================================================================
 
+  private Coords innerGetTranslatedToGameCoords() {
+    // если игра уже в стадии игры, а не расстановки, юнит не трогали или если не заблокирована возможность отката, то
+    // берем OriginalCoords в противном случае берем Coords
+    return getOwner().findContext().getResult().isGameRan()
+            // игра идет
+            && isRollbackAvailable() && !isMoveLocked()
+            ? originalCoords
+            : coords;
+  }
+  //===================================================================================================
+
   @Override
-  public Result<Warrior> moveWarriorTo(Coords coords) {
-    this.coords = new Coords(coords);
-    Result result = ResultImpl.success(this);
+  public Coords getTranslatedToGameCoords() {
+    return new Coords(innerGetTranslatedToGameCoords());
+  }
+  //===================================================================================================
+
+  @Override
+  public int calcMoveCost(Coords to) {
+    Coords from = innerGetTranslatedToGameCoords();
+
+    return (int) Math.round((double) getWarriorSMoveCost() * Math.sqrt((double) ((from.getX() - to.getX()) * (from.getX() - to.getX())
+            + (from.getY() - to.getY()) * (from.getY() - to.getY()))) / (double) getOwner().findContext().getResult().getLevelMap().getSimpleUnitSize());
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Warrior> moveWarriorTo(Coords to) {
+    Result result;
+    if (!moveLocked) {
+      treatedActionPointsForMove = calcMoveCost(to);
+      touchedAtThisTurn = true;
+      this.coords = new Coords(to);
+      result = ResultImpl.success(this);
+    } else {
+      // новые координаты воина уже заморожены и не могут быть отменены
+      // Воин %s (id %s) игрока %s в игре %s (id %s) не может более выполнить перемещение в данном ходе
+      result = ResultImpl
+              .fail(WARRIOR_CAN_T_MORE_MOVE_ON_THIS_TURN.getError(
+                      getWarriorBaseClass().getTitle()
+                      , getId()
+                      , getOwner().getId()
+                      , getOwner().findContext().getResult().getGameName()
+                      , getOwner().findContext().getResult().getContextId()));
+    }
     return result;
   }
   //===================================================================================================
@@ -220,6 +264,8 @@ public class WarriorImpl implements Warrior {
     rollbackAvailable = true;
     // начальные координаты
     originalCoords = new Coords(coords);
+    // не использовался в этом ходе / защите
+    touchedAtThisTurn = false;
   }
   //===================================================================================================
 
@@ -270,7 +316,7 @@ public class WarriorImpl implements Warrior {
    * Удаление влияния
    *
    * @param influencer
-   * @param silent        не отправлять уведомления о действии
+   * @param silent     не отправлять уведомления о действии
    */
   void innerRemoveInfluencerFromWarrior(Influencer influencer, boolean silent) {
     influencers.remove(influencer.getId());
@@ -330,6 +376,19 @@ public class WarriorImpl implements Warrior {
   @Override
   public void lockRollback() {
     this.rollbackAvailable = false;
+  }
+  //===================================================================================================
+
+  @Override
+  public boolean isTouchedAtThisTurn() {
+    return touchedAtThisTurn;
+  }
+  //===================================================================================================
+
+  @Override
+  public Warrior setSelectedOnThisTurn(boolean touchedAtThisTurn) {
+    this.touchedAtThisTurn = touchedAtThisTurn;
+    return this;
   }
   //===================================================================================================
 

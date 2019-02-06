@@ -208,7 +208,7 @@ public class EventLogger {
       case GAME_CONTEXT_REMOVED: {
         //  "Удаление контекста игры '%s' (владелец '%s'). %s"
         logger.info(event.getEventType().getFormattedMessage(event.getSource(Context.class).getContextId()
-                , event.getSource(Context.class).getContextOwner().getTitle()
+                , event.getSource(Context.class).getContextCreator().getTitle()
                 , event.getSource(Result.class).toString()));
         break;
       }

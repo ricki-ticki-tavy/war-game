@@ -25,7 +25,7 @@ public class GameProcessData {
 
   public final Map<Integer, Player> frozenListOfPlayers = new ConcurrentHashMap<>(5);
 
-  public final Map<String, Warrior> playerTransactionalData = new ConcurrentHashMap<>(10);
+//  public final Map<String, Warrior> playerTransactionalData = new ConcurrentHashMap<>(10);
 
   public final Map<String, Warrior> allWarriorsOnMap = new ConcurrentHashMap<>(100);
 

@@ -3,7 +3,6 @@ package core.entity.map;
 import api.core.Context;
 import api.core.Result;
 import api.entity.ability.Modifier;
-import api.entity.warrior.HasCoordinates;
 import api.entity.warrior.Influencer;
 import api.entity.warrior.Warrior;
 import api.enums.LifeTimeUnit;
@@ -15,7 +14,6 @@ import api.game.map.Player;
 import api.game.map.metadata.LevelMapMetaDataXml;
 import core.game.GameProcessData;
 import core.system.ResultImpl;
-import core.system.error.GameError;
 import core.system.error.GameErrors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +25,6 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -202,7 +199,7 @@ public class LevelMapImpl implements LevelMap {
       context.fireGameEvent(null, PLAYER_DISCONNECTED, new EventDataContainer(player, result), null);
 
       // если это создатель игры, и контекст УЖЕ не в режиме удаления, то
-      if (!context.isDeleting() && context.getContextOwner().equals(player)) {
+      if (!context.isDeleting() && context.getContextCreator().equals(player)) {
         // выкидываем всех игроков
         players.values().stream().forEach(this::disconnectPlayer);
         // Удаляем контекст
@@ -247,22 +244,27 @@ public class LevelMapImpl implements LevelMap {
   }
   //===================================================================================================
 
-  @Override
-  public Result<Warrior> moveWarriorTo(Player player, String warriorId, Coords newCoords) {
+
+  protected Result<Warrior> innerMoveWarriorTo(Player player, String warriorId, Coords newCoords) {
     return player.findWarriorById(warriorId)
+            .map(warrior -> player.ifCanMoveWarrior(warrior))
             .map(warrior -> innerWhatIfMoveWarriorTo(player, warrior, newCoords)
                     .map(coords -> {
-                      if (context.isGameRan()) {
-                        // если юнита нет среди тех, которые были затронуты в этот ход, то добавить в этот список
-                        gameProcessData.playerTransactionalData.computeIfAbsent(warrior.getId()
-                                , id -> warrior);
-                      }
                       // кинем сообщение, что юнит перемещен
-                      Result<Warrior> result = warrior.moveWarriorTo(coords);
+                      Result<Warrior> result = player.moveWarriorTo(warrior, coords);
                       context.fireGameEvent(null, WARRIOR_MOVED
                               , new EventDataContainer(warrior, result), null);
                       return result;
                     }));
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Warrior> moveWarriorTo(Player player, String warriorId, Coords newCoords) {
+    return context.isGameRan()
+            ? ifPlayerOwnsThisTurn(player, ": перемещение юнита " + warriorId)
+            .map(playerOwnsThisTurn -> innerMoveWarriorTo(playerOwnsThisTurn, warriorId, newCoords))
+            : innerMoveWarriorTo(player, warriorId, newCoords);
   }
   //===================================================================================================
 
@@ -275,19 +277,9 @@ public class LevelMapImpl implements LevelMap {
 
   public Result<Coords> getWarriorSOriginCoords(Warrior warrior) {
     // ищем в списке юнитов, задействованных ы этом ходу наш юнит
-    Warrior touchedWarrior = gameProcessData.playerTransactionalData.get(warrior.getId());
-    return touchedWarrior == null || touchedWarrior.isMoveLocked() || !touchedWarrior.isRollbackAvailable()
+    return !warrior.isTouchedAtThisTurn() || warrior.isMoveLocked() || !warrior.isRollbackAvailable()
             ? ResultImpl.success(new Coords(warrior.getCoords()))
-            : ResultImpl.success(touchedWarrior.getOriginalCoords());
-  }
-  //===================================================================================================
-
-  public Result<Player> ifPlayerIsTurnOwner(Player player) {
-    return getPlayerOwnsThisTurn()
-            .map(playerOwnedThisTurn -> player == playerOwnedThisTurn
-                    ? ResultImpl.success(player)
-                    : ResultImpl.fail(PLAYER_CAN_T_PASS_THE_TURN_PLAYER_IS_NOT_TURN_OWNER.getError(
-                    player.getId(), context.getGameName(), context.getContextId(), playerOwnedThisTurn.getId())));
+            : ResultImpl.success(warrior.getOriginalCoords());
   }
   //===================================================================================================
 
@@ -327,14 +319,12 @@ public class LevelMapImpl implements LevelMap {
   public Result<Player> nextTurn(Player player) {
     return
             // проверим этот ли игрок сейчас владеет ходом
-            ifPlayerIsTurnOwner(player)
+            ifPlayerOwnsThisTurn(player, ". Передача хода невозможна так как ходит игрок " + getPlayerOwnsThisTurn().getResult().getId())
                     // переведем в защиту уходящего игрока
                     .map(finePlayer -> finePlayer.prepareToDefensePhase())
                     // сменим игрока
                     .map(oldPlayer -> switchToNextPlayerTurn())
                     .map(newPlayer -> {
-                      // зачистить транзакционные данные игрока
-                      gameProcessData.playerTransactionalData.clear();
                       // подготовим нового игрока к ходу
                       return newPlayer.prepareToAttackPhase();
                     });
@@ -346,19 +336,6 @@ public class LevelMapImpl implements LevelMap {
     return warrior.getWarriorSMoveCost();
   }
   //===================================================================================================
-
-//  /**
-//   * Собирает всех юнитов карты.
-//   *
-//   * @param excludedWarrior
-//   * @return
-//   */
-//  private List<HasCoordinates> getAllUnitsExcludeOneThis(Warrior excludedWarrior) {
-//    List<HasCoordinates> allWarriors = new ArrayList(gameProcessData.allWarriorsOnMap.values());
-//    allWarriors.remove(excludedWarrior);
-//    return allWarriors;
-//  }
-//  //===================================================================================================
 
   private int calcQuadOfWayLength(Coords pointFrom, Coords pointTo) {
     return (pointFrom.getX() - pointTo.getX()) * (pointFrom.getX() - pointTo.getX())
@@ -413,7 +390,7 @@ public class LevelMapImpl implements LevelMap {
 
   public Result<Coords> tryToMove(Warrior warrior, Coords to, int objectSize, int maxWayLengthInPixels, Rectangle perimeter) {
     // если еще идет расстановка, то координаты юнита и есть его оригинальные координаты
-    Coords from = context.isGameRan() ? warrior.getOriginalCoords() : new Coords(warrior.getCoords());
+    Coords from = warrior.getTranslatedToGameCoords();
     // сначала проверим ограничение по дальности
     int pwrVectorLength = (to.getY() - from.getY()) * (to.getY() - from.getY())
             + (to.getX() - from.getX()) * (to.getX() - from.getX());
@@ -448,7 +425,7 @@ public class LevelMapImpl implements LevelMap {
   //===================================================================================================
 
   private Result<Coords> innerWhatIfMoveWarriorTo(Player player, Warrior warrior, Coords coords) {
-    // режим расстановки. ставим не выходя за периметр
+    // Если игра началась
     return tryToMove(warrior, coords
             // размер юнита в "пикселях"
             , context.getGameRules().getWarriorSize()
@@ -465,6 +442,19 @@ public class LevelMapImpl implements LevelMap {
   @Override
   public Result<Context> ifNewWarriorSCoordinatesAreAvailable(Warrior warrior, Coords newCoords) {
     return ResultImpl.success(this);
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Player> ifPlayerOwnsThisTurn(Player player, String... args) {
+    return getPlayerOwnsThisTurn()
+            .map(player1 -> player1 == player
+                    ? ResultImpl.success(player)
+                    : ResultImpl.fail(PLAYER_IS_NOT_OWENER_OF_THIS_ROUND.getError(
+                    player.findContext().getResult().getGameName()
+                    , player.findContext().getResult().getContextId()
+                    , player.getId()
+                    , args.length > 0 ? args[0] : "")));
   }
   //===================================================================================================
 

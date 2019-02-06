@@ -6,7 +6,7 @@ import org.apache.logging.log4j.util.Strings;
  * Координаты
  */
 public class Coords{
-  private int x, y;
+  private int x, y, moveCost;
 
   public Coords(int x, int y){
     this.x = x;
@@ -38,5 +38,14 @@ public class Coords{
   @Override
   public String toString() {
     return x + ":" + y;
+  }
+
+  public int getMoveCost() {
+    return moveCost;
+  }
+
+  public Coords setMoveCost(int moveCost) {
+    this.moveCost = moveCost;
+    return this;
   }
 }
