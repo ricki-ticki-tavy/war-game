@@ -232,14 +232,14 @@ public interface Context {
    *
    * @return
    */
-  Result<Player> getPlayerOwnsTheTurn();
+  Result<Player> getPlayerOwnsThisTurn();
 
   /**
    * Это утверждение, что переданный игрок и является ходящим сейчас
    *
    * @return
    */
-  Result<Player> ifPlayerOwnsTheTurnEqualsTo(Player player);
+  Result<Player> ifPlayerOwnsTheTurnEqualsTo(Player player, String... args);
 
 //  /**
 //   * проверяет может ли ходящий сейчас игрок переместить данный юнит. Проверка права игрока ходить, контексты и прочее

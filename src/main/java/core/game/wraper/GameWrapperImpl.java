@@ -144,7 +144,7 @@ public class GameWrapperImpl implements GameWrapper {
   @Override
   public Result<Player> getGetPlayerOwnsTheRound(String contextId) {
     return core.findGameContextByUID(contextId)
-            .map(fineContext -> fineContext.getPlayerOwnsTheTurn())
+            .map(fineContext -> fineContext.getPlayerOwnsThisTurn())
             .logIfError(logger);
   }
   //===================================================================================================

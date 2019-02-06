@@ -295,11 +295,6 @@ public class ContextImpl implements Context {
   }
   //===================================================================================================
 
-  private Result<Player> ifPlayerOwnsThisTurn(Player player) {
-    return player == getPlayerOwnsTheTurn() ? ResultImpl.success(player) : ResultImpl.fail(PLAYER_IS_NOT_OWENER_OF_THIS_ROUND.getError(player.getId(), getContextId()));
-  }
-  //===================================================================================================
-
   @Override
   public Result<Warrior> moveWarriorTo(String userName, String warriorId, Coords coords) {
     return ifGameDeleting(false)
@@ -313,7 +308,7 @@ public class ContextImpl implements Context {
     return ifGameDeleting(false)
             .map(fineContext -> fineContext.findUserByName(userName)
                     // если игра запущена, то двигать фигуры можно только в свой ход
-                    .map(player -> !fineContext.isGameRan() || getPlayerOwnsTheTurn() == player
+                    .map(player -> !fineContext.isGameRan() || getPlayerOwnsThisTurn() == player
                             ? (Result<Coords>) getLevelMap().whatIfMoveWarriorTo(player, warriorId, coords)
                             : ResultImpl.fail(PLAYER_IS_NOT_OWENER_OF_THIS_ROUND.getError(userName, "перемещение юнита " + warriorId))));
   }
@@ -329,7 +324,7 @@ public class ContextImpl implements Context {
   //===================================================================================================
 
   @Override
-  public Result<Player> getPlayerOwnsTheTurn() {
+  public Result<Player> getPlayerOwnsThisTurn() {
     return ifGameDeleting(false)
             .map(context -> context.ifGameRan(true))
             .map(context -> getLevelMap().getPlayerOwnsThisTurn());
@@ -337,11 +332,8 @@ public class ContextImpl implements Context {
   //===================================================================================================
 
   @Override
-  public Result<Player> ifPlayerOwnsTheTurnEqualsTo(Player player) {
-    return getPlayerOwnsTheTurn()
-            .map(player1 -> player1 == player
-                    ? ResultImpl.success(player)
-                    : ResultImpl.fail(PLAYER_IS_NOT_OWENER_OF_THIS_ROUND.getError(player.getId(), "")));
+  public Result<Player> ifPlayerOwnsTheTurnEqualsTo(Player player, String... args) {
+    return getLevelMap().ifPlayerOwnsThisTurn(player, args);
   }
   //===================================================================================================
 

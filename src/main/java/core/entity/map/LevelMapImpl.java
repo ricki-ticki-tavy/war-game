@@ -247,10 +247,11 @@ public class LevelMapImpl implements LevelMap {
 
   protected Result<Warrior> innerMoveWarriorTo(Player player, String warriorId, Coords newCoords) {
     return player.findWarriorById(warriorId)
+            .map(warrior -> player.ifCanMoveWarrior(warrior))
             .map(warrior -> innerWhatIfMoveWarriorTo(player, warrior, newCoords)
                     .map(coords -> {
                       // кинем сообщение, что юнит перемещен
-                      Result<Warrior> result = warrior.moveWarriorTo(coords);
+                      Result<Warrior> result = player.moveWarriorTo(warrior, coords);
                       context.fireGameEvent(null, WARRIOR_MOVED
                               , new EventDataContainer(warrior, result), null);
                       return result;
@@ -260,15 +261,10 @@ public class LevelMapImpl implements LevelMap {
 
   @Override
   public Result<Warrior> moveWarriorTo(Player player, String warriorId, Coords newCoords) {
-    if (context.isGameRan()) {
-      return context.ifPlayerOwnsTheTurnEqualsTo(player)
-              .map(playerOwnsThisTurn -> innerMoveWarriorTo(playerOwnsThisTurn, warriorId, newCoords))
-              .mapFail(warriorResult -> (Result<Warrior>) ResultImpl.fail(
-                      PLAYER_IS_NOT_OWENER_OF_THIS_ROUND.getError(player.getId()
-                              , " перемещение юнита " + warriorId)));
-    } else {
-      return innerMoveWarriorTo(player, warriorId, newCoords);
-    }
+    return context.isGameRan()
+            ? ifPlayerOwnsThisTurn(player, ": перемещение юнита " + warriorId)
+            .map(playerOwnsThisTurn -> innerMoveWarriorTo(playerOwnsThisTurn, warriorId, newCoords))
+            : innerMoveWarriorTo(player, warriorId, newCoords);
   }
   //===================================================================================================
 
@@ -281,19 +277,9 @@ public class LevelMapImpl implements LevelMap {
 
   public Result<Coords> getWarriorSOriginCoords(Warrior warrior) {
     // ищем в списке юнитов, задействованных ы этом ходу наш юнит
-    Warrior touchedWarrior = gameProcessData.playerTransactionalData.get(warrior.getId());
-    return touchedWarrior == null || touchedWarrior.isMoveLocked() || !touchedWarrior.isRollbackAvailable()
+    return !warrior.isTouchedAtThisTurn() || warrior.isMoveLocked() || !warrior.isRollbackAvailable()
             ? ResultImpl.success(new Coords(warrior.getCoords()))
-            : ResultImpl.success(touchedWarrior.getOriginalCoords());
-  }
-  //===================================================================================================
-
-  public Result<Player> ifPlayerIsTurnOwner(Player player) {
-    return getPlayerOwnsThisTurn()
-            .map(playerOwnedThisTurn -> player == playerOwnedThisTurn
-                    ? ResultImpl.success(player)
-                    : ResultImpl.fail(PLAYER_CAN_T_PASS_THE_TURN_PLAYER_IS_NOT_TURN_OWNER.getError(
-                    player.getId(), context.getGameName(), context.getContextId(), playerOwnedThisTurn.getId())));
+            : ResultImpl.success(warrior.getOriginalCoords());
   }
   //===================================================================================================
 
@@ -333,14 +319,12 @@ public class LevelMapImpl implements LevelMap {
   public Result<Player> nextTurn(Player player) {
     return
             // проверим этот ли игрок сейчас владеет ходом
-            ifPlayerIsTurnOwner(player)
+            ifPlayerOwnsThisTurn(player, ". Передача хода невозможна так как ходит игрок " + getPlayerOwnsThisTurn().getResult().getId())
                     // переведем в защиту уходящего игрока
                     .map(finePlayer -> finePlayer.prepareToDefensePhase())
                     // сменим игрока
                     .map(oldPlayer -> switchToNextPlayerTurn())
                     .map(newPlayer -> {
-                      // зачистить транзакционные данные игрока
-                      gameProcessData.playerTransactionalData.clear();
                       // подготовим нового игрока к ходу
                       return newPlayer.prepareToAttackPhase();
                     });
@@ -352,19 +336,6 @@ public class LevelMapImpl implements LevelMap {
     return warrior.getWarriorSMoveCost();
   }
   //===================================================================================================
-
-//  /**
-//   * Собирает всех юнитов карты.
-//   *
-//   * @param excludedWarrior
-//   * @return
-//   */
-//  private List<HasCoordinates> getAllUnitsExcludeOneThis(Warrior excludedWarrior) {
-//    List<HasCoordinates> allWarriors = new ArrayList(gameProcessData.allWarriorsOnMap.values());
-//    allWarriors.remove(excludedWarrior);
-//    return allWarriors;
-//  }
-//  //===================================================================================================
 
   private int calcQuadOfWayLength(Coords pointFrom, Coords pointTo) {
     return (pointFrom.getX() - pointTo.getX()) * (pointFrom.getX() - pointTo.getX())
@@ -455,14 +426,7 @@ public class LevelMapImpl implements LevelMap {
 
   private Result<Coords> innerWhatIfMoveWarriorTo(Player player, Warrior warrior, Coords coords) {
     // Если игра началась
-    return context.isGameRan()
-            // и этим юнитом не делалось движений
-            && !warrior.isTouchedAtThisTurn()
-            // и предел используемых за ход юнитов достигнут
-            && player.getWarriorsTouchedAtThisTurn().getResult().size() >= context.getGameRules().getMovesCountPerTurnForEachPlayer()
-            ? ResultImpl.fail(PLAYER_UNIT_MOVES_ON_THIS_TURN_ARE_EXCEEDED
-            .getError(warrior.getOwner().getId(), String.valueOf(context.getGameRules().getMovesCountPerTurnForEachPlayer())))
-            : tryToMove(warrior, coords
+    return tryToMove(warrior, coords
             // размер юнита в "пикселях"
             , context.getGameRules().getWarriorSize()
             // очки действия, оставшиеся в данном ходу для перемещения
@@ -480,5 +444,19 @@ public class LevelMapImpl implements LevelMap {
     return ResultImpl.success(this);
   }
   //===================================================================================================
+
+  @Override
+  public Result<Player> ifPlayerOwnsThisTurn(Player player, String... args) {
+    return getPlayerOwnsThisTurn()
+            .map(player1 -> player1 == player
+                    ? ResultImpl.success(player)
+                    : ResultImpl.fail(PLAYER_IS_NOT_OWENER_OF_THIS_ROUND.getError(
+                    player.findContext().getResult().getGameName()
+                    , player.findContext().getResult().getContextId()
+                    , player.getId()
+                    , args.length > 0 ? args[0] : "")));
+  }
+  //===================================================================================================
+
 
 }

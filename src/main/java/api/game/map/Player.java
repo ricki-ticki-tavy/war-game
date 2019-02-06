@@ -97,11 +97,18 @@ public interface Player extends BaseEntityHeader {
   /**
    * Переместить юнит на новые координаты
    *
-   * @param warriorId
-   * @param newCoords
+   * @param warrior
+   * @param to
    * @return
    */
-  Result<Warrior> moveWarriorTo(String warriorId, Coords newCoords);
+  Result<Warrior> moveWarriorTo(Warrior warrior, Coords to);
+
+  /**
+   * Проверяет возможно ли движение данного югита в принципе
+   * @param warrior
+   * @return
+   */
+  Result<Warrior> ifCanMoveWarrior(Warrior warrior);
 
   /**
    * очищает воинов, артефакты и прочее у игрока
