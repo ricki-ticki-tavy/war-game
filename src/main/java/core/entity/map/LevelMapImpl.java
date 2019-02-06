@@ -52,6 +52,7 @@ public class LevelMapImpl implements LevelMap {
   private Map<String, Player> players;
   private Context context;
   private boolean loaded = false;
+  private Rectangle mapBorder;
 
   private GameProcessData gameProcessData;
 
@@ -68,6 +69,9 @@ public class LevelMapImpl implements LevelMap {
 
   @Override
   public void beginGame() {
+    // границы движения - вся карта
+    mapBorder = new Rectangle(new Coords(5, 5), new Coords(width - 5, height - 5));
+
     // сохраним список пользователей, начавших игру
     getPlayers().stream()
             .forEach(player -> {
@@ -269,12 +273,20 @@ public class LevelMapImpl implements LevelMap {
   //===================================================================================================
 
   @Override
+  public Result<Warrior> rollbackMove(Player player, String warriorId) {
+    return ifPlayerOwnsThisTurn(player, ": отмена перемещения юнита " + warriorId)
+            .map(playerOwnsThisTurn -> playerOwnsThisTurn.rollbackMove(warriorId));
+  }
+  //===================================================================================================
+
+  @Override
   public Result<Coords> whatIfMoveWarriorTo(Player player, String warriorId, Coords coords) {
     return player.findWarriorById(warriorId)
             .map(warrior -> innerWhatIfMoveWarriorTo(player, warrior, coords));
   }
   //===================================================================================================
 
+  // TODO ПЕРЕДЕЛАТЬ по слоям. Метод уже есть у юнита!!!
   public Result<Coords> getWarriorSOriginCoords(Warrior warrior) {
     // ищем в списке юнитов, задействованных ы этом ходу наш юнит
     return !warrior.isTouchedAtThisTurn() || warrior.isMoveLocked() || !warrior.isRollbackAvailable()
@@ -289,6 +301,7 @@ public class LevelMapImpl implements LevelMap {
   }
   //===================================================================================================
 
+  //TODO переделать по слоям
   @Override
   public Result<List<Influencer>> getWarriorSInfluencers(Player player, String warriorId) {
     return player.findWarriorById(warriorId)
@@ -434,7 +447,7 @@ public class LevelMapImpl implements LevelMap {
                     // делим на стоимость
                     * simpleUnitSize / warrior.getWarriorSMoveCost()
                     : 10000000
-            , context.isGameRan() ? null : player.getStartZone());
+            , context.isGameRan() ? mapBorder : player.getStartZone());
   }
   //===================================================================================================
 

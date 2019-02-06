@@ -91,6 +91,12 @@ public interface LevelMap {
   Result<Warrior> moveWarriorTo(Player player, String warriorId, Coords newCoords);
 
   /**
+   * Откатить перемещение воина
+   * @return
+   */
+  Result<Warrior> rollbackMove(Player player, String warriorId);
+
+  /**
    * Возвращает координаты,куда можно переместить перемещаемого юнита, исходя из того, куда его хотят переместить
    * @param player
    * @param warriorId

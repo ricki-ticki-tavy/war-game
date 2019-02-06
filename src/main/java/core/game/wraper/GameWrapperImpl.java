@@ -32,7 +32,6 @@ public class GameWrapperImpl implements GameWrapper {
   Core core;
 
   //===================================================================================================
-  //===================================================================================================
 
   @PostConstruct
   public void testGame() {
@@ -98,6 +97,14 @@ public class GameWrapperImpl implements GameWrapper {
   public Result<Warrior> moveWarriorTo(String contextId, String userName, String warriorId, Coords coords) {
     return core.findGameContextByUID(contextId)
             .map(fineContext -> fineContext.moveWarriorTo(userName, warriorId, coords))
+            .logIfError(logger);
+  }
+//===================================================================================================
+
+  @Override
+  public Result<Warrior> rollbackMove(String contextId, String userName, String warriorId) {
+    return core.findGameContextByUID(contextId)
+            .map(fineContext -> fineContext.rollbackMove(userName, warriorId))
             .logIfError(logger);
   }
 //===================================================================================================

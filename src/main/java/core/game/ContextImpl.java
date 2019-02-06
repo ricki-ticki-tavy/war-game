@@ -304,6 +304,14 @@ public class ContextImpl implements Context {
   //===================================================================================================
 
   @Override
+  public Result<Warrior> rollbackMove(String userName, String warriorId) {
+    return ifGameDeleting(false)
+            .map(context -> findUserByName(userName))
+            .map(player -> getLevelMap().rollbackMove(player, warriorId));
+  }
+  //===================================================================================================
+
+  @Override
   public Result<Coords> whatIfMoveWarriorTo(String userName, String warriorId, Coords coords) {
     return ifGameDeleting(false)
             .map(fineContext -> fineContext.findUserByName(userName)

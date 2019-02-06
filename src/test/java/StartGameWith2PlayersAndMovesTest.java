@@ -1,6 +1,9 @@
 import api.core.Result;
 import api.entity.warrior.Warrior;
+import api.enums.EventType;
+import api.enums.LifeTimeUnit;
 import api.game.Coords;
+import api.game.Event;
 import api.game.map.Player;
 import api.game.wraper.GameWrapper;
 import core.system.ResultImpl;
@@ -14,6 +17,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.util.Assert;
+
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 import static core.system.error.GameErrors.*;
 
@@ -153,7 +159,8 @@ public class StartGameWith2PlayersAndMovesTest extends AbstractMapTest {
     Assert.isTrue(warriorResult.getResult().getTreatedActionPointsForMove() == 80, "Неверно рассчитана стоимость перемещения");
 
     // двигаем скелетона на большее расстояние, чем он может. двигаться он будет не с предыдущих координат, а с тех, на которых
-    // стоял В НАЧАЛЕ ХОДА так как он еще не делал ничего, кроме перемещения и может откатиться назад
+    // стоял В НАЧАЛЕ ХОДА так как он еще не делал ничего, кроме перемещения и может откатиться назад. Запаса очков хода ему
+    // хватит только на 30 единиц по 10 точек. таким образом он сдвинется на 300 точек с позиции 200:600.
     warriorResult = gameWrapper.moveWarriorTo(gameContext, player2, warrior1p2, new Coords(900, 600));
     assertSuccess(warriorResult);
     Assert.isTrue(warriorResult.getResult().getCoords().equals(new Coords(500, 600)), "Неверные координаты перемещения. возможно неверная стоимость перемещения");
@@ -164,7 +171,27 @@ public class StartGameWith2PlayersAndMovesTest extends AbstractMapTest {
     Assert.isTrue(warriorResult.isFail(PLAYER_UNIT_MOVES_ON_THIS_TURN_ARE_EXCEEDED), "Превышение лимита фигур за ход игроком 2");
 
     // Делаем откат движения первого юнита второго игрока
+    warriorResult = gameWrapper.rollbackMove(gameContext, player2, warrior1p2);
+    assertSuccess(warriorResult);
+    Assert.isTrue(!warriorResult.getResult().isTouchedAtThisTurn(), "Признак задействованности юнита в этом ходу сохранился");
+    Assert.isTrue(warriorResult.getResult().getCoords().equals(new Coords(200, 600)), "Неверные координаты перемещения. возможно неверная стоимость перемещения");
 
+    // двигаем вторым юнитом второго игрока. Так как была отмена движения первого юнита, то мы суспехом сдвинем этот
+    // юнит. Дальность перемещения больше, чем то, на что хватит очков действия. юнит переместится с 800 по Х до 500
+    warriorResult = gameWrapper.moveWarriorTo(gameContext, player2, warrior2p2, new Coords(400, 600));
+    assertSuccess(warriorResult);
+    Assert.isTrue(warriorResult.getResult().getCoords().equals(new Coords(500, 600)), "Неверные координаты перемещения. возможно неверная стоимость перемещения");
+
+    // выполним блокировку отката юнита
+    warriorResult.getResult().lockRollback();
+    Assert.isTrue(warriorResult.getResult().getOriginalCoords().equals(new Coords(500, 600)), "Неверные координаты перемещения. возможно неверная стоимость перемещения");
+    // Пробуем откатить перемещенный юнит. Должен быть отказ
+    warriorResult = gameWrapper.rollbackMove(gameContext, player2, warrior2p2);
+    Assert.isTrue(warriorResult.isFail(WARRIOR_CAN_T_ROLLBACK_MOVE), "Откат вышел не смотря на блокировку");
+
+    // Еще раз передадим ход. Должно быть событие
+    playerResult = gameWrapper.nextTurn(gameContext, player2);
+    assertSuccess(playerResult);
   }
 
   @Test

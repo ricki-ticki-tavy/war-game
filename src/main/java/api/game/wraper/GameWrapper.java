@@ -70,6 +70,12 @@ public interface GameWrapper {
   Result<Warrior> moveWarriorTo(String contextId, String userName, String warriorId, Coords coords);
 
   /**
+   * Откатить перемещение воина
+   * @return
+   */
+  Result<Warrior> rollbackMove(String contextId, String userName, String warriorId);
+
+  /**
    * Возвращает координаты,куда можно переместить перемещаемого юнита, исходя из того, куда его хотят переместить
    * @param contextId
    * @param userName

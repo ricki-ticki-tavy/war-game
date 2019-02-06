@@ -36,13 +36,6 @@ public interface Warrior extends BaseEntityHeader, HasCoordinates {
   List<WarriorSHand> getHands();
 
   /**
-   * Получить оружие юнита
-   *
-   * @return
-   */
-  List<Weapon> getWeapons();
-
-  /**
    * Перемещает юнит в заданные координаты
    *
    * @param to
@@ -71,6 +64,13 @@ public interface Warrior extends BaseEntityHeader, HasCoordinates {
    * @return
    */
   Result<Weapon> dropWeapon(String weaponInstanceId);
+
+  /**
+   * Получить оружие юнита
+   *
+   * @return
+   */
+  List<Weapon> getWeapons();
 
   /**
    * Получить значения атрибутов этого юнита
@@ -172,11 +172,17 @@ public interface Warrior extends BaseEntityHeader, HasCoordinates {
   void lockRollback();
 
   /**
+   * Откатить перемещение воина
+   * @return
+   */
+  Result<Warrior> rollbackMove();
+
+  /**
    * Установить или снять отметку, что юнит использован в этом ходе
    * @param selectedAtThisTurn
    * @return
    */
-  Warrior setSelectedOnThisTurn(boolean selectedAtThisTurn);
+  Warrior setTouchedOnThisTurn(boolean selectedAtThisTurn);
 
   /**
    * возвращает признак был ли юнит использован в этом ходе

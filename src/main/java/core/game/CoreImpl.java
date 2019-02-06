@@ -124,7 +124,7 @@ public class CoreImpl implements Core {
               foundContext.getLevelMap().getPlayers()
                       .stream()
                       .forEach(player ->
-                          foundContext.disconnectPlayer(player));
+                              foundContext.disconnectPlayer(player));
               // вычеркнуть контекст из списка
               contextMap.remove(foundContext.getContextId());
               // отправимсообщение об удалении контекста
@@ -204,13 +204,19 @@ public class CoreImpl implements Core {
   @Override
   public Result<Context> unsubscribeEvent(Context context, String consumerId, EventType... eventTypes) {
     Map<EventType, Map<String, Consumer<Event>>> contextConsumers = eventConsumers.get(context);
-    if (contextConsumers != null){
-      Arrays.stream(eventTypes).forEach(eventType -> {
-        Map<String, Consumer<Event>> consumersOfEvent = contextConsumers.get(eventType);
-        if (consumersOfEvent != null) {
-          consumersOfEvent.remove(consumerId);
-        }
-      });
+    if (contextConsumers != null) {
+      if (eventTypes.length != 0) {
+        Arrays.stream(eventTypes).forEach(eventType -> {
+          Map<String, Consumer<Event>> consumersOfEvent = contextConsumers.get(eventType);
+          if (consumersOfEvent != null) {
+            consumersOfEvent.remove(consumerId);
+          }
+        });
+      } else {
+        // не указан тип события. Отписываемся везде
+        contextConsumers.values().stream()
+                .forEach(stringConsumerMap -> stringConsumerMap.remove(consumerId));
+      }
     }
     return ResultImpl.success(context);
   }
