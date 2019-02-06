@@ -103,6 +103,13 @@ public interface Player extends BaseEntityHeader {
    */
   Result<Warrior> moveWarriorTo(Warrior warrior, Coords to);
 
+
+  /**
+   * Откатить перемещение воина
+   * @return
+   */
+  Result<Warrior> rollbackMove(String warriorId);
+
   /**
    * Проверяет возможно ли движение данного югита в принципе
    * @param warrior

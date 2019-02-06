@@ -172,6 +172,13 @@ public class PlayerImpl implements Player {
   //===================================================================================================
 
   @Override
+  public Result<Warrior> rollbackMove(String warriorId) {
+    return findWarriorById(warriorId)
+    .map(warrior -> warrior.rollbackMove());
+  }
+  //===================================================================================================
+
+  @Override
   public Result<Warrior> ifCanMoveWarrior(Warrior warrior) {
     return context.isGameRan()
             // и этим юнитом не делалось движений

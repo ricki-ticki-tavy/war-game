@@ -22,9 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static api.enums.EventType.*;
-import static core.system.error.GameErrors.WARRIOR_CAN_T_MORE_MOVE_ON_THIS_TURN;
-import static core.system.error.GameErrors.WARRIOR_HANDS_NO_FREE_SLOTS;
-import static core.system.error.GameErrors.WARRIOR_WEAPON_NOT_FOUND;
+import static core.system.error.GameErrors.*;
 
 // TODO добавить поддержку ограничения оружия по допустимому списку
 @Component
@@ -149,7 +147,7 @@ public class WarriorImpl implements Warrior {
     Result result;
     if (!moveLocked) {
       treatedActionPointsForMove = calcMoveCost(to);
-      touchedAtThisTurn = true;
+      setTouchedOnThisTurn(true);
       this.coords = new Coords(to);
       result = ResultImpl.success(this);
     } else {
@@ -265,7 +263,7 @@ public class WarriorImpl implements Warrior {
     // начальные координаты
     originalCoords = new Coords(coords);
     // не использовался в этом ходе / защите
-    touchedAtThisTurn = false;
+    setTouchedOnThisTurn(false);
   }
   //===================================================================================================
 
@@ -376,6 +374,40 @@ public class WarriorImpl implements Warrior {
   @Override
   public void lockRollback() {
     this.rollbackAvailable = false;
+    this.originalCoords = new Coords(coords);
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Warrior> rollbackMove() {
+    Result<Warrior> result;
+    // если откат не заблокирован
+    if (isRollbackAvailable()) {
+      coords = new Coords(originalCoords);
+      // снять признак задействованности в данном ходе
+      setTouchedOnThisTurn(false);
+      // обнулить использованные очки
+      setTreatedActionPointsForMove(0);
+
+      result = ResultImpl.success(this);
+      // уведомление
+      getOwner().findContext().getResult().fireGameEvent(null
+              , WARRIOR_MOVE_ROLLEDBACK
+              , new EventDataContainer(this, result)
+              , null);
+    } else {
+      Context context = getOwner().findContext().getResult();
+      // В игре %s (id %s) игрок %s не может откатить перемещение воина '%s %s' (id %s) так как откат
+      // заблокирован последующими действиями
+      result = ResultImpl.fail(WARRIOR_CAN_T_ROLLBACK_MOVE.getError(
+              context.getGameName()
+              , context.getContextId()
+              , getOwner().getId()
+              , getWarriorBaseClass().getTitle()
+              , getTitle()
+              , getId()));
+    }
+    return result;
   }
   //===================================================================================================
 
@@ -386,7 +418,7 @@ public class WarriorImpl implements Warrior {
   //===================================================================================================
 
   @Override
-  public Warrior setSelectedOnThisTurn(boolean touchedAtThisTurn) {
+  public Warrior setTouchedOnThisTurn(boolean touchedAtThisTurn) {
     this.touchedAtThisTurn = touchedAtThisTurn;
     return this;
   }

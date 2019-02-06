@@ -107,6 +107,18 @@ public class EventLogger {
                 , event.getSource(Warrior.class).getCoords().toString()));
         break;
       }
+      case WARRIOR_MOVE_ROLLEDBACK: {
+        // "В игре '%s' (id %s) игрок '%s' отменил движение юнитом '%s %s' (id %s) и вернул его на координаты '%s'"
+        logger.info(event.getEventType().getFormattedMessage(
+                event.getSourceContext().getGameName()
+                , event.getSourceContext().getContextId()
+                , event.getSource(Warrior.class).getOwner().getId()
+                , event.getSource(Warrior.class).getWarriorBaseClass().getTitle()
+                , event.getSource(Warrior.class).getTitle()
+                , event.getSource(Warrior.class).getId()
+                , event.getSource(Warrior.class).getCoords().toString()));
+        break;
+      }
       case WARRIOR_REMOVED: {
         //   "В игре '%s' (контекст '%s') игроком '%s' удален воин '%s' (id %s)"
         logger.info(event.getEventType().getFormattedMessage(event.getSourceContext().getGameName()

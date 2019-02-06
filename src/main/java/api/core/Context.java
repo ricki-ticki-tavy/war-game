@@ -181,6 +181,12 @@ public interface Context {
   Result<Warrior> moveWarriorTo(String userName, String warriorId, Coords newCoords);
 
   /**
+   * Откатить перемещение воина
+   * @return
+   */
+  Result<Warrior> rollbackMove(String userName, String warriorId);
+
+  /**
    * Возвращает координаты,куда можно переместить перемещаемого юнита, исходя из того, куда его хотят переместить
    * @param userName
    * @param warriorId

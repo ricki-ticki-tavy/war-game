@@ -17,6 +17,7 @@ public enum GameErrors {
   , WARRIOR_NOT_FOUND_AT_PLAYER_BY_NAME("WR-5", "Игра %s (id %s) игрок %s не имеет воина с id %s")
   , WARRIOR_CAN_T_MORE_MOVE_ON_THIS_TURN("WR-6", "Воин %s (id %s) игрока %s в игре %s (id %s) не может более выполнить перемещение в данном ходе")
   , WARRIOR_CAN_T_MOVE_TO_THIS_POINT("WR-7", "В игре %s (id %s)  воин '%s %s' (id %s) игрока %s не может переместиться на %s так как эти координаты заняты")
+  , WARRIOR_CAN_T_ROLLBACK_MOVE("WR-8", "В игре %s (id %s) игрок %s не может откатить перемещение воина '%s %s' (id %s) так как откат заблокирован последующими действиями")
 
   , WEAPON_BASE_CLASS_NOT_FOUND_BY_NAME("WP-1", "Класс оружия с именем %s не существует")
 

@@ -273,12 +273,20 @@ public class LevelMapImpl implements LevelMap {
   //===================================================================================================
 
   @Override
+  public Result<Warrior> rollbackMove(Player player, String warriorId) {
+    return ifPlayerOwnsThisTurn(player, ": отмена перемещения юнита " + warriorId)
+            .map(playerOwnsThisTurn -> playerOwnsThisTurn.rollbackMove(warriorId));
+  }
+  //===================================================================================================
+
+  @Override
   public Result<Coords> whatIfMoveWarriorTo(Player player, String warriorId, Coords coords) {
     return player.findWarriorById(warriorId)
             .map(warrior -> innerWhatIfMoveWarriorTo(player, warrior, coords));
   }
   //===================================================================================================
 
+  // TODO ПЕРЕДЕЛАТЬ по слоям. Метод уже есть у юнита!!!
   public Result<Coords> getWarriorSOriginCoords(Warrior warrior) {
     // ищем в списке юнитов, задействованных ы этом ходу наш юнит
     return !warrior.isTouchedAtThisTurn() || warrior.isMoveLocked() || !warrior.isRollbackAvailable()
@@ -293,6 +301,7 @@ public class LevelMapImpl implements LevelMap {
   }
   //===================================================================================================
 
+  //TODO переделать по слоям
   @Override
   public Result<List<Influencer>> getWarriorSInfluencers(Player player, String warriorId) {
     return player.findWarriorById(warriorId)
