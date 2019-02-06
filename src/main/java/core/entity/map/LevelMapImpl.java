@@ -52,6 +52,7 @@ public class LevelMapImpl implements LevelMap {
   private Map<String, Player> players;
   private Context context;
   private boolean loaded = false;
+  private Rectangle mapBorder;
 
   private GameProcessData gameProcessData;
 
@@ -68,6 +69,9 @@ public class LevelMapImpl implements LevelMap {
 
   @Override
   public void beginGame() {
+    // границы движения - вся карта
+    mapBorder = new Rectangle(new Coords(5, 5), new Coords(width - 5, height - 5));
+
     // сохраним список пользователей, начавших игру
     getPlayers().stream()
             .forEach(player -> {
@@ -434,7 +438,7 @@ public class LevelMapImpl implements LevelMap {
                     // делим на стоимость
                     * simpleUnitSize / warrior.getWarriorSMoveCost()
                     : 10000000
-            , context.isGameRan() ? null : player.getStartZone());
+            , context.isGameRan() ? mapBorder : player.getStartZone());
   }
   //===================================================================================================
 
