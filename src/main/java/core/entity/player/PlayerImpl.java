@@ -67,6 +67,12 @@ public class PlayerImpl implements Player {
   //===================================================================================================
 
   @Override
+  public Map<String, Warrior> getAllWarriors() {
+    return warriors;
+  }
+  //===================================================================================================
+
+  @Override
   public List<Warrior> getWarriors() {
     return new ArrayList(warriors.values());
   }

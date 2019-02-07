@@ -11,6 +11,7 @@ import api.game.Coords;
 import api.game.Rectangle;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Игрок
@@ -32,6 +33,13 @@ public interface Player extends BaseEntityHeader {
    * @return
    */
   List<Warrior> getWarriors();
+
+  /**
+   * Вернуть всех воинов
+   *
+   * @return
+   */
+  Map<String, Warrior> getAllWarriors();
 
   /**
    * Задать зону выставления воинов
