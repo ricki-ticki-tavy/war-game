@@ -11,6 +11,7 @@ import core.entity.warrior.Viking;
 import core.entity.weapon.Bow;
 import core.entity.weapon.ShortSword;
 import core.entity.weapon.Sword;
+import core.game.CoreImpl;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -25,18 +26,21 @@ import org.springframework.util.Assert;
 import java.util.List;
 
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = {CreateWarriorsWeaponsUsersTest.class})
-@ContextConfiguration(loader = AnnotationConfigContextLoader.class, classes = TestContextConfiguration.class)
+//@RunWith(SpringRunner.class)
+//@SpringBootTest(classes = {CreateWarriorsWeaponsUsersTest.class})
+//@ContextConfiguration(loader = AnnotationConfigContextLoader.class, classes = TestContextConfiguration.class)
 public class CreateWarriorsWeaponsUsersTest {
   private static final Logger logger = LoggerFactory.getLogger(CreateWarriorsWeaponsUsersTest.class);
 
-  @Autowired
+//  @Autowired
   GameWrapper gameWrapper;
 
-  @Test
-  public void test1() {
-    Assert.isTrue(gameWrapper.getCore().getContextList().size() == 0, "Контексты не пусты !!!");
+  public CreateWarriorsWeaponsUsersTest setGameWrapper(GameWrapper gameWrapper){
+    this.gameWrapper = gameWrapper;
+    return this;
+  }
+
+  public void innerDoTest(){
 
     int step = 1;
     logger.info("step " + step++);
@@ -167,5 +171,10 @@ public class CreateWarriorsWeaponsUsersTest {
     gameWrapper.getCore().removeGameContext(context1.getContextId());
     Assert.isTrue(gameWrapper.getCore().findGameContextByUID(context1.getContextId()).isFail(), "Контекст не удален");
   }
+
+//  @Test
+//  public void test1() {
+//    innerDoTest();
+//  }
 
 }

@@ -9,6 +9,7 @@ import core.entity.map.GameRulesImpl;
 import core.entity.warrior.Skeleton;
 import core.entity.warrior.Viking;
 import core.entity.warrior.Vityaz;
+import core.game.CoreImpl;
 import org.springframework.util.Assert;
 
 /**
@@ -24,8 +25,6 @@ public abstract class AbstractMapTest {
   protected String warrior1p2;
   protected String warrior2p2;
 
-  abstract GameWrapper getGameWrapper();
-
   protected String extractError(Result result) {
     return result.isFail() ? result.getError().getMessage() : "";
   }
@@ -35,9 +34,7 @@ public abstract class AbstractMapTest {
     Assert.isTrue(operatioinResult.isSuccess(), msg);
   }
 
-  public void initMap() {
-
-    GameWrapper gameWrapper = getGameWrapper();
+  public void initMap(GameWrapper gameWrapper) {
 
     Result<Player> playerResult = gameWrapper.login("test");
     assertSuccess(playerResult);

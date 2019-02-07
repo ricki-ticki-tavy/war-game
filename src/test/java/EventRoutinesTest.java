@@ -16,20 +16,21 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Проверка подписывания и отписывания от событий.
  */
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = {StartGameWith2PlayersAndMovesTest.class})
-@ContextConfiguration(loader = AnnotationConfigContextLoader.class, classes = TestContextConfiguration.class)
+//@RunWith(SpringRunner.class)
+//@SpringBootTest(classes = {StartGameWith2PlayersAndMovesTest.class})
+//@ContextConfiguration(loader = AnnotationConfigContextLoader.class, classes = TestContextConfiguration.class)
 public class EventRoutinesTest extends AbstractMapTest{
 
-  @Autowired
+//  @Autowired
   GameWrapper gameWrapper;
 
-  protected GameWrapper getGameWrapper() {
-    return gameWrapper;
+  public EventRoutinesTest setGameWrapper(GameWrapper gameWrapper){
+    this.gameWrapper = gameWrapper;
+    return this;
   }
 
-  private void innerDoTest(){
-    initMap();
+  public void innerDoTest(){
+    initMap(gameWrapper);
 
     // Проверка отработки события готовности к игре
     AtomicBoolean eventDone = new AtomicBoolean(false);
@@ -62,10 +63,13 @@ public class EventRoutinesTest extends AbstractMapTest{
     assertSuccess(playerResult);
     Assert.isTrue(!eventDone.get(), "события было");
 
+    Result r = gameWrapper.getCore().removeGameContext(gameContext);
+    assertSuccess(r);
+
   }
 
-  @Test
-  public void doTest(){
-    innerDoTest();
-  }
+//  @Test
+//  public void doTest(){
+//    innerDoTest();
+//  }
 }

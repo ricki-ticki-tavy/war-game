@@ -195,7 +195,9 @@ public class PlayerImpl implements Player {
   public Result<Player> clear() {
     List<Warrior> warriorsList = new ArrayList<>(warriors.values());
     warriors.clear();
-    warriorsList.stream().forEach(warrior -> innerRemoveWarrior(warrior));
+    if (context != null) {
+      warriorsList.stream().forEach(warrior -> innerRemoveWarrior(warrior));
+    }
     return ResultImpl.success(this);
   }
   //===================================================================================================

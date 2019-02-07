@@ -28,22 +28,22 @@ import static core.system.error.GameErrors.*;
  * переход игроков в режим готовности, переход игры в режим ИГРА.
  */
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = {StartGameWith2PlayersAndMovesTest.class})
-@ContextConfiguration(loader = AnnotationConfigContextLoader.class, classes = TestContextConfiguration.class)
+//@RunWith(SpringRunner.class)
+//@SpringBootTest(classes = {StartGameWith2PlayersAndMovesTest.class})
+//@ContextConfiguration(loader = AnnotationConfigContextLoader.class, classes = TestContextConfiguration.class)
 public class StartGameWith2PlayersAndMovesTest extends AbstractMapTest {
   private static final Logger logger = LoggerFactory.getLogger(StartGameWith2PlayersAndMovesTest.class);
 
-  @Autowired
+//  @Autowired
   GameWrapper gameWrapper;
 
-  protected GameWrapper getGameWrapper() {
-    return gameWrapper;
+  public StartGameWith2PlayersAndMovesTest setGameWrapper(GameWrapper gameWrapper){
+    this.gameWrapper = gameWrapper;
+    return this;
   }
 
-  public void test() {
-    Assert.isTrue(gameWrapper.getCore().getContextList().size() == 0, "Контексты не пусты !!!");
-    initMap();
+  public void innerDoTest() {
+    initMap(gameWrapper);
 
     // Двигаем воина 1 у игрока 1
     Result<Warrior> warriorResult = gameWrapper.moveWarriorTo(gameContext, player1, warrior1p1, new Coords(400, 400));
@@ -192,12 +192,16 @@ public class StartGameWith2PlayersAndMovesTest extends AbstractMapTest {
     // Еще раз передадим ход. Должно быть событие
     playerResult = gameWrapper.nextTurn(gameContext, player2);
     assertSuccess(playerResult);
+
+    r = gameWrapper.getCore().removeGameContext(gameContext);
+    assertSuccess(r);
+
   }
 
-  @Test
-  public void startPlayTest() {
-    test();
-  }
+//  @Test
+//  public void startPlayTest() {
+//    innerDoTest();
+//  }
 
 
 }
