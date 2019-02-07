@@ -25,6 +25,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -164,8 +165,7 @@ public class LevelMapImpl implements LevelMap {
               , String.valueOf(context.getGameRules().getMaxStartCreaturePerPlayer())));
     }
     // TODO сделать проверку координат
-    return player.createWarrior(warriorBaseClassName, coords)
-            .doIfSuccess(warrior -> gameProcessData.allWarriorsOnMap.put(warrior.getId(), warrior));
+    return player.createWarrior(warriorBaseClassName, coords);
   }
   //===================================================================================================
 
@@ -243,8 +243,7 @@ public class LevelMapImpl implements LevelMap {
 
   @Override
   public Result<Warrior> removeWarrior(Player player, String warriorId) {
-    return player.removeWarrior(warriorId)
-            .doIfSuccess(warrior -> gameProcessData.allWarriorsOnMap.remove(warrior.getId()));
+    return player.removeWarrior(warriorId);
   }
   //===================================================================================================
 
@@ -350,6 +349,19 @@ public class LevelMapImpl implements LevelMap {
   }
   //===================================================================================================
 
+  public Map<String, Warrior> innerGetAllWarriorsOnMap(Coords coords, int radiusInMapUnits){
+    Map<String, Warrior> allWarriors;
+    if (coords == null){
+      allWarriors = new HashMap<>(100);
+      players.values().stream().forEach(player -> allWarriors.putAll(player.getAllWarriors()));
+    } else {
+      // TODO дописать
+      allWarriors = null;
+    }
+    return allWarriors;
+  }
+  //===================================================================================================
+
   private int calcQuadOfWayLength(Coords pointFrom, Coords pointTo) {
     return (pointFrom.getX() - pointTo.getX()) * (pointFrom.getX() - pointTo.getX())
             + (pointFrom.getY() - pointTo.getY()) * (pointFrom.getY() - pointTo.getY());
@@ -421,7 +433,7 @@ public class LevelMapImpl implements LevelMap {
     final int pwrObjectSize = objectSize * objectSize;
     final Coords copyOfTo = new Coords(to);
     Coords to_ = new Coords(to);
-    return gameProcessData.allWarriorsOnMap.values().stream()
+    return innerGetAllWarriorsOnMap(null, 0).values().stream()
             .filter(nextWarrior -> warrior != nextWarrior && pwrObjectSize > calcQuadOfWayLength(nextWarrior.getCoords(), copyOfTo))
             .findFirst()
             .map(foundWarrior -> ResultImpl.fail(WARRIOR_CAN_T_MOVE_TO_THIS_POINT.getError(
