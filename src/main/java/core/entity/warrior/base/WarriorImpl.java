@@ -11,6 +11,7 @@ import api.game.Coords;
 import api.game.EventDataContainer;
 import api.game.map.Player;
 import core.system.ResultImpl;
+import core.system.error.GameError;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -99,6 +100,18 @@ public class WarriorImpl implements Warrior {
   //===================================================================================================
 
   @Override
+  public Result<Weapon> findWeaponById(String weaponId) {
+    Weapon weapon = hands.values().stream()
+            .filter(warriorSHand -> warriorSHand.hasWeapon(weaponId))
+            .findFirst().map(warriorSHand -> warriorSHand.getWeaponById(weaponId))
+            .get();
+    return weapon == null
+            ? ResultImpl.fail(generateWeapoNotFoundError(weaponId))
+            : ResultImpl.success(weapon);
+  }
+  //===================================================================================================
+
+  @Override
   public String getId() {
     return id;
   }
@@ -119,7 +132,7 @@ public class WarriorImpl implements Warrior {
   private Coords innerGetTranslatedToGameCoords() {
     // если игра уже в стадии игры, а не расстановки, юнит не трогали или если не заблокирована возможность отката, то
     // берем OriginalCoords в противном случае берем Coords
-    return getOwner().findContext().getResult().isGameRan()
+    return gameContext.isGameRan()
             // игра идет
             && isRollbackAvailable() && !isMoveLocked()
             ? originalCoords
@@ -138,7 +151,7 @@ public class WarriorImpl implements Warrior {
     Coords from = innerGetTranslatedToGameCoords();
 
     return (int) Math.round((double) getWarriorSMoveCost() * Math.sqrt((double) ((from.getX() - to.getX()) * (from.getX() - to.getX())
-            + (from.getY() - to.getY()) * (from.getY() - to.getY()))) / (double) getOwner().findContext().getResult().getLevelMap().getSimpleUnitSize());
+            + (from.getY() - to.getY()) * (from.getY() - to.getY()))) / (double) gameContext.getLevelMap().getSimpleUnitSize());
   }
   //===================================================================================================
 
@@ -158,8 +171,8 @@ public class WarriorImpl implements Warrior {
                       getWarriorBaseClass().getTitle()
                       , getId()
                       , getOwner().getId()
-                      , getOwner().findContext().getResult().getGameName()
-                      , getOwner().findContext().getResult().getContextId()));
+                      , gameContext.getGameName()
+                      , gameContext.getContextId()));
     }
     return result;
   }
@@ -222,6 +235,19 @@ public class WarriorImpl implements Warrior {
     return result;
   }
   //===================================================================================================
+
+  private GameError generateWeapoNotFoundError(String weaponId) {
+    //"В игре %s (id %s) у игрока %s воин '%s %s' (id %s) не имеет оружия с id '%s'"
+    return WARRIOR_WEAPON_NOT_FOUND.getError(
+            gameContext.getGameName()
+            , gameContext.getContextId()
+            , getOwner().getId()
+            , getWarriorBaseClass().getTitle()
+            , getTitle()
+            , getId()
+            , weaponId);
+
+  }
 
   @Override
   public Result<WarriorSBaseAttributes> getAttributes() {
@@ -298,7 +324,7 @@ public class WarriorImpl implements Warrior {
   public Result<Influencer> addInfluenceToWarrior(Modifier modifier, Object source, LifeTimeUnit lifeTimeUnit, int lifeTime) {
     Influencer influencer = new InfluencerImpl(this, modifier, source, lifeTimeUnit, lifeTime);
     influencers.put(influencer.getId(), influencer);
-    getOwner().findContext().getResult().fireGameEvent(null, WARRIOR_INFLUENCER_ADDED
+    gameContext.fireGameEvent(null, WARRIOR_INFLUENCER_ADDED
             , new EventDataContainer(influencer, this), null);
     return ResultImpl.success(influencer);
   }
@@ -319,7 +345,7 @@ public class WarriorImpl implements Warrior {
   void innerRemoveInfluencerFromWarrior(Influencer influencer, boolean silent) {
     influencers.remove(influencer.getId());
     if (!silent) {
-      getOwner().findContext().getResult().fireGameEvent(null, WARRIOR_INFLUENCER_REMOVED
+      gameContext.fireGameEvent(null, WARRIOR_INFLUENCER_REMOVED
               , new EventDataContainer(influencer, this), null);
     }
   }
@@ -391,7 +417,7 @@ public class WarriorImpl implements Warrior {
 
       result = ResultImpl.success(this);
       // уведомление
-      getOwner().findContext().getResult().fireGameEvent(null
+      gameContext.fireGameEvent(null
               , WARRIOR_MOVE_ROLLEDBACK
               , new EventDataContainer(this, result)
               , null);

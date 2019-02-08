@@ -5,6 +5,7 @@ import api.core.Result;
 import api.entity.ability.Modifier;
 import api.entity.warrior.Influencer;
 import api.entity.warrior.Warrior;
+import api.entity.weapon.Weapon;
 import api.enums.LifeTimeUnit;
 import api.game.Coords;
 import api.game.Rectangle;
@@ -113,7 +114,14 @@ public interface LevelMap {
    */
   Result<Warrior> removeWarrior(Player player, String warriorId);
 
-
+  /**
+   * Вооружить воина предметом
+   * @param player
+   * @param warriorId
+   * @param weaponClass
+   * @return
+   */
+  Result<Weapon> giveWeaponToWarrior(Player player, String warriorId, Class<? extends Weapon> weaponClass);
 
   /**
    * Добавить игрока в игру

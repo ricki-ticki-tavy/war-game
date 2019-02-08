@@ -5,6 +5,7 @@ import api.core.Result;
 import api.entity.ability.Modifier;
 import api.entity.warrior.Influencer;
 import api.entity.warrior.Warrior;
+import api.entity.weapon.Weapon;
 import api.enums.LifeTimeUnit;
 import api.game.Coords;
 import api.game.EventDataContainer;
@@ -244,6 +245,12 @@ public class LevelMapImpl implements LevelMap {
   @Override
   public Result<Warrior> removeWarrior(Player player, String warriorId) {
     return player.removeWarrior(warriorId);
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Weapon> giveWeaponToWarrior(Player player, String warriorId, Class<? extends Weapon> weaponClass) {
+    return player.giveWeaponToWarrior(warriorId, weaponClass);
   }
   //===================================================================================================
 

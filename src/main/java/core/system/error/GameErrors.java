@@ -11,7 +11,7 @@ public enum GameErrors {
   , PLAYER_CAN_T_PASS_THE_TURN_PLAYER_IS_NOT_TURN_OWNER("PL-5", "Пользователь  '%s' игра '%s' (id %s) не может передать ход дальше так как не его ход. Сейчас ход игрока '%s'")
 
   , WARRIOR_HANDS_NO_FREE_SLOTS("WR-1", "Руки воина имеют свободных %s мест, а оружие '%s' требует %s места")
-  , WARRIOR_WEAPON_NOT_FOUND("WR-2", "Воин не имеет оружия с id '%s'")
+  , WARRIOR_WEAPON_NOT_FOUND("WR-2", "В игре %s (id %s) у игрока %s воин '%s %s' (id %s) не имеет оружия с id '%s'")
   , WARRIOR_BASE_ATTRS_IS_FINAL("WR-3", "Воину уже назначены базовыеатрибуты. Переопределение не возможно")
   , WARRIOR_BASE_CLASS_NOT_FOUND_BY_NAME("WR-4", "Класс воина с именем %s не существует")
   , WARRIOR_NOT_FOUND_AT_PLAYER_BY_NAME("WR-5", "Игра %s (id %s) игрок %s не имеет воина с id %s")

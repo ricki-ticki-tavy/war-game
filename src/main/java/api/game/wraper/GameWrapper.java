@@ -92,7 +92,7 @@ public interface GameWrapper {
    * @param weaponName
    * @return
    */
-  Result<Weapon> giveWeaponToWarrior(String userName, String warriorId, String weaponName);
+  Result<Weapon> giveWeaponToWarrior(String contextId, String userName, String warriorId, String weaponName);
 
   // TODO переделать с кодом контекста в параметр
   /**

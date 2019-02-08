@@ -3,6 +3,7 @@ package api.core;
 import api.entity.warrior.Influencer;
 import api.entity.warrior.Warrior;
 import api.entity.warrior.WarriorBaseClass;
+import api.entity.weapon.Weapon;
 import api.enums.EventType;
 import api.game.Coords;
 import api.game.Event;
@@ -202,6 +203,15 @@ public interface Context {
    * @return
    */
   Result<Warrior> removeWarrior(String userName, String warriorId);
+
+  /**
+   * Вооружить воина предметом
+   * @param userName
+   * @param warriorId
+   * @param weaponClass
+   * @return
+   */
+  Result<Weapon> giveWeaponToWarrior(String userName, String warriorId, Class<? extends Weapon> weaponClass);
 
   /**
    * Получить пользователя - создателя игры

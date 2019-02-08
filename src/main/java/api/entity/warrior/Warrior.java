@@ -73,6 +73,13 @@ public interface Warrior extends BaseEntityHeader, HasCoordinates {
   List<Weapon> getWeapons();
 
   /**
+   * Найти оружие по его id
+   * @param weaponId
+   * @return
+   */
+  Result<Weapon> findWeaponById(String weaponId);
+
+  /**
    * Получить значения атрибутов этого юнита
    *
    * @return

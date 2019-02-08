@@ -5,6 +5,7 @@ import api.core.Result;
 import api.entity.ability.Modifier;
 import api.entity.warrior.Influencer;
 import api.entity.warrior.Warrior;
+import api.entity.weapon.Weapon;
 import api.enums.LifeTimeUnit;
 import api.game.Coords;
 import api.game.EventDataContainer;
@@ -226,6 +227,20 @@ public class PlayerImpl implements Player {
     return readyToPlay ? ResultImpl.fail(USER_IS_READY_TO_PLAY.getError(getId(), context.getGameName(), context.getContextId()))
             : findWarriorById(warriorId)
             .map(warrior -> innerRemoveWarrior(warrior));
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Weapon> giveWeaponToWarrior(String warriorId, Class<? extends Weapon> weaponClass) {
+    return findWarriorById(warriorId)
+    .map(foundWarrior -> foundWarrior.takeWeapon(weaponClass));
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Weapon> findWeaponById(String weaponId) {
+    // TODO Реализовать
+    return null;
   }
   //===================================================================================================
 

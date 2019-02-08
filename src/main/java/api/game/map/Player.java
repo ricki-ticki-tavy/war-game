@@ -6,6 +6,7 @@ import api.entity.ability.Modifier;
 import api.entity.base.BaseEntityHeader;
 import api.entity.warrior.Influencer;
 import api.entity.warrior.Warrior;
+import api.entity.weapon.Weapon;
 import api.enums.LifeTimeUnit;
 import api.game.Coords;
 import api.game.Rectangle;
@@ -140,6 +141,13 @@ public interface Player extends BaseEntityHeader {
    */
   Result<Warrior> removeWarrior(String warriorId);
 
+  /**
+   * Вооружить воина предметом
+   * @param warriorId
+   * @param weaponClass
+   * @return
+   */
+  Result<Weapon> giveWeaponToWarrior(String warriorId, Class<? extends Weapon> weaponClass);
 
   /**
    * Подготовка воина перед ходом игрока. Восстановление различных параметров до нормальных значений
@@ -172,17 +180,13 @@ public interface Player extends BaseEntityHeader {
    */
   Result<List<Warrior>> getWarriorsTouchedAtThisTurn();
 
+  /**
+   * Найти оружие по его id
+   * @param weaponId
+   * @return
+   */
+  Result<Weapon> findWeaponById(String weaponId);
 
-//  /**
-//   * Удалить влияние у юнита
-//   * @param influencer
-//   * @return
-//   */
-//  Result<Influencer> removeInfluencerFromWarrior(String warriorId, Influencer influencer);
 
-//  /**
-//   * Получить список оказываемых влияний на юнит
-//   * @return
-//   */
-//  Result<List<Influencer>> getWarriorSInfluencers();
+
 }

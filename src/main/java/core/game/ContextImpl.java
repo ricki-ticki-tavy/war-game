@@ -5,6 +5,7 @@ import api.core.Core;
 import api.core.Result;
 import api.entity.warrior.Influencer;
 import api.entity.warrior.Warrior;
+import api.entity.weapon.Weapon;
 import api.enums.EventType;
 import api.game.Coords;
 import api.game.Event;
@@ -299,7 +300,7 @@ public class ContextImpl implements Context {
   public Result<Warrior> moveWarriorTo(String userName, String warriorId, Coords coords) {
     return ifGameDeleting(false)
             .map(fineContext -> fineContext.findUserByName(userName)
-            .map(player -> fineContext.getLevelMap().moveWarriorTo(player, warriorId, coords)));
+                    .map(player -> fineContext.getLevelMap().moveWarriorTo(player, warriorId, coords)));
   }
   //===================================================================================================
 
@@ -351,6 +352,15 @@ public class ContextImpl implements Context {
             .map(context -> context.ifGameRan(false))
             .map(context -> context.findUserByName(userName)
                     .map(player -> context.getLevelMap().removeWarrior(player, warriorId)));
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Weapon> giveWeaponToWarrior(String userName, String warriorId, Class<? extends Weapon> weaponClass) {
+    return ifGameDeleting(false)
+            .map(fineContext -> findUserByName(userName))
+            .map(player -> ifGameRan(false)
+                    .map(context -> context.getLevelMap().giveWeaponToWarrior(player, warriorId, weaponClass)));
   }
   //===================================================================================================
 
