@@ -1,25 +1,15 @@
+package tests;
+
 import api.core.Result;
 import api.entity.warrior.Warrior;
-import api.enums.EventType;
-import api.enums.LifeTimeUnit;
 import api.game.Coords;
-import api.game.Event;
 import api.game.map.Player;
 import api.game.wraper.GameWrapper;
 import core.system.ResultImpl;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.util.Assert;
-
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
+import tests.abstracts.AbstractMapTest;
 
 import static core.system.error.GameErrors.*;
 
@@ -29,7 +19,7 @@ import static core.system.error.GameErrors.*;
  */
 
 //@RunWith(SpringRunner.class)
-//@SpringBootTest(classes = {StartGameWith2PlayersAndMovesTest.class})
+//@SpringBootTest(classes = {tests.StartGameWith2PlayersAndMovesTest.class})
 //@ContextConfiguration(loader = AnnotationConfigContextLoader.class, classes = TestContextConfiguration.class)
 public class StartGameWith2PlayersAndMovesTest extends AbstractMapTest {
   private static final Logger logger = LoggerFactory.getLogger(StartGameWith2PlayersAndMovesTest.class);

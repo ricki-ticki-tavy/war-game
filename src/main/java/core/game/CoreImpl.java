@@ -17,7 +17,7 @@ import core.entity.weapon.Bow;
 import core.entity.weapon.ShortSword;
 import core.entity.weapon.Sword;
 import core.system.ResultImpl;
-import core.system.eco.EventLogger;
+import core.system.log.EventLogger;
 import core.system.event.EventImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +49,7 @@ public class CoreImpl implements Core {
 
   private Map<String, Context> contextMap = new ConcurrentHashMap<>(10);
   private Map<String, Player> players = new ConcurrentHashMap<>(1000);
+  private Random random = new Random(new Date().getTime());
 
   /**
    * групировка по контекстам, далее внутри групировка по типам событий. Один и тот же потребитель может
@@ -153,9 +154,12 @@ public class CoreImpl implements Core {
   //===================================================================================================
 
   @Override
-  //TODO
   public int getRandom(int min, int max) {
-    return 0;
+    synchronized (random) {
+      return max == min
+              ? random.nextInt(max) + 1
+              : random.nextInt(max - min) + min;
+    }
   }
   //===================================================================================================
 
@@ -164,6 +168,7 @@ public class CoreImpl implements Core {
    *
    * @param event
    */
+
   private void fireEventInContext(Context fireInContext, Event event) {
     Optional.ofNullable(fireInContext)
             .ifPresent(firedContext -> Optional.ofNullable(eventConsumers.get(firedContext))

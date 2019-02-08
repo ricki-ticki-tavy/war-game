@@ -1,3 +1,5 @@
+package tests.abstracts;
+
 import api.core.Context;
 import api.core.Result;
 import api.entity.warrior.Warrior;

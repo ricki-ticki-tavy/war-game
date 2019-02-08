@@ -1,11 +1,13 @@
 package api.entity.warrior;
 
+import api.core.Context;
 import api.core.Result;
 import api.entity.ability.Modifier;
 import api.entity.base.BaseEntityHeader;
 import api.entity.weapon.Weapon;
 import api.enums.LifeTimeUnit;
 import api.game.Coords;
+import api.game.action.AttackResult;
 import api.game.map.Player;
 
 import java.util.List;
@@ -48,6 +50,12 @@ public interface Warrior extends BaseEntityHeader, HasCoordinates {
    * @return
    */
   Player getOwner();
+
+  /**
+   * Получить контекст игры
+   * @return
+   */
+  Context getContext();
 
   /**
    * Взять в руку оружие
@@ -102,6 +110,14 @@ public interface Warrior extends BaseEntityHeader, HasCoordinates {
   Result<Warrior> prepareToDefensePhase();
 
   /**
+   * Атаковать выбранным оружием другого воина
+   * @param targetWarrior
+   * @param weaponId
+   * @return
+   */
+  Result<AttackResult> attackWarrior(Warrior targetWarrior, String weaponId);
+
+  /**
    * добавить влияние юниту
    *
    * @param modifier
@@ -143,7 +159,9 @@ public interface Warrior extends BaseEntityHeader, HasCoordinates {
    Coords getOriginalCoords();
 
   /**
-   * Получить приведенные к игре координаты. Если юнит
+   * Получить приведенные к игре координаты. Если юнит НЕ перемещался или перемещался, но есть возможность отката
+   * перемещения, то вернутся координаты, которые были до начала его движения (originCoords). Если юнит нет
+   * возможности отката, то вернутся его координаты текущие
    * @return
    */
    Coords getTranslatedToGameCoords();
@@ -203,6 +221,14 @@ public interface Warrior extends BaseEntityHeader, HasCoordinates {
    * @return
    */
   boolean isRollbackAvailable();
+
+  /**
+   * Получить расстояние в "пикелях" до указанной координаты. Рассчитывается на основании текущих ПРИВЕДЕННЫХ
+   * координат юнита. (getTranslatedToGameCoords)
+   * @param to
+   * @return
+   */
+  int calcDistanceTo(Coords to);
 
   /**
    * Кол-во потраенных на перемещение единиц действия. Имеет смысл только до тех пор, пока можно выполнить откат

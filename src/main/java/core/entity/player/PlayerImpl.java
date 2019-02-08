@@ -213,7 +213,7 @@ public class PlayerImpl implements Player {
     warriors.remove(warrior.getId());
     // отписаться ото всех событий котрые должны удалять влияния на юнит
     warrior.getWarriorSInfluencers()
-            .doIfSuccess(influencers -> influencers.stream().forEach(influencer -> influencer.removeFromWarrior(true)));
+            .peak(influencers -> influencers.stream().forEach(influencer -> influencer.removeFromWarrior(true)));
     //  пошлем событие
     Result<Warrior> result = ResultImpl.success(warrior);
     context.fireGameEvent(null, WARRIOR_REMOVED, new EventDataContainer(warrior, result), null);
@@ -285,7 +285,7 @@ public class PlayerImpl implements Player {
     return findWarriorById(warriorId)
             .map(warrior -> warrior.addInfluenceToWarrior(modifier, source, lifeTimeUnit, lifeTime))
             // добавить слушатель события
-            .doIfSuccess(influencer -> {});
+            .peak(influencer -> {});
   }
   //===================================================================================================
 

@@ -9,6 +9,7 @@ import api.enums.LifeTimeUnit;
 import api.enums.PlayerPhaseType;
 import api.game.Coords;
 import api.game.EventDataContainer;
+import api.game.action.AttackResult;
 import api.game.map.Player;
 import core.system.ResultImpl;
 import core.system.error.GameError;
@@ -156,6 +157,15 @@ public class WarriorImpl implements Warrior {
   //===================================================================================================
 
   @Override
+  public int calcDistanceTo(Coords to) {
+    Coords from = innerGetTranslatedToGameCoords();
+
+    return (int) Math.round(Math.sqrt((double) ((from.getX() - to.getX()) * (from.getX() - to.getX())
+            + (from.getY() - to.getY()) * (from.getY() - to.getY()))) / (double) gameContext.getLevelMap().getSimpleUnitSize());
+  }
+  //===================================================================================================
+
+  @Override
   public Result<Warrior> moveWarriorTo(Coords to) {
     Result result;
     if (!moveLocked) {
@@ -181,6 +191,12 @@ public class WarriorImpl implements Warrior {
   @Override
   public Player getOwner() {
     return owner;
+  }
+  //===================================================================================================
+
+  @Override
+  public Context getContext() {
+    return gameContext;
   }
   //===================================================================================================
 
@@ -233,6 +249,53 @@ public class WarriorImpl implements Warrior {
             , null);
 
     return result;
+  }
+  //===================================================================================================
+
+  public Result<Warrior> isWarriorAlied(Warrior warrior, boolean isAllied) {
+    Result<Warrior> warriorResult = owner.findWarriorById(warrior.getId());
+    if (warriorResult.isSuccess() == isAllied) {
+      // утверждение совпало
+      warriorResult = ResultImpl.success(warrior);
+    } else {
+      warriorResult = isAllied
+              // ждали дружественного, а он - враг
+              // "В игре %s (id %s)  воин '%s %s' (id %s) не является врагом для воина '%s %s' (id %s) игрока %s %s"
+              ? ResultImpl.fail(WEAPON_ATTACK_TARGET_WARRIOR_IS_NOT_ALIED.getError(
+              gameContext.getGameName()
+              , gameContext.getContextId()
+              , warrior.getWarriorBaseClass().getTitle()
+              , warrior.getTitle()
+              , warrior.getId()
+              , getWarriorBaseClass().getTitle()
+              , getTitle()
+              , getId()
+              , getOwner().getId()
+              , ""))
+              // "В игре %s (id %s)  воин '%s %s' (id %s) является враждебным для воина '%s %s' (id %s) игрока %s %s"
+              : ResultImpl.fail(WEAPON_ATTACK_TARGET_WARRIOR_IS_NOT_ALIED.getError(
+              gameContext.getGameName()
+              , gameContext.getContextId()
+              , warrior.getWarriorBaseClass().getTitle()
+              , warrior.getTitle()
+              , warrior.getId()
+              , getWarriorBaseClass().getTitle()
+              , getTitle()
+              , getId()
+              , getOwner().getId()
+              , ""));
+    }
+    return warriorResult;
+  }
+  //===================================================================================================
+
+  public Result<AttackResult> attackWarrior(Warrior targetWarrior, String weaponId) {
+    // проверим, что это не дружественный воин
+    return isWarriorAlied(targetWarrior, false)
+            // Найдем у своего воинаоружие
+            .map(fineTargetWarrior -> findWeaponById(weaponId)
+                    // вдарим
+                    .map(weapon -> weapon.attack(fineTargetWarrior)));
   }
   //===================================================================================================
 
@@ -301,8 +364,8 @@ public class WarriorImpl implements Warrior {
   private Result<Warrior> prepareToPhase(PlayerPhaseType playerPhaseType) {
     restoreAttributesAvailableForRestoration(playerPhaseType);
     return applayInfluences(playerPhaseType)
-            .doIfSuccess(warrior -> warrior.getOwner().findContext()
-                    .doIfSuccess(context -> context.fireGameEvent(null
+            .peak(warrior -> warrior.getOwner().findContext()
+                    .peak(context -> context.fireGameEvent(null
                             , playerPhaseType == PlayerPhaseType.PLAYER_PHASE_TYPE_DEFENSE ? WARRIOR_PREPARED_TO_DEFENCE : WARRIOR_PREPARED_TO_ATTACK
                             , new EventDataContainer(this), null)));
   }

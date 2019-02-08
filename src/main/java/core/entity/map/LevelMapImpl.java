@@ -26,10 +26,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static api.enums.EventType.*;
@@ -155,7 +152,7 @@ public class LevelMapImpl implements LevelMap {
 
   @Override
   public List<Warrior> getWarriors(Coords center, int radius) {
-    return null;
+    return new ArrayList<>(innerGetAllWarriorsOnMap(center, radius).values());
   }
   //===================================================================================================
 

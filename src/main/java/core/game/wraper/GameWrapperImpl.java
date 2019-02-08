@@ -61,7 +61,7 @@ public class GameWrapperImpl implements GameWrapper {
               return errorResult
                       .logIfError(logger);
             })
-            .map(foundUser -> core.createGameContext(foundUser, new GameRulesImpl(gameRules)
+            .mapSafe(foundUser -> core.createGameContext(foundUser, new GameRulesImpl(gameRules)
                     , this.getClass().getClassLoader().getResourceAsStream(mapName)
                     , gameName, hidden))
             .logIfError(logger);
@@ -71,7 +71,7 @@ public class GameWrapperImpl implements GameWrapper {
   @Override
   public Result<Player> connectToGame(String userName, String contextId) {
     return core.findUserByName(userName)
-            .map(foundUser -> core.findGameContextByUID(contextId)
+            .mapSafe(foundUser -> core.findGameContextByUID(contextId)
                     .map(foundContext -> foundContext.connectPlayer(foundUser))
                     .map(ctx -> (Result<Player>) ResultImpl.success(foundUser)))
             .logIfError(logger);
@@ -88,7 +88,7 @@ public class GameWrapperImpl implements GameWrapper {
   public Result<Warrior> createWarrior(String contextId, String userName, String className, Coords coords) {
     // ищем контекст
     return core.findGameContextByUID(contextId)
-            .map(fineContext -> fineContext.createWarrior(userName, className, coords))
+            .mapSafe(fineContext -> fineContext.createWarrior(userName, className, coords))
             .logIfError(logger);
   }
 //===================================================================================================
@@ -96,7 +96,7 @@ public class GameWrapperImpl implements GameWrapper {
   @Override
   public Result<Warrior> moveWarriorTo(String contextId, String userName, String warriorId, Coords coords) {
     return core.findGameContextByUID(contextId)
-            .map(fineContext -> fineContext.moveWarriorTo(userName, warriorId, coords))
+            .mapSafe(fineContext -> fineContext.moveWarriorTo(userName, warriorId, coords))
             .logIfError(logger);
   }
 //===================================================================================================
@@ -104,7 +104,7 @@ public class GameWrapperImpl implements GameWrapper {
   @Override
   public Result<Warrior> rollbackMove(String contextId, String userName, String warriorId) {
     return core.findGameContextByUID(contextId)
-            .map(fineContext -> fineContext.rollbackMove(userName, warriorId))
+            .mapSafe(fineContext -> fineContext.rollbackMove(userName, warriorId))
             .logIfError(logger);
   }
 //===================================================================================================
@@ -112,7 +112,7 @@ public class GameWrapperImpl implements GameWrapper {
   @Override
   public Result<Coords> whatIfMoveWarriorTo(String contextId, String userName, String warriorId, Coords coords) {
     return core.findGameContextByUID(contextId)
-            .map(fineContext -> fineContext.whatIfMoveWarriorTo(userName, warriorId, coords))
+            .mapSafe(fineContext -> fineContext.whatIfMoveWarriorTo(userName, warriorId, coords))
             .logIfError(logger);
   }
 //===================================================================================================
@@ -121,7 +121,7 @@ public class GameWrapperImpl implements GameWrapper {
   @Override
   public Result<Weapon> giveWeaponToWarrior(String contextId, String userName, String warriorId, String weaponClassName) {
     return core.findGameContextByUID(contextId)
-            .map(fineContext -> core.findWeaponByName(weaponClassName)
+            .mapSafe(fineContext -> core.findWeaponByName(weaponClassName)
                     .map(weponClass -> fineContext.giveWeaponToWarrior(userName, warriorId, weponClass)))
             .logIfError(logger);
   }
@@ -130,7 +130,7 @@ public class GameWrapperImpl implements GameWrapper {
   @Override
   public Result<Weapon> takeWeaponFromWarrior(String userName, String warriorId, String weaponId) {
     return core.findUserByName(userName)
-            .map(foundPlayer -> foundPlayer.findContext()
+            .mapSafe(foundPlayer -> foundPlayer.findContext()
                     .map(foundContext -> foundPlayer.findWarriorById(warriorId)
                             .map(foundWarrior -> foundWarrior.dropWeapon(weaponId))))
             .logIfError(logger);
@@ -140,7 +140,7 @@ public class GameWrapperImpl implements GameWrapper {
   @Override
   public Result<Weapon> findWeaponById(String contextId, String userName, String warriorId, String weaponId) {
     return core.findGameContextByUID(contextId)
-            .map(context -> core.findUserByName(userName)
+            .mapSafe(context -> core.findUserByName(userName)
                     .map(player -> context.findWeaponById(userName, warriorId, weaponId)));
   }
 //===================================================================================================
@@ -148,7 +148,7 @@ public class GameWrapperImpl implements GameWrapper {
   @Override
   public Result<Player> playerReady(String userName, boolean readyToPlay) {
     return core.findUserByName(userName)
-            .map(foundPlayer -> foundPlayer.findContext()
+            .mapSafe(foundPlayer -> foundPlayer.findContext()
                     .map(foundContext -> foundContext.setPlayerReadyToGameState(foundPlayer, readyToPlay)))
             .logIfError(logger);
   }
@@ -157,7 +157,7 @@ public class GameWrapperImpl implements GameWrapper {
   @Override
   public Result<Player> getGetPlayerOwnsTheRound(String contextId) {
     return core.findGameContextByUID(contextId)
-            .map(fineContext -> fineContext.getPlayerOwnsThisTurn())
+            .mapSafe(fineContext -> fineContext.getPlayerOwnsThisTurn())
             .logIfError(logger);
   }
   //===================================================================================================
@@ -165,7 +165,7 @@ public class GameWrapperImpl implements GameWrapper {
   @Override
   public Result<Warrior> removeWarrior(String contextId, String userName, String warriorId) {
     return core.findGameContextByUID(contextId)
-            .map(fineContext -> fineContext.removeWarrior(userName, warriorId));
+            .mapSafe(fineContext -> fineContext.removeWarrior(userName, warriorId));
   }
   //===================================================================================================
 
@@ -192,8 +192,8 @@ public class GameWrapperImpl implements GameWrapper {
   @Override
   public Result<Player> nextTurn(String contextId, String userName) {
     return core.findGameContextByUID(contextId)
-            .map(context -> context.ifGameDeleting(false))
-            .map(fineContext -> fineContext.nextTurn(userName))
+            .mapSafe(context -> context.ifGameDeleting(false))
+            .mapSafe(fineContext -> fineContext.nextTurn(userName))
             .logIfError(logger);
   }
   //===================================================================================================
@@ -201,8 +201,8 @@ public class GameWrapperImpl implements GameWrapper {
   @Override
   public Result<List<Influencer>> getWarriorSInfluencers(String contextId, String userName, String warriorId) {
     return core.findGameContextByUID(contextId)
-            .map(context -> context.ifGameDeleting(false))
-            .map(context -> context.getWarriorSInfluencers(userName, warriorId));
+            .mapSafe(context -> context.ifGameDeleting(false))
+            .mapSafe(context -> context.getWarriorSInfluencers(userName, warriorId));
   }
   //===================================================================================================
 

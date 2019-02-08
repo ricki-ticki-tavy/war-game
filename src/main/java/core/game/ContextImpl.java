@@ -95,7 +95,7 @@ public class ContextImpl implements Context {
   public Result<Context> initDelete() {
     return deleting.get()
             ? ResultImpl.fail(CONTEXT_DELETE_ALREADY_IN_PROGRESS.getError(getGameName(), getContextId()))
-            : ResultImpl.success(this).doIfSuccess(context -> deleting.set(true));
+            : ResultImpl.success(this).peak(context -> deleting.set(true));
   }
   //===================================================================================================
 

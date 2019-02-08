@@ -25,7 +25,15 @@ public interface Result<T> extends BaseEntityHeader{
 
   <O> Result<O> map(Function<T, Result<O>> consumer);
 
-  Result<T> doIfSuccess(Consumer<T> consumer);
+  /**
+   * выполняет с перехватом и оборачиванием исключений в ошибку
+   * @param consumer
+   * @param <O>
+   * @return
+   */
+  <O> Result<O> mapSafe(Function<T, Result<O>> consumer);
+
+  Result<T> peak(Consumer<T> consumer);
 
   @Deprecated
   <O> Result<T> doIfFail(Consumer<O> consumer);

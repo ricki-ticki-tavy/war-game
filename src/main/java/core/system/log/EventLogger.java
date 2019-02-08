@@ -1,4 +1,4 @@
-package core.system.eco;
+package core.system.log;
 
 import api.core.Context;
 import api.core.Result;

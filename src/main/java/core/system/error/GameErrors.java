@@ -20,6 +20,9 @@ public enum GameErrors {
   , WARRIOR_CAN_T_ROLLBACK_MOVE("WR-8", "В игре %s (id %s) игрок %s не может откатить перемещение воина '%s %s' (id %s) так как откат заблокирован последующими действиями")
 
   , WEAPON_BASE_CLASS_NOT_FOUND_BY_NAME("WP-1", "Класс оружия с именем %s не существует")
+  , WEAPON_ATTACK_TARGET_IS_OUT_OF_RANGE("WA-1", "В игре %s (id %s)  воин '%s %s' (id %s) игрока %s не может атаковать воина '%s %s' (id %s) игрока %s : %s")
+  , WEAPON_ATTACK_TARGET_WARRIOR_IS_ALIED("WA-2", "В игре %s (id %s)  воин '%s %s' (id %s) не является врагом для воина '%s %s' (id %s) игрока %s %s")
+  , WEAPON_ATTACK_TARGET_WARRIOR_IS_NOT_ALIED("WA-3", "В игре %s (id %s)  воин '%s %s' (id %s) является врагом для воина '%s %s' (id %s) игрока %s %s")
 
   , MAP_LOAD_ERROR("M-1", "Ошибка загрузки карты: %s")
   , MAP_IS_NOT_LOADED("M-2", "Карта не загружена")
@@ -45,6 +48,8 @@ public enum GameErrors {
   , SYSTEM_NOT_REALIZED("NR-1", "Метод %s не реализован.")
 
   , SYSTEM_USER_ERROR("UM-1", "%s.")
+
+  , SYSTEM_RUNTIME_ERROR("RE-1", "%s.")
 
   ;
 
