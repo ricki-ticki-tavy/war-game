@@ -254,6 +254,12 @@ public class LevelMapImpl implements LevelMap {
   }
   //===================================================================================================
 
+  @Override
+  public Result<Weapon> findWeaponById(Player player, String warriorId, String weaponId) {
+    return player.findWeaponById(warriorId, weaponId);
+  }
+  //===================================================================================================
+
 
   protected Result<Warrior> innerMoveWarriorTo(Player player, String warriorId, Coords newCoords) {
     return player.findWarriorById(warriorId)

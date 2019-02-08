@@ -365,6 +365,14 @@ public class ContextImpl implements Context {
   //===================================================================================================
 
   @Override
+  public Result<Weapon> findWeaponById(String userName, String warriorId, String weaponId) {
+    return ifGameDeleting(false)
+            .map(context -> context.findUserByName(userName))
+            .map(player -> getLevelMap().findWeaponById(player, warriorId, weaponId));
+  }
+  //===================================================================================================
+
+  @Override
   public Result<Player> nextTurn(String userName) {
     return ifGameRan(true)
             .map(fineContext -> fineContext.findUserByName(userName))

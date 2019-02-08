@@ -214,6 +214,15 @@ public interface Context {
   Result<Weapon> giveWeaponToWarrior(String userName, String warriorId, Class<? extends Weapon> weaponClass);
 
   /**
+   * Найти оружие по его id
+   * @param userName
+   * @param warriorId
+   * @param weaponId
+   * @return
+   */
+  Result<Weapon> findWeaponById(String userName, String warriorId, String weaponId);
+
+  /**
    * Получить пользователя - создателя игры
    *
    * @return

@@ -238,9 +238,9 @@ public class PlayerImpl implements Player {
   //===================================================================================================
 
   @Override
-  public Result<Weapon> findWeaponById(String weaponId) {
-    // TODO Реализовать
-    return null;
+  public Result<Weapon> findWeaponById(String warriorId, String weaponId) {
+    return findWarriorById(warriorId)
+            .map(foundWarrior -> foundWarrior.findWeaponById(weaponId));
   }
   //===================================================================================================
 

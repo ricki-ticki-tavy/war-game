@@ -182,10 +182,11 @@ public interface Player extends BaseEntityHeader {
 
   /**
    * Найти оружие по его id
+   * @param warriorId
    * @param weaponId
    * @return
    */
-  Result<Weapon> findWeaponById(String weaponId);
+  Result<Weapon> findWeaponById(String warriorId, String weaponId);
 
 
 

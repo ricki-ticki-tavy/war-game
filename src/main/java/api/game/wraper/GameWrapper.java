@@ -105,6 +105,16 @@ public interface GameWrapper {
   Result<Weapon> takeWeaponFromWarrior(String userName, String warriorId, String weaponId);
 
   /**
+   * Найти оружие по его id
+   * @param contextId
+   * @param userName
+   * @param warriorId
+   * @param weaponId
+   * @return
+   */
+  Result<Weapon> findWeaponById(String contextId, String userName, String warriorId, String weaponId);
+
+  /**
    * Удалить юнит игроком
    * @param contextId
    * @param userName

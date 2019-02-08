@@ -225,7 +225,7 @@ public class WarriorImpl implements Warrior {
   public Result<Weapon> dropWeapon(String weaponInstanceId) {
     Result result = hands.values().stream().filter(hand -> hand.hasWeapon(weaponInstanceId)).findFirst()
             .map(warriorSHand -> ResultImpl.success(warriorSHand.removeWeapon(weaponInstanceId)))
-            .orElse(ResultImpl.fail(WARRIOR_WEAPON_NOT_FOUND.getError(weaponInstanceId)));
+            .orElse(ResultImpl.fail(generateWeapoNotFoundError(weaponInstanceId)));
 
     gameContext.fireGameEvent(null
             , result.isSuccess() ? WEAPON_DROPED : WEAPON_TRY_TO_DROP

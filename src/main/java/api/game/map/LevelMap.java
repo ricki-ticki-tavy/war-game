@@ -124,6 +124,15 @@ public interface LevelMap {
   Result<Weapon> giveWeaponToWarrior(Player player, String warriorId, Class<? extends Weapon> weaponClass);
 
   /**
+   * Найти оружие по его id
+   * @param player
+   * @param warriorId
+   * @param weaponId
+   * @return
+   */
+  Result<Weapon> findWeaponById(Player player, String warriorId, String weaponId);
+
+  /**
    * Добавить игрока в игру
    * @return
    */
