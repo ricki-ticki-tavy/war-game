@@ -10,6 +10,7 @@ import api.enums.EventType;
 import api.game.Coords;
 import api.game.Event;
 import api.game.EventDataContainer;
+import api.game.action.AttackResult;
 import api.game.map.LevelMap;
 import api.game.map.Player;
 import api.game.map.metadata.GameRules;
@@ -190,6 +191,13 @@ public class ContextImpl implements Context {
   }
   //===================================================================================================
 
+  @Override
+  public Result<Warrior> findWarriorById(String warriorId) {
+    return ifGameDeleting(false)
+            .map(fineContext -> getLevelMap().findWarriorById(warriorId));
+  }
+  //===================================================================================================
+
 
   @Override
   public Result<Warrior> createWarrior(String userName, String warriorClassName, Coords coords) {
@@ -197,6 +205,14 @@ public class ContextImpl implements Context {
             .map(thisContext1 -> thisContext1.ifGameDeleting(false))
             .map(fineContext -> fineContext.findUserByName(userName))
             .map(player -> getLevelMap().createWarrior(player, warriorClassName, coords));
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<AttackResult> attackWarrior(String userName, String attackerWarriorId, String targetWarriorId, String weaponId) {
+    return ifGameDeleting(false)
+            .map(fineContext -> fineContext.findUserByName(userName))
+            .map(player -> getLevelMap().attackWarrior(player, attackerWarriorId, targetWarriorId, weaponId));
   }
   //===================================================================================================
 
@@ -225,7 +241,7 @@ public class ContextImpl implements Context {
   public Result<Context> ifGameRan(boolean state) {
     return isGameRan() == state ? ResultImpl.success(this) : ResultImpl.fail(
             state
-                    ? CONTEXT_NOT_IN_GAME_RAN_STATE.getError(getGameName(), getContextId())
+                    ? CONTEXT_GAME_NOT_STARTED.getError(getGameName(), getContextId())
                     : CONTEXT_IN_GAME_RAN_STATE.getError(getGameName(), getContextId()));
   }
   //===================================================================================================
@@ -293,6 +309,14 @@ public class ContextImpl implements Context {
   @Override
   public Result<Context> ifNewWarriorSCoordinatesAreAvailable(Warrior warrior, Coords newCoords) {
     return ResultImpl.success(this);
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Warrior> ifWarriorCanActsAtThisTurn(String userName, String warriorId) {
+    return ifGameDeleting(false)
+            .map(fineContext -> fineContext.findUserByName(userName))
+            .map(player -> getLevelMap().ifWarriorCanActsAtThisTurn(player, warriorId));
   }
   //===================================================================================================
 
@@ -384,6 +408,13 @@ public class ContextImpl implements Context {
   public Result<List<Influencer>> getWarriorSInfluencers(String userName, String warriorId) {
     return findUserByName(userName)
             .map(player -> getLevelMap().getWarriorSInfluencers(player, warriorId));
+  }
+  //===================================================================================================
+
+  @Override
+  public int calcDistanceTo(Coords from, Coords to) {
+    return (int) Math.round(Math.sqrt((double) ((from.getX() - to.getX()) * (from.getX() - to.getX())
+            + (from.getY() - to.getY()) * (from.getY() - to.getY()))));
   }
   //===================================================================================================
 }

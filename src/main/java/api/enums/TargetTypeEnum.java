@@ -1,9 +1,10 @@
 package api.enums;
 
 public enum TargetTypeEnum{
-  THIS_WARRIOR("Этот воин"),
-  WARRIOR("Дружественный воин"),
+  ANY("Любой воин"),
   ENEMY_WARRIOR("Вражеский Воин"),
+  ALLIED_WARRIOR("Дружественный воин"),
+  THIS_WARRIOR("Этот воин"),
   PLAYER("Игрок"),
   ENEMY_PLAYER("Противник");
 

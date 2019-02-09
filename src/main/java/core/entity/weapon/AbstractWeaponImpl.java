@@ -4,10 +4,9 @@ import api.core.Result;
 import api.entity.ability.Modifier;
 import api.entity.warrior.Warrior;
 import api.entity.weapon.Weapon;
+import api.enums.TargetTypeEnum;
 import api.game.action.AttackResult;
-import api.game.map.Player;
 import core.system.ResultImpl;
-import core.system.error.GameError;
 import core.system.error.GameErrors;
 
 import java.util.*;
@@ -239,7 +238,7 @@ public abstract class AbstractWeaponImpl implements Weapon {
   @Override
   public Weapon setOwner(Warrior owner) {
     if (this.owner != null && this.owner != owner) {
-      throw GameErrors.SYSTEM_OBJECT_NOT_NULL.getError("warrior.owner", owner.toString());
+      throw GameErrors.SYSTEM_OBJECT_ALREADY_INITIALIZED.getError("warrior.owner", owner.toString());
     }
     this.owner = owner;
     return this;
@@ -254,8 +253,16 @@ public abstract class AbstractWeaponImpl implements Weapon {
     // для начала получим свободные очки действия.
     int availableActionPoints = owner.getWarriorSActionPoints(false);
 
-    // расстояние до цели
-    int distanceToTarget = owner.calcDistanceTo(targetWarrior.getCoords());
+    // размер ячейки карты
+    int mapUnitSize = owner.getContext().getLevelMap().getSimpleUnitSize();
+
+    // Размер воина (в "пикселях")
+    int warriorSize = owner.getContext().getGameRules().getWarriorSize();
+
+    // расстояние до цели. при этом считаем не расстояние между центрами юнитов, а расстояния от края юнита до края
+    // юнита. При условии, что они круглые расстояние сократится с расстояния между центрами на два радиуса фигур
+    // или, что равнозначно на размер юнита
+    int distanceToTarget = owner.calcDistanceTo(targetWarrior.getCoords()) - warriorSize;
 
     // если есть у оружия дистанционная атака и на нее хватает действия, то пробуем применить ее
     if (canDealRangedDamage && availableActionPoints >= rangedAttackCost) {
@@ -274,10 +281,31 @@ public abstract class AbstractWeaponImpl implements Weapon {
             attackResult = generateAttackError(targetWarrior, " Не осталось выстрелов");
           } else {
             // выстрелов тоже хватает. Проверим, что нету рядом врагов на расстоянии равном или меньшем
-            // минимальной дистанции стрельбы
-            List<Warrior> nearWarriorList = owner.getContext().getLevelMap()
-                    .getWarriors(owner.getTranslatedToGameCoords(), minRangedAttackRange);
-
+            // минимальной дистанции стрельбы. при расчете учитываем размер воина как и при расчете дистанции до цели
+            // (см выше)
+            List<Warrior> nearMeWarriorsList = owner.getContext().getLevelMap()
+                    .getWarriors(owner.getTranslatedToGameCoords(), minRangedAttackRange + warriorSize, TargetTypeEnum.ENEMY_WARRIOR, owner.getOwner());
+            if (nearMeWarriorsList.size() > 0){
+              // есть рядом противники. дистанционная атака невозможна, а выбранный для атаки противник находится на
+              // расстоянии более минимальной для дистанционной. Тут ближняя атака невозможна, даже если это допускает
+              // оружие
+              attackResult = generateAttackError(targetWarrior, " рядом есть враги");
+            }
+            // проверки пройдены. Можно атаковать дистанционно
+            // если расстояние до цели более расстояния, после которого урон спадает, то пересчитаем максимальный и
+            // минимальный уроны
+            int maxDmg, minDmg;
+            if (distanceToTarget > fadeRangeStart){
+              // да. Надо пересчитывать макс и мин уроны
+              int fadeCoef = 100 - ((distanceToTarget - fadeRangeStart) * fadeDamagePercentPerLength + mapUnitSize / 2 + 1)
+                         / mapUnitSize;
+              maxDmg = (rangedMaxDamage * fadeCoef) / 100;
+              minDmg = (rangedMinDamage * fadeCoef) / 100;
+            } else {
+              maxDmg = rangedMaxDamage;
+              minDmg = rangedMinDamage;
+            }
+            int dealDamage = owner.getContext().getCore().getRandom(minDmg, maxDmg);
           }
         }
       }

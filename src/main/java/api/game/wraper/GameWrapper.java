@@ -7,6 +7,7 @@ import api.entity.warrior.Influencer;
 import api.entity.warrior.Warrior;
 import api.entity.weapon.Weapon;
 import api.game.Coords;
+import api.game.action.AttackResult;
 import api.game.map.Player;
 import api.game.map.metadata.GameRules;
 
@@ -61,6 +62,17 @@ public interface GameWrapper {
   Result<Warrior> createWarrior(String contextId, String userName, String className, Coords coords);
 
   /**
+   * Атаковать выбранным оружием другого воина
+   * @param contextId
+   * @param userName
+   * @param attackerWarriorId
+   * @param targetWarriorId
+   * @param weaponId
+   * @return
+   */
+  Result<AttackResult> attackWarrior(String contextId, String userName, String attackerWarriorId, String targetWarriorId, String weaponId);
+
+  /**
    * Переместить юнит на заданные координаты
    * @param userName
    * @param warriorId
@@ -103,6 +115,23 @@ public interface GameWrapper {
    * @return
    */
   Result<Weapon> takeWeaponFromWarrior(String userName, String warriorId, String weaponId);
+
+  /**
+   * Найти юнит по его коду независимо от того, какому игроку он принадлежит
+   * @param contextId
+   * @param warriorId
+   * @return
+   */
+  Result<Warrior> findWarriorById(String contextId, String warriorId);
+
+  /**
+   * Проверяет возможно ли выполнение атаки или применения способности данным юнитом в этом ходе
+   * @param contextId
+   * @param userName
+   * @param warriorId
+   * @return
+   */
+  Result<Warrior> ifWarriorCanActsAtThisTurn(String contextId, String userName, String warriorId);
 
   /**
    * Найти оружие по его id

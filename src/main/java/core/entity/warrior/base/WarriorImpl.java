@@ -158,10 +158,7 @@ public class WarriorImpl implements Warrior {
 
   @Override
   public int calcDistanceTo(Coords to) {
-    Coords from = innerGetTranslatedToGameCoords();
-
-    return (int) Math.round(Math.sqrt((double) ((from.getX() - to.getX()) * (from.getX() - to.getX())
-            + (from.getY() - to.getY()) * (from.getY() - to.getY()))) / (double) gameContext.getLevelMap().getSimpleUnitSize());
+    return gameContext.calcDistanceTo(innerGetTranslatedToGameCoords(), to);
   }
   //===================================================================================================
 

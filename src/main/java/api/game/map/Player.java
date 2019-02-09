@@ -10,6 +10,7 @@ import api.entity.weapon.Weapon;
 import api.enums.LifeTimeUnit;
 import api.game.Coords;
 import api.game.Rectangle;
+import api.game.action.AttackResult;
 
 import java.util.List;
 import java.util.Map;
@@ -36,11 +37,13 @@ public interface Player extends BaseEntityHeader {
   List<Warrior> getWarriors();
 
   /**
-   * Вернуть всех воинов
+   * Вернуть всех воинов.Не копирует список в новый лист. Это оригинальный MAP с юнитами.
+   * Только для внутреннего использования
    *
    * @return
    */
-  Map<String, Warrior> getAllWarriors();
+  @Deprecated
+  Map<String, Warrior> getOriginWarriors();
 
   /**
    * Задать зону выставления воинов
@@ -120,11 +123,18 @@ public interface Player extends BaseEntityHeader {
   Result<Warrior> rollbackMove(String warriorId);
 
   /**
-   * Проверяет возможно ли движение данного югита в принципе
+   * Проверяет возможно ли движение данного югита в этом ходе
    * @param warrior
    * @return
    */
-  Result<Warrior> ifCanMoveWarrior(Warrior warrior);
+  Result<Warrior> ifWarriorCanMoveAtThisTurn(Warrior warrior);
+
+  /**
+   * Проверяет возможно ли выполнение атаки или применения способности данным юнитом в этом ходе
+   * @param warrior
+   * @return
+   */
+  Result<Warrior> ifWarriorCanActsAtThisTurn(Warrior warrior);
 
   /**
    * очищает воинов, артефакты и прочее у игрока
@@ -163,6 +173,15 @@ public interface Player extends BaseEntityHeader {
    * @return
    */
   Result<Player> prepareToDefensePhase();
+
+  /**
+   * Атаковать выбранным оружием другого воина
+   * @param attackerWarriorId
+   * @param targetWarriorId
+   * @param weaponId
+   * @return
+   */
+  Result<AttackResult> attackWarrior(String attackerWarriorId, String targetWarriorId, String weaponId);
 
   /**
    * добавить влияние юниту

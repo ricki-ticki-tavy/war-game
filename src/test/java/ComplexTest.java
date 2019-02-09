@@ -9,6 +9,7 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import tests.CreateWarriorsWeaponsUsersTest;
 import tests.EventRoutinesTest;
 import tests.StartGameWith2PlayersAndMovesTest;
+import tests.WeaponsTest;
 
 /**
  * Проверка подписывания и отписывания от событий.
@@ -26,6 +27,8 @@ public class ComplexTest{
   }
 
   private void innerDoTest(){
+    new WeaponsTest().setGameWrapper(gameWrapper).innerDoTest();
+
     new CreateWarriorsWeaponsUsersTest().setGameWrapper(gameWrapper).innerDoTest();
     new EventRoutinesTest().setGameWrapper(gameWrapper).innerDoTest();
     new StartGameWith2PlayersAndMovesTest().setGameWrapper(gameWrapper).innerDoTest();

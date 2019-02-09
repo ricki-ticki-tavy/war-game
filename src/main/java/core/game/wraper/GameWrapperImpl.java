@@ -9,6 +9,7 @@ import api.entity.weapon.Weapon;
 import api.enums.EventType;
 import api.game.Coords;
 import api.game.EventDataContainer;
+import api.game.action.AttackResult;
 import api.game.map.Player;
 import api.game.map.metadata.GameRules;
 import api.game.wraper.GameWrapper;
@@ -94,6 +95,14 @@ public class GameWrapperImpl implements GameWrapper {
 //===================================================================================================
 
   @Override
+  public Result<AttackResult> attackWarrior(String contextId, String userName, String attackerWarriorId, String targetWarriorId, String weaponId) {
+    return core.findGameContextByUID(contextId)
+            .mapSafe(context -> context.attackWarrior(userName, attackerWarriorId, targetWarriorId, weaponId))
+            .logIfError(logger);
+  }
+//===================================================================================================
+
+  @Override
   public Result<Warrior> moveWarriorTo(String contextId, String userName, String warriorId, Coords coords) {
     return core.findGameContextByUID(contextId)
             .mapSafe(fineContext -> fineContext.moveWarriorTo(userName, warriorId, coords))
@@ -117,7 +126,6 @@ public class GameWrapperImpl implements GameWrapper {
   }
 //===================================================================================================
 
-  // TODO перевести на параметр контекста
   @Override
   public Result<Weapon> giveWeaponToWarrior(String contextId, String userName, String warriorId, String weaponClassName) {
     return core.findGameContextByUID(contextId)
@@ -138,10 +146,28 @@ public class GameWrapperImpl implements GameWrapper {
 //===================================================================================================
 
   @Override
+  public Result<Warrior> findWarriorById(String contextId, String warriorId) {
+    return core.findGameContextByUID(contextId)
+            .mapSafe(context -> context.findWarriorById(warriorId))
+            .logIfError(logger);
+  }
+//===================================================================================================
+
+  @Override
+  public Result<Warrior> ifWarriorCanActsAtThisTurn(String contextId, String userName, String warriorId) {
+    return core.findGameContextByUID(contextId)
+            .mapSafe(context -> context.findUserByName(userName)
+                    .map(player -> context.ifWarriorCanActsAtThisTurn(userName, warriorId)))
+            .logIfError(logger);
+  }
+//===================================================================================================
+
+  @Override
   public Result<Weapon> findWeaponById(String contextId, String userName, String warriorId, String weaponId) {
     return core.findGameContextByUID(contextId)
             .mapSafe(context -> core.findUserByName(userName)
-                    .map(player -> context.findWeaponById(userName, warriorId, weaponId)));
+                    .map(player -> context.findWeaponById(userName, warriorId, weaponId)))
+            .logIfError(logger);
   }
 //===================================================================================================
 
@@ -165,7 +191,8 @@ public class GameWrapperImpl implements GameWrapper {
   @Override
   public Result<Warrior> removeWarrior(String contextId, String userName, String warriorId) {
     return core.findGameContextByUID(contextId)
-            .mapSafe(fineContext -> fineContext.removeWarrior(userName, warriorId));
+            .mapSafe(fineContext -> fineContext.removeWarrior(userName, warriorId))
+            .logIfError(logger);
   }
   //===================================================================================================
 
@@ -202,7 +229,8 @@ public class GameWrapperImpl implements GameWrapper {
   public Result<List<Influencer>> getWarriorSInfluencers(String contextId, String userName, String warriorId) {
     return core.findGameContextByUID(contextId)
             .mapSafe(context -> context.ifGameDeleting(false))
-            .mapSafe(context -> context.getWarriorSInfluencers(userName, warriorId));
+            .mapSafe(context -> context.getWarriorSInfluencers(userName, warriorId))
+            .logIfError(logger);
   }
   //===================================================================================================
 
