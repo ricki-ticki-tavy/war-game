@@ -15,7 +15,7 @@ import java.util.UUID;
 public class ShortSword extends AbstractWeaponImpl {
 
   public static final String CLASS_NAME = "Короткий меч";
-  private static final String OUID = "WepShSwd_" + UUID.randomUUID().toString();
+  private final String OUID = "WepShSwd_" + UUID.randomUUID().toString();
 
   public ShortSword(){
     super();

@@ -102,13 +102,11 @@ public class WarriorImpl implements Warrior {
 
   @Override
   public Result<Weapon> findWeaponById(String weaponId) {
-    Weapon weapon = hands.values().stream()
+    return hands.values().stream()
             .filter(warriorSHand -> warriorSHand.hasWeapon(weaponId))
             .findFirst().map(warriorSHand -> warriorSHand.getWeaponById(weaponId))
-            .get();
-    return weapon == null
-            ? ResultImpl.fail(generateWeapoNotFoundError(weaponId))
-            : ResultImpl.success(weapon);
+            .map(weapon -> ResultImpl.success(weapon))
+            .orElse(ResultImpl.fail(generateWeapoNotFoundError(weaponId)));
   }
   //===================================================================================================
 
@@ -257,7 +255,7 @@ public class WarriorImpl implements Warrior {
       warriorResult = isAllied
               // ждали дружественного, а он - враг
               // "В игре %s (id %s)  воин '%s %s' (id %s) не является врагом для воина '%s %s' (id %s) игрока %s %s"
-              ? ResultImpl.fail(WEAPON_ATTACK_TARGET_WARRIOR_IS_NOT_ALIED.getError(
+              ? ResultImpl.fail(WARRIOR_ATTACK_TARGET_WARRIOR_IS_NOT_ALIED.getError(
               gameContext.getGameName()
               , gameContext.getContextId()
               , warrior.getWarriorBaseClass().getTitle()
@@ -269,7 +267,7 @@ public class WarriorImpl implements Warrior {
               , getOwner().getId()
               , ""))
               // "В игре %s (id %s)  воин '%s %s' (id %s) является враждебным для воина '%s %s' (id %s) игрока %s %s"
-              : ResultImpl.fail(WEAPON_ATTACK_TARGET_WARRIOR_IS_ALIED.getError(
+              : ResultImpl.fail(WARRIOR_ATTACK_TARGET_WARRIOR_IS_ALIED.getError(
               gameContext.getGameName()
               , gameContext.getContextId()
               , warrior.getWarriorBaseClass().getTitle()
@@ -518,6 +516,13 @@ public class WarriorImpl implements Warrior {
   @Override
   public int getTreatedActionPointsForMove() {
     return treatedActionPointsForMove;
+  }
+  //===================================================================================================
+
+  @Override
+  public Warrior setTitle(String title) {
+    this.title = title;
+    return this;
   }
   //===================================================================================================
 

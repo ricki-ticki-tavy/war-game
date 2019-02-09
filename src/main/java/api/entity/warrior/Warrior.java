@@ -237,6 +237,13 @@ public interface Warrior extends BaseEntityHeader, HasCoordinates {
    */
   int getTreatedActionPointsForMove();
 
+  /**
+   * Задать имя воина
+   * @param title
+   * @return
+   */
+  Warrior setTitle(String title);
+
   void setTreatedActionPointsForMove(int treatedActionPointsForMove);
 
 

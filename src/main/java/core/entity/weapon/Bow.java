@@ -15,7 +15,7 @@ import java.util.UUID;
 public class Bow extends AbstractWeaponImpl {
 
   public static final String CLASS_NAME = "Простой лук";
-  private static final String OUID = "WepBow_" + UUID.randomUUID().toString();
+  private final String OUID = "WepBow_" + UUID.randomUUID().toString();
 
   public Bow() {
     super();

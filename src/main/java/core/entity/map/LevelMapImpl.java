@@ -155,8 +155,8 @@ public class LevelMapImpl implements LevelMap {
   //===================================================================================================
 
   @Override
-  public List<Warrior> getWarriors(Coords center, int radius, TargetTypeEnum warriorsType, Player alliedPlayer) {
-    return new ArrayList<>(innerGetAllWarriorsOnMap(center, radius, warriorsType, alliedPlayer).values());
+  public List<Warrior> getWarriors(Coords center, int radiusInPixels, TargetTypeEnum warriorsType, Player alliedPlayer) {
+    return new ArrayList<>(innerGetAllWarriorsOnMap(center, radiusInPixels, warriorsType, alliedPlayer).values());
   }
   //===================================================================================================
 
@@ -402,9 +402,8 @@ public class LevelMapImpl implements LevelMap {
   }
   //===================================================================================================
 
-  public Map<String, Warrior> innerGetAllWarriorsOnMap(Coords from, int radiusInMapUnits, TargetTypeEnum warriorsType, Player alliedPlayer) {
+  public Map<String, Warrior> innerGetAllWarriorsOnMap(Coords from, int radiusInPixels, TargetTypeEnum warriorsType, Player alliedPlayer) {
     final Map<String, Warrior> allWarriors;
-    int radiusInPixels = radiusInMapUnits * simpleUnitSize;
     // в зависимости от типа искомых юнитов будем готовить разный поток пользователей для сбора воинов
     Stream<Player> sourcePlayersStream = null;
     switch (warriorsType) {

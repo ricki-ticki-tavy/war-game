@@ -15,7 +15,7 @@ import java.util.UUID;
 public class Sword extends AbstractWeaponImpl {
 
   public static final String CLASS_NAME = "Простой меч";
-  private static final String OUID = "WepSwd_" + UUID.randomUUID().toString();
+  private final String OUID = "WepSwd_" + UUID.randomUUID().toString();
 
   public Sword() {
     super();

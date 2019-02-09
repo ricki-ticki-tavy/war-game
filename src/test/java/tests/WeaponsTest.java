@@ -71,6 +71,13 @@ public class WeaponsTest extends AbstractMapTest {
     Assert.isTrue(warriorResult.getResult().getTranslatedToGameCoords().equals(new Coords(500, 530)), "Неверные координаты перемещения. возможно неверная стоимость перемещения");
     Warrior warriorImpl1p2 = warriorResult.getResult();
 
+    // подвинем воина 2 игрока 2 подальше от середины и от воина 2 игрока 1, но чуть в стороне от воина 1
+    // игрока 1, чтобы дать воину 1 игрока 1 возможность стрелять из лука
+    warriorResult = gameWrapper.moveWarriorTo(gameContext, player2, warrior2p2, new Coords(770, 770));
+    assertSuccess(warriorResult);
+    Assert.isTrue(warriorResult.getResult().getTranslatedToGameCoords().equals(new Coords(770, 770)), "Неверные координаты перемещения. возможно неверная стоимость перемещения");
+    Warrior warriorImpl2p2 = warriorResult.getResult();
+
     Assert.isTrue(warriorImpl1p1.calcDistanceTo(warriorImpl1p2.getTranslatedToGameCoords()) >
                     context.getGameRules().getWarriorSize() + 2 * context.getLevelMap().getSimpleUnitSize()
             , "Расстояние от воина 1 игрока 1 до воина 1 игрока 2 должно быть более 2-х клеток");
@@ -101,12 +108,23 @@ public class WeaponsTest extends AbstractMapTest {
 
     // Пробуем атаковать воином 2 игрока 1 воина 1 игрока 1. Это не должно выйти так как они не враги
     attackResult = gameWrapper.attackWarrior(gameContext, player1, warrior2p1, warrior1p1, bowWarrior2p1);
-    Assert.isTrue(attackResult.isFail(WEAPON_ATTACK_TARGET_WARRIOR_IS_ALIED), "Атака дружественного воина удалась");
+    Assert.isTrue(attackResult.isFail(WARRIOR_ATTACK_TARGET_WARRIOR_IS_ALIED), "Атака дружественного воина удалась");
 
     // Пробуем атаковать воином 2 игрока 1 воина 2 игрока 2. Это не должно выйти так как слишком близко стоит враг
-    attackResult = gameWrapper.attackWarrior(gameContext, player1, warrior2p1, warrior2p2, bowWarrior2p1);
-    Assert.isTrue(attackResult.isFail(WEAPON_ATTACK_RANGED_NOT_POSIBLE_ENEMYS_IS_NEAR_ATTACKER), "Дистанционная атака при наличии рядом врага удалась");
+    attackResult = gameWrapper.attackWarrior(gameContext, player1, warrior2p1, warrior1p2, bowWarrior2p1);
+    Assert.isTrue(attackResult.isFail(WARRIOR_ATTACK_RANGED_NOT_POSIBLE_ENEMYS_IS_NEAR_ATTACKER), "Дистанционная атака при наличии рядом врага удалась");
 
+    // Пробуем атаковать воином 1 игрока 1 воина 1 игрока 2 оружием воина 2 игрока 1. Это не должно выйти
+    attackResult = gameWrapper.attackWarrior(gameContext, player1, warrior1p1, warrior1p2, bowWarrior2p1);
+    Assert.isTrue(attackResult.isFail(WARRIOR_WEAPON_NOT_FOUND), "Дистанционная атака при наличии рядом врага удалась");
+
+    // Пробуем атаковать воином 1 игрока 1 воина 1 игрока 2. Это должно выйти
+//    attackResult = gameWrapper.attackWarrior(gameContext, player1, warrior1p1, warrior1p2, bowWarrior1p1);
+//    Assert.isTrue(attackResult.isFail(WARRIOR_ATTACK_RANGED_NOT_POSIBLE_ENEMYS_IS_NEAR_ATTACKER), "Дистанционная атака при наличии рядом врага удалась");
+
+    // Пробуем атаковать воином 1 игрока 1 воина 2 игрока 2. Это должно выйти
+    attackResult = gameWrapper.attackWarrior(gameContext, player1, warrior1p1, warrior2p2, bowWarrior1p1);
+    Assert.isTrue(attackResult.isFail(WARRIOR_ATTACK_RANGED_NOT_POSIBLE_ENEMYS_IS_NEAR_ATTACKER), "Дистанционная атака при наличии рядом врага удалась");
 
     Result r = gameWrapper.getCore().removeGameContext(gameContext);
     assertSuccess(r);

@@ -6,14 +6,13 @@ import api.entity.warrior.Warrior;
 import api.entity.weapon.Weapon;
 import api.enums.TargetTypeEnum;
 import api.game.action.AttackResult;
+import core.game.action.AttackResultImpl;
 import core.system.ResultImpl;
 import core.system.error.GameErrors;
 
 import java.util.*;
 
-import static core.system.error.GameErrors.WEAPON_ATTACK_RANGED_NOT_POSIBLE_ENEMYS_IS_NEAR_ATTACKER;
-import static core.system.error.GameErrors.WEAPON_ATTACK_WEAPON_IS_OUT_OF_CHARGES;
-import static core.system.error.GameErrors.WEAPON_ATTACK_TARGET_IS_OUT_OF_RANGE;
+import static core.system.error.GameErrors.*;
 
 /**
  * Абстрактное оружие. Общие методы
@@ -277,11 +276,11 @@ public abstract class AbstractWeaponImpl implements Weapon {
         // превышает допустимую
         if (distanceToTarget > maxRangedAttackRange * mapUnitSize) {
           // "В игре %s (id %s)  воин '%s %s' (id %s) игрока %s не может атаковать воина '%s %s' (id %s) игрока %s : %s"
-          attackResult = generateAttackError(WEAPON_ATTACK_TARGET_IS_OUT_OF_RANGE, targetWarrior);
+          attackResult = generateAttackError(WARRIOR_ATTACK_TARGET_IS_OUT_OF_RANGE, targetWarrior);
         } else {
           // вроде с целью все в норме. Проверим сколько осталось выстрелов. -1 - бесконечно
           if (totalRangedUseCount <= 0 && totalRangedUseCount != -1){
-            attackResult = generateAttackError(WEAPON_ATTACK_WEAPON_IS_OUT_OF_CHARGES, targetWarrior);
+            attackResult = generateAttackError(WARRIOR_ATTACK_WEAPON_IS_OUT_OF_CHARGES, targetWarrior);
           } else {
             // выстрелов тоже хватает. Проверим, что нету рядом врагов на расстоянии равном или меньшем
             // минимальной дистанции стрельбы. при расчете учитываем размер воина как и при расчете дистанции до цели
@@ -292,7 +291,7 @@ public abstract class AbstractWeaponImpl implements Weapon {
               // есть рядом противники. дистанционная атака невозможна, а выбранный для атаки противник находится на
               // расстоянии более минимальной для дистанционной. Тут ближняя атака невозможна, даже если это допускает
               // оружие
-              attackResult = generateAttackError(WEAPON_ATTACK_RANGED_NOT_POSIBLE_ENEMYS_IS_NEAR_ATTACKER, targetWarrior);
+              attackResult = generateAttackError(WARRIOR_ATTACK_RANGED_NOT_POSIBLE_ENEMYS_IS_NEAR_ATTACKER, targetWarrior);
             }
             // проверки пройдены. Можно атаковать дистанционно
             // если расстояние до цели более расстояния, после которого урон спадает, то пересчитаем максимальный и
@@ -308,10 +307,22 @@ public abstract class AbstractWeaponImpl implements Weapon {
               maxDmg = rangedMaxDamage;
               minDmg = rangedMinDamage;
             }
-            int dealDamage = owner.getContext().getCore().getRandom(minDmg, maxDmg);
+            int dealDamage = owner.getContext().getCore().getRandom(minDmg < 1 ? 1 : minDmg, maxDmg < 1 ? 1 : maxDmg);
+            attackResult = ResultImpl.success(new AttackResultImpl(owner.getOwner(), owner
+                    , this, targetWarrior.getOwner(), targetWarrior, null));
           }
         }
       }
+    } else if (canDealRangedDamage){
+      // нет рукопашной атаки или не хватает единиц действия
+      // если оружие дистанционное, то дистанцией для рукопашки берем не параметры рукопашной атаки, а минимальную
+      // дистанцию дистанционно атаки.
+      int innerMeleeAttackRange = canDealRangedDamage ? minRangedAttackRange : meleeAttackRange;
+    } else if (canDealRangedDamage){
+      // если мы тут, то значит не хватило очков для дистанционки и нет рукопашной атаки
+      attackResult = generateAttackError(WARRIOR_ATTACK_THERE_IS_NOT_ENOUGH_ACTION_POINTS, targetWarrior);
+    } else {
+      attackResult = generateAttackError(WARRIOR_ATTACK_UNKNOW_REASON_SHAISE, targetWarrior);
     }
 
     return attackResult;

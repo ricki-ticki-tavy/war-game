@@ -70,12 +70,12 @@ public interface LevelMap {
   /**
    * Получить список воинов в окружности заданным радиусом
    * @param center координата центра
-   * @param radius радиус окружности. 0 - все воины
+   * @param radiusInPixels радиус окружности в "пикселях". 0 - все воины
    * @param warriorsType Тип собираемых воинов. Все, враги, свои
    * @param alliedPlayer если warriorsType не ANY, то игрок, который ищет других воинов. Дружественный игрок
    * @return
    */
-  List<Warrior> getWarriors(Coords center, int radius, TargetTypeEnum warriorsType, Player alliedPlayer);
+  List<Warrior> getWarriors(Coords center, int radiusInPixels, TargetTypeEnum warriorsType, Player alliedPlayer);
 
   /**
    * Добавить воина в заданные координаты заданному игроку
