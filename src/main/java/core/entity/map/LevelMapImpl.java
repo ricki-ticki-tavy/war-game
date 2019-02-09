@@ -269,17 +269,18 @@ public class LevelMapImpl implements LevelMap {
 
   @Override
   public Result<Warrior> findWarriorById(String warriorId) {
-    Warrior warrior = players.values().stream()
-            .parallel()
+    Optional<Optional<Warrior>> warriorOptional = players.values().stream()
             .map(player -> player.getOriginWarriors().values().stream()
-                    .filter(nextWarrior -> nextWarrior.getId().equals(warriorId))
-                    .findFirst()).findFirst().get().get();
-    return warrior == null
+                    .parallel()
+                    .filter(nextWarrior -> nextWarrior.getId().equals(warriorId)).findFirst())
+            .filter(nextWarriorOptional -> nextWarriorOptional.isPresent()).findFirst();
+
+    return (warriorOptional == null) || (!warriorOptional.isPresent())
             // "Игра %s (id %s) не имеет воина с id %s"
             ? ResultImpl.fail(WARRIOR_NOT_FOUND_ON_THE_MAP.getError(context.getGameName()
             , context.getContextId()
             , warriorId))
-            : ResultImpl.success(warrior);
+            : ResultImpl.success(warriorOptional.get().get());
   }
   //===================================================================================================
 

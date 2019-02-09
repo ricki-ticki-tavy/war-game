@@ -11,6 +11,10 @@ import core.system.error.GameErrors;
 
 import java.util.*;
 
+import static core.system.error.GameErrors.WEAPON_ATTACK_RANGED_NOT_POSIBLE_ENEMYS_IS_NEAR_ATTACKER;
+import static core.system.error.GameErrors.WEAPON_ATTACK_WEAPON_IS_OUT_OF_CHARGES;
+import static core.system.error.GameErrors.WEAPON_ATTACK_TARGET_IS_OUT_OF_RANGE;
+
 /**
  * Абстрактное оружие. Общие методы
  */
@@ -219,8 +223,8 @@ public abstract class AbstractWeaponImpl implements Weapon {
   }
   //===================================================================================================
 
-  private Result generateAttackError(Warrior targetWarrior, String message) {
-    return ResultImpl.fail(GameErrors.WEAPON_ATTACK_TARGET_IS_OUT_OF_RANGE.getError(
+  private Result generateAttackError(GameErrors gameError, Warrior targetWarrior) {
+    return ResultImpl.fail(gameError.getError(
             owner.getContext().getGameName()
             , owner.getContext().getContextId()
             , owner.getWarriorBaseClass().getTitle()
@@ -230,8 +234,7 @@ public abstract class AbstractWeaponImpl implements Weapon {
             , targetWarrior.getWarriorBaseClass().getTitle()
             , targetWarrior.getTitle()
             , targetWarrior.getId()
-            , targetWarrior.getOwner().getId()
-            , " так как дистанция для выстрела велика"));
+            , targetWarrior.getOwner().getId()));
   }
   //===================================================================================================
 
@@ -269,35 +272,35 @@ public abstract class AbstractWeaponImpl implements Weapon {
       // вроде можно и очков хватает. дистанционное оружие дествует только на дистанции. Если расстояние
       // менее дальности рукопашной атаки, то наносится будет ближняя атака, если доступна
 
-      if (distanceToTarget >= minRangedAttackRange) {
+      if (distanceToTarget >= minRangedAttackRange * mapUnitSize) {
         // расстояние более минимальной дистанции дальней атаки. Проверим, что дальность до цели не
         // превышает допустимую
-        if (distanceToTarget > maxRangedAttackRange) {
+        if (distanceToTarget > maxRangedAttackRange * mapUnitSize) {
           // "В игре %s (id %s)  воин '%s %s' (id %s) игрока %s не может атаковать воина '%s %s' (id %s) игрока %s : %s"
-          attackResult = generateAttackError(targetWarrior, " так как дистанция для выстрела велика");
+          attackResult = generateAttackError(WEAPON_ATTACK_TARGET_IS_OUT_OF_RANGE, targetWarrior);
         } else {
-          // вроде с целью все в норме. Проверим сколько осталось выстрелов
-          if (totalRangedUseCount <= 0){
-            attackResult = generateAttackError(targetWarrior, " Не осталось выстрелов");
+          // вроде с целью все в норме. Проверим сколько осталось выстрелов. -1 - бесконечно
+          if (totalRangedUseCount <= 0 && totalRangedUseCount != -1){
+            attackResult = generateAttackError(WEAPON_ATTACK_WEAPON_IS_OUT_OF_CHARGES, targetWarrior);
           } else {
             // выстрелов тоже хватает. Проверим, что нету рядом врагов на расстоянии равном или меньшем
             // минимальной дистанции стрельбы. при расчете учитываем размер воина как и при расчете дистанции до цели
             // (см выше)
             List<Warrior> nearMeWarriorsList = owner.getContext().getLevelMap()
-                    .getWarriors(owner.getTranslatedToGameCoords(), minRangedAttackRange + warriorSize, TargetTypeEnum.ENEMY_WARRIOR, owner.getOwner());
+                    .getWarriors(owner.getTranslatedToGameCoords(), minRangedAttackRange * mapUnitSize + warriorSize, TargetTypeEnum.ENEMY_WARRIOR, owner.getOwner());
             if (nearMeWarriorsList.size() > 0){
               // есть рядом противники. дистанционная атака невозможна, а выбранный для атаки противник находится на
               // расстоянии более минимальной для дистанционной. Тут ближняя атака невозможна, даже если это допускает
               // оружие
-              attackResult = generateAttackError(targetWarrior, " рядом есть враги");
+              attackResult = generateAttackError(WEAPON_ATTACK_RANGED_NOT_POSIBLE_ENEMYS_IS_NEAR_ATTACKER, targetWarrior);
             }
             // проверки пройдены. Можно атаковать дистанционно
             // если расстояние до цели более расстояния, после которого урон спадает, то пересчитаем максимальный и
             // минимальный уроны
             int maxDmg, minDmg;
-            if (distanceToTarget > fadeRangeStart){
+            if (distanceToTarget > fadeRangeStart* mapUnitSize){
               // да. Надо пересчитывать макс и мин уроны
-              int fadeCoef = 100 - ((distanceToTarget - fadeRangeStart) * fadeDamagePercentPerLength + mapUnitSize / 2 + 1)
+              int fadeCoef = 100 - ((distanceToTarget - fadeRangeStart * mapUnitSize) * fadeDamagePercentPerLength + mapUnitSize / 2 + 1)
                          / mapUnitSize;
               maxDmg = (rangedMaxDamage * fadeCoef) / 100;
               minDmg = (rangedMinDamage * fadeCoef) / 100;

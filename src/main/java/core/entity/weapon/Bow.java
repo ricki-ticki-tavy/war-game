@@ -30,8 +30,8 @@ public class Bow extends AbstractWeaponImpl {
     this.rangedAttackCost = 120;
     this.additionalModifiers = null;
     this.unrejectable = false;
-    this.useCountPerRound = 0;
-    this.totalRangedUseCount = 0;
+    this.useCountPerRound = -1;
+    this.totalRangedUseCount = -1;
     this.canDealRangedDamage = true;
     this.minRangedAttackRange = 2;
     this.maxRangedAttackRange = 40;

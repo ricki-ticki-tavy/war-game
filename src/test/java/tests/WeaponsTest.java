@@ -13,8 +13,7 @@ import core.entity.weapon.Sword;
 import org.springframework.util.Assert;
 import tests.abstracts.AbstractMapTest;
 
-import static core.system.error.GameErrors.CONTEXT_GAME_NOT_STARTED;
-import static core.system.error.GameErrors.PLAYER_IS_NOT_OWENER_OF_THIS_ROUND;
+import static core.system.error.GameErrors.*;
 
 /**
  * Проверка подписывания и отписывания от событий.
@@ -100,7 +99,13 @@ public class WeaponsTest extends AbstractMapTest {
     attackResult = gameWrapper.attackWarrior(gameContext, player2, warrior1p2, warrior2p1, swordWarrior1p2);
     Assert.isTrue(attackResult.isFail(PLAYER_IS_NOT_OWENER_OF_THIS_ROUND), "Атака не в свой ход удалась");
 
-    // Пробуем атаковать воином 2 игрока 1 воина 1 игрока 2. Это не должно выйти так как слишком близко стоит враг
+    // Пробуем атаковать воином 2 игрока 1 воина 1 игрока 1. Это не должно выйти так как они не враги
+    attackResult = gameWrapper.attackWarrior(gameContext, player1, warrior2p1, warrior1p1, bowWarrior2p1);
+    Assert.isTrue(attackResult.isFail(WEAPON_ATTACK_TARGET_WARRIOR_IS_ALIED), "Атака дружественного воина удалась");
+
+    // Пробуем атаковать воином 2 игрока 1 воина 2 игрока 2. Это не должно выйти так как слишком близко стоит враг
+    attackResult = gameWrapper.attackWarrior(gameContext, player1, warrior2p1, warrior2p2, bowWarrior2p1);
+    Assert.isTrue(attackResult.isFail(WEAPON_ATTACK_RANGED_NOT_POSIBLE_ENEMYS_IS_NEAR_ATTACKER), "Дистанционная атака при наличии рядом врага удалась");
 
 
     Result r = gameWrapper.getCore().removeGameContext(gameContext);

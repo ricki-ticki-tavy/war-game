@@ -248,7 +248,7 @@ public class WarriorImpl implements Warrior {
   }
   //===================================================================================================
 
-  public Result<Warrior> isWarriorAlied(Warrior warrior, boolean isAllied) {
+  public Result<Warrior> ifWarriorAlied(Warrior warrior, boolean isAllied) {
     Result<Warrior> warriorResult = owner.findWarriorById(warrior.getId());
     if (warriorResult.isSuccess() == isAllied) {
       // утверждение совпало
@@ -269,7 +269,7 @@ public class WarriorImpl implements Warrior {
               , getOwner().getId()
               , ""))
               // "В игре %s (id %s)  воин '%s %s' (id %s) является враждебным для воина '%s %s' (id %s) игрока %s %s"
-              : ResultImpl.fail(WEAPON_ATTACK_TARGET_WARRIOR_IS_NOT_ALIED.getError(
+              : ResultImpl.fail(WEAPON_ATTACK_TARGET_WARRIOR_IS_ALIED.getError(
               gameContext.getGameName()
               , gameContext.getContextId()
               , warrior.getWarriorBaseClass().getTitle()
@@ -287,7 +287,7 @@ public class WarriorImpl implements Warrior {
 
   public Result<AttackResult> attackWarrior(Warrior targetWarrior, String weaponId) {
     // проверим, что это не дружественный воин
-    return isWarriorAlied(targetWarrior, false)
+    return ifWarriorAlied(targetWarrior, false)
             // Найдем у своего воинаоружие
             .map(fineTargetWarrior -> findWeaponById(weaponId)
                     // вдарим

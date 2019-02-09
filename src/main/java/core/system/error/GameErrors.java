@@ -21,8 +21,10 @@ public enum GameErrors {
   , WARRIOR_CAN_T_ROLLBACK_MOVE("WR-9", "В игре %s (id %s) игрок %s не может откатить перемещение воина '%s %s' (id %s) так как откат заблокирован последующими действиями")
 
   , WEAPON_BASE_CLASS_NOT_FOUND_BY_NAME("WP-1", "Класс оружия с именем %s не существует")
-  , WEAPON_ATTACK_TARGET_IS_OUT_OF_RANGE("WA-1", "В игре %s (id %s)  воин '%s %s' (id %s) игрока %s не может атаковать воина '%s %s' (id %s) игрока %s : %s")
-  , WEAPON_ATTACK_TARGET_WARRIOR_IS_ALIED("WA-2", "В игре %s (id %s)  воин '%s %s' (id %s) не является врагом для воина '%s %s' (id %s) игрока %s %s")
+  , WEAPON_ATTACK_TARGET_IS_OUT_OF_RANGE("WA-1", "В игре %s (id %s)  воин '%s %s' (id %s) игрока %s не может атаковать воина '%s %s' (id %s) игрока %s так как дистанция для атаки велика")
+  , WEAPON_ATTACK_WEAPON_IS_OUT_OF_CHARGES("WA-2", "В игре %s (id %s)  воин '%s %s' (id %s) игрока %s не может атаковать воина '%s %s' (id %s) игрока %s так как не осталось зарядов")
+  , WEAPON_ATTACK_RANGED_NOT_POSIBLE_ENEMYS_IS_NEAR_ATTACKER("WA-2", "В игре %s (id %s)  воин '%s %s' (id %s) игрока %s не может дистанционно атаковать воина '%s %s' (id %s) игрока %s так как рядом есть враги")
+  , WEAPON_ATTACK_TARGET_WARRIOR_IS_ALIED("WA-4", "В игре %s (id %s)  воин '%s %s' (id %s) не является врагом для воина '%s %s' (id %s) игрока %s %s")
   , WEAPON_ATTACK_TARGET_WARRIOR_IS_NOT_ALIED("WA-3", "В игре %s (id %s)  воин '%s %s' (id %s) является врагом для воина '%s %s' (id %s) игрока %s %s")
 
   , MAP_LOAD_ERROR("M-1", "Ошибка загрузки карты: %s")

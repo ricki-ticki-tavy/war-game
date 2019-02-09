@@ -209,7 +209,7 @@ public class PlayerImpl implements Player {
                     // и этим юнитом не делалось движений
                     !warrior.isTouchedAtThisTurn()
                             // и предел используемых за ход юнитов достигнут
-                            && getWarriorsTouchedAtThisTurn().getResult().size() >= context.getGameRules().getMovesCountPerTurnForEachPlayer()
+                            && getWarriorsTouchedAtThisTurn().getResult().size() < context.getGameRules().getMovesCountPerTurnForEachPlayer()
                             // или юнит уже задействован в этом ходе
                             || warrior.isTouchedAtThisTurn()
                             ? ResultImpl.success(warrior)
