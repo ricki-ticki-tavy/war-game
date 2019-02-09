@@ -45,11 +45,10 @@ public enum GameErrors {
   , CONTEXT_IN_GAME_RAN_STATE("CT-7", "игра '%s' (context %s) уже в процессе игры.")
   , CONTEXT_NOT_IN_GAME_RAN_STATE("CT-8", "игра '%s' (context %s) еще не началась. Игроки готовятся.")
 
-  , SYSTEM_NOT_REALIZED("NR-1", "Метод %s не реализован.")
-
-  , SYSTEM_USER_ERROR("UM-1", "%s.")
-
-  , SYSTEM_RUNTIME_ERROR("RE-1", "%s.")
+  , SYSTEM_NOT_REALIZED("SE-1", "Метод %s не реализован.")
+  , SYSTEM_USER_ERROR("SE-2", "%s.")
+  , SYSTEM_RUNTIME_ERROR("SE-3", "%s.")
+  , SYSTEM_OBJECT_NOT_NULL("SE-4", "Объект %s уже инициализирован (%s). Повторное переопределение значения невозможно.")
 
   ;
 

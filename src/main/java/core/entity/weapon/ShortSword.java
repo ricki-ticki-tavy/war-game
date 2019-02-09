@@ -17,8 +17,8 @@ public class ShortSword extends AbstractWeaponImpl {
   public static final String CLASS_NAME = "Короткий меч";
   private static final String OUID = "WepShSwd_" + UUID.randomUUID().toString();
 
-  public ShortSword(Warrior owner){
-    super(owner);
+  public ShortSword(){
+    super();
     this.id = OUID;
     this.title = CLASS_NAME;
     this.description = "Короткий меч. Ближний бой ";

@@ -210,17 +210,16 @@ public class WarriorImpl implements Warrior {
   public Result takeWeapon(Class<? extends Weapon> weaponClass) {
     Result result = null;
     Weapon weapon = beanFactory.getBean(weaponClass);
-    try {
-      if (weapon.getNeededHandsCountToTakeWeapon() > 0) {
-        int freePoints = 2 - hands.values().stream().map(hand -> hand.isFree() ? 0 : 1).reduce(0, (acc, chg) -> acc += chg);
-        if (freePoints < weapon.getNeededHandsCountToTakeWeapon()) {
-          result = ResultImpl.fail(WARRIOR_HANDS_NO_FREE_SLOTS.getError(String.valueOf(freePoints)
-                  , weapon.getTitle()
-                  , String.valueOf(weapon.getNeededHandsCountToTakeWeapon())));
-          return result;
-        }
+    if (weapon.getNeededHandsCountToTakeWeapon() > 0) {
+      int freePoints = 2 - hands.values().stream().map(hand -> hand.isFree() ? 0 : 1).reduce(0, (acc, chg) -> acc += chg);
+      if (freePoints < weapon.getNeededHandsCountToTakeWeapon()) {
+        result = ResultImpl.fail(WARRIOR_HANDS_NO_FREE_SLOTS.getError(String.valueOf(freePoints)
+                , weapon.getTitle()
+                , String.valueOf(weapon.getNeededHandsCountToTakeWeapon())));
       }
+    }
 
+    if (result == null) {
       AtomicInteger points = new AtomicInteger(weapon.getNeededHandsCountToTakeWeapon());
       // место есть в руках. Ищем свободную руку
       hands.values().stream()
@@ -228,12 +227,12 @@ public class WarriorImpl implements Warrior {
               .forEach(hand -> {
                 points.decrementAndGet();
                 hand.addWeapon(weapon);
+                weapon.setOwner(this);
               });
       result = ResultImpl.success(weapon);
-      return result;
-    } finally {
-      gameContext.fireGameEvent(null, WEAPON_TAKEN, new EventDataContainer(this, weapon, result), null);
     }
+    gameContext.fireGameEvent(null, WEAPON_TAKEN, new EventDataContainer(this, weapon, result), null);
+    return result;
   }
   //===================================================================================================
 

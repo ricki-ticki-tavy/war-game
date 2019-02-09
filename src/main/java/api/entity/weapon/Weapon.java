@@ -121,4 +121,11 @@ public interface Weapon extends BaseEntityHeader{
    */
   Result<AttackResult> attack(Warrior targetWarrior);
 
+  /**
+   * задать  владельца снаряжения
+   * @param owner
+   * @return
+   */
+  Weapon setOwner(Warrior owner);
+
 }

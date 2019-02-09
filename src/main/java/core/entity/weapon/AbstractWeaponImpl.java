@@ -10,10 +10,7 @@ import core.system.ResultImpl;
 import core.system.error.GameError;
 import core.system.error.GameErrors;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Абстрактное оружие. Общие методы
@@ -88,8 +85,7 @@ public abstract class AbstractWeaponImpl implements Weapon {
     this.neededHandsCountToTakeWeapon = neededHandsCountToTakeWeapon;
   }
 
-  protected AbstractWeaponImpl(Warrior owner) {
-    this.owner = owner;
+  protected AbstractWeaponImpl() {
   }
 
   @Override
@@ -237,6 +233,16 @@ public abstract class AbstractWeaponImpl implements Weapon {
             , targetWarrior.getId()
             , targetWarrior.getOwner().getId()
             , " так как дистанция для выстрела велика"));
+  }
+  //===================================================================================================
+
+  @Override
+  public Weapon setOwner(Warrior owner) {
+    if (this.owner != null && this.owner != owner) {
+      throw GameErrors.SYSTEM_OBJECT_NOT_NULL.getError("warrior.owner", owner.toString());
+    }
+    this.owner = owner;
+    return this;
   }
   //===================================================================================================
 

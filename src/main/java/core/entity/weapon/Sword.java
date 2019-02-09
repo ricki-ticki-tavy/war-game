@@ -17,8 +17,8 @@ public class Sword extends AbstractWeaponImpl {
   public static final String CLASS_NAME = "Простой меч";
   private static final String OUID = "WepSwd_" + UUID.randomUUID().toString();
 
-  public Sword(Warrior owner) {
-    super(owner);
+  public Sword() {
+    super();
     this.id = OUID;
     this.title = CLASS_NAME;
     this.description = "Простой меч. Ближний бой ";
