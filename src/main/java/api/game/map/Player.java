@@ -184,6 +184,21 @@ public interface Player extends BaseEntityHeader {
   Result<AttackResult> attackWarrior(String attackerWarriorId, String targetWarriorId, String weaponId);
 
   /**
+   * Метод вызывается после того, как атакующим воином выполнены все расчеты оказываемых на атакуемого воина воздействий
+   * тут плеер может добавить что-то еще от себя.
+   * @return
+   */
+  Result<AttackResult> innerAttachToAttackToWarrior(AttackResult attackResult);
+
+  /**
+   * Этот метод вызывается когда воин игрока атакуется. В этом методе происходит анализ всех нанесенныхз уронов,
+   * перерасчет их (в случае наличия сопротивления, брони и прочее) и применение урона и влияний к воину
+   * @param attackResult
+   * @return
+   */
+  Result<AttackResult> innerWarriorUnderAttack(AttackResult attackResult);
+
+  /**
    * добавить влияние юниту
    *
    * @param modifier

@@ -298,6 +298,19 @@ public class PlayerImpl implements Player {
   //===================================================================================================
 
   @Override
+  public Result<AttackResult> innerAttachToAttackToWarrior(AttackResult attackResult) {
+    return ResultImpl.success(attackResult); // TODO добавить сбор с артефактов всяких полезностей
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<AttackResult> innerWarriorUnderAttack(AttackResult attackResult) {
+    // TODO реализовать применение атаки
+    return ResultImpl.success(attackResult);
+  }
+  //===================================================================================================
+
+  @Override
   public Result<Player> prepareToAttackPhase() {
     Result<Warrior> warriorResult;
     // восстановим значения воинов. свои влияния воин собирает сам

@@ -379,7 +379,7 @@ public class WarriorImpl implements Warrior {
 
   @Override
   public Result<Influencer> addInfluenceToWarrior(Modifier modifier, Object source, LifeTimeUnit lifeTimeUnit, int lifeTime) {
-    Influencer influencer = new InfluencerImpl(this, modifier, source, lifeTimeUnit, lifeTime);
+    Influencer influencer = new InfluencerImpl(this, source, lifeTimeUnit, lifeTime, modifier);
     influencers.put(influencer.getId(), influencer);
     gameContext.fireGameEvent(null, WARRIOR_INFLUENCER_ADDED
             , new EventDataContainer(influencer, this), null);

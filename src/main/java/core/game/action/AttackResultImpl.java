@@ -1,9 +1,14 @@
 package core.game.action;
 
+import api.entity.warrior.Influencer;
 import api.entity.warrior.Warrior;
 import api.entity.weapon.Weapon;
 import api.game.Event;
+import api.game.action.AttackResult;
 import api.game.map.Player;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class AttackResultImpl implements api.game.action.AttackResult {
 
@@ -13,6 +18,7 @@ public class AttackResultImpl implements api.game.action.AttackResult {
   private Warrior target;
   private Weapon weapon;
   private Event event;
+  private final List<Influencer> influencers = new ArrayList<>(20);
 
   public AttackResultImpl(Player attackerPlayer, Warrior attacker, Weapon weapon
           , Player targetPlayer, Warrior target, Event event){
@@ -52,5 +58,16 @@ public class AttackResultImpl implements api.game.action.AttackResult {
   @Override
   public Event getEvent() {
     return event;
+  }
+
+  @Override
+  public List<Influencer> getInfluencers() {
+    return influencers;
+  }
+
+  @Override
+  public AttackResult addInfluencer(Influencer influencer) {
+    influencers.add(influencer);
+    return this;
   }
 }

@@ -9,32 +9,38 @@ import api.enums.LifeTimeUnit;
 import api.game.Event;
 import core.system.ResultImpl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class InfluencerImpl implements Influencer {
   private LifeTimeUnit lifeTimeUnit;
   private int lifeTime;
   private Warrior targetWarrior;
-  private Modifier modifier;
+  private final Modifier modifier;
   private Object source;
   private String id = UUID.randomUUID().toString();
   private String consumerId = null;
+  private final List<Influencer> children;
   //===================================================================================================
   //===================================================================================================
 
   /**
-   * @param targetWarrior владелец. Тот, на кого это влияние направлено
-   * @param modifier      модификатор влияния
+   * @param targetWarrior Тот, на кого это влияние направлено
    * @param source        кто является источникомвлияния. Кто его наложил.
    * @param lifeTimeUnit  единицы, в которых измеряется время жизни влияния
    * @param lifeTime      время жизни влияния
+   * @param modifier      модификатор влияния
    */
-  public InfluencerImpl(Warrior targetWarrior, Modifier modifier, Object source, LifeTimeUnit lifeTimeUnit, int lifeTime) {
+  public InfluencerImpl(Warrior targetWarrior, Object source, LifeTimeUnit lifeTimeUnit, int lifeTime, Modifier modifier) {
     this.modifier = modifier;
     this.lifeTimeUnit = lifeTimeUnit;
     this.lifeTime = lifeTime;
     this.targetWarrior = targetWarrior;
     this.source = source;
+    this.children = new ArrayList<>(10);
     if (!lifeTimeUnit.getEventType().equals(EventType.ALWAYS)) {
       consumerId = targetWarrior.getOwner().findContext().getResult().subscribeEvent(this::onTimeEvent, lifeTimeUnit.getEventType());
     }
@@ -94,6 +100,25 @@ public class InfluencerImpl implements Influencer {
     unsubscribe();
     ((WarriorImpl)targetWarrior).innerRemoveInfluencerFromWarrior(this, silent);
     return ResultImpl.success(this);
+  }
+  //===================================================================================================
+
+  @Override
+  public Influencer addChildren(Influencer influencer) {
+    this.children.add(influencer);
+    return this;
+  }
+  //===================================================================================================
+
+  @Override
+  public List<Influencer> getChildren() {
+    return new ArrayList(children);
+  }
+  //===================================================================================================
+
+  @Override
+  public Modifier getModifier() {
+    return modifier;
   }
   //===================================================================================================
 

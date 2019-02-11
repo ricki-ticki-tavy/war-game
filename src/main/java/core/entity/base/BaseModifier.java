@@ -1,11 +1,14 @@
 package core.entity.base;
 
 import api.core.Context;
+import api.core.IntParam;
+import api.core.Result;
 import api.entity.ability.Modifier;
 import api.enums.AttributeEnum;
 import api.enums.TargetTypeEnum;
+import core.system.ResultImpl;
 
-public abstract class AbstractModifier implements Modifier {
+public class BaseModifier implements Modifier {
 
   protected TargetTypeEnum target;
   protected String title;
@@ -20,7 +23,7 @@ public abstract class AbstractModifier implements Modifier {
     return target;
   }
 
-  public AbstractModifier(TargetTypeEnum target) {
+  public BaseModifier(TargetTypeEnum target) {
     this.target = target;
   }
 
@@ -45,15 +48,20 @@ public abstract class AbstractModifier implements Modifier {
   }
 
   @Override
-  public int getValue() {
-    return minValue == maxValue
-            ? minValue
-            : context.getCore().getRandom(minValue, maxValue);
+  public Result<IntParam> getValue() {
+    int calculatedValue = 0;
+    if (probability == 100 || context.getCore().getRandom(0, 100) <= probability){
+      calculatedValue = minValue == maxValue
+              ? minValue
+              : context.getCore().getRandom(minValue, maxValue);
+
+    }
+    return ResultImpl.success(calculatedValue);
   }
 
   @Override
   public int getMinValue() {
-    return 0;
+    return minValue;
   }
 
   @Override
@@ -61,7 +69,7 @@ public abstract class AbstractModifier implements Modifier {
     return maxValue;
   }
 
-  public AbstractModifier(Context context
+  public BaseModifier(Context context
           , String title, String description, TargetTypeEnum target
           , AttributeEnum attribute, int minValue, int maxValue
           , int probability) {
@@ -80,5 +88,7 @@ public abstract class AbstractModifier implements Modifier {
     return context;
   }
 
-  public AbstractModifier(){}
+  public BaseModifier(){}
+
+
 }
