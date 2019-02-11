@@ -35,6 +35,9 @@ public enum EventType {
   , WARRIOR_PREPARED_TO_DEFENCE("В игре '%s' (контекст '%s') у игрока '%s' воин '%s (%s)' (id %s) подготовился к защите")
   , WARRIOR_PREPARED_TO_ATTACK("В игре '%s' (контекст '%s') у игрока '%s' воин '%s (%s)' (id %s) подготовился к действиям и атаке")
 
+  , WARRIOR_HAS_LUCK("В игре '%s' воину '%s %s' игрока '%s' улыбнулась удача %s")
+  , WARRIOR_WAS_ATTACKED_BY_ENEMY("В игре '%s' воин '%s %s' игрока '%s' нанес оружием %s воину '%s %s' игрока %s %s единиц урона")
+
   , WEAPON_TAKEN("В игре '%s' игрок '%s' снарядил юнит '%s' (id '%s') оружием '%s'. %s")
   , WEAPON_TRY_TO_DROP("В игре '%s' игрок '%s' попытался убрать у юнита '%s' (id '%s') оружие id '%s'. %s")
   , WEAPON_DROPED("В игре '%s' игрок '%s' убрал у юнита '%s' (id '%s') оружие '%s' (id '%s'). %s")

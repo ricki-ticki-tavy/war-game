@@ -3,6 +3,7 @@ package api.entity.warrior;
 import api.core.Result;
 import api.entity.ability.Modifier;
 import api.entity.base.BaseEntityHeader;
+import api.game.action.AttackResult;
 
 import java.util.List;
 
@@ -41,4 +42,11 @@ public interface Influencer extends BaseEntityHeader {
    * @return
    */
   Modifier getModifier();
+
+  /**
+   * Применить влияние на воина
+   * @param attackResult
+   * @return
+   */
+  Result<Warrior> applayToWarrior(AttackResult attackResult);
 }

@@ -45,7 +45,7 @@ public interface Modifier {
    * Возвращает значение.
    * @return
    */
-  Result<IntParam> getValue();
+  Result<Integer> getValue();
 
   /**
    * минимальное значение влияния. - уменьшает + увеличивает
@@ -64,4 +64,17 @@ public interface Modifier {
    * @return
    */
   Context getContext();
+
+  /**
+   * Получить фиксированное значение последнего результата вычисления размера влияния модификатора
+   * @return
+   */
+  int getLastCalculatedValue();
+
+  /**
+   * Установить фиксированное значение последнего результата вычисления размера влияния модификатора
+   * @param value
+   * @return
+   */
+  Modifier setLastCalculatedValue(int value);
 }

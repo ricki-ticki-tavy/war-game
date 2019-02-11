@@ -153,6 +153,7 @@ public class CoreImpl implements Core {
   }
   //===================================================================================================
 
+  // TODO учесть параметр УДАЧА
   @Override
   public int getRandom(int min, int max) {
     synchronized (random) {

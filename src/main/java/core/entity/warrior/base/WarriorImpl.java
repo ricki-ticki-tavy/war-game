@@ -293,6 +293,13 @@ public class WarriorImpl implements Warrior {
   }
   //===================================================================================================
 
+  @Override
+  public Result<AttackResult> innerWarriorUnderAttack(AttackResult attackResult) {
+    // TODO реализовать рассчет защиты и особенностей воина
+    return ResultImpl.success(attackResult);
+  }
+  //===================================================================================================
+
   private GameError generateWeapoNotFoundError(String weaponId) {
     //"В игре %s (id %s) у игрока %s воин '%s %s' (id %s) не имеет оружия с id '%s'"
     return WARRIOR_WEAPON_NOT_FOUND.getError(
@@ -305,10 +312,11 @@ public class WarriorImpl implements Warrior {
             , weaponId);
 
   }
+  //===================================================================================================
 
   @Override
-  public Result<WarriorSBaseAttributes> getAttributes() {
-    return ResultImpl.success(attributes);
+  public WarriorSBaseAttributes getAttributes() {
+    return attributes;
   }
   //===================================================================================================
 
@@ -437,8 +445,8 @@ public class WarriorImpl implements Warrior {
 
   @Override
   public int getWarriorSMoveCost() {
-    return getAttributes().getResult().getArmorClass().getMoveCost()
-            + getAttributes().getResult().getDeltaCostMove();
+    return getAttributes().getArmorClass().getMoveCost()
+            + getAttributes().getDeltaCostMove();
   }
   //===================================================================================================
 

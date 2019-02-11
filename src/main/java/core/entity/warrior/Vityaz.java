@@ -1,10 +1,13 @@
 package core.entity.warrior;
 
+import api.core.Result;
 import api.enums.ArmorClassEnum;
+import api.game.action.AttackResult;
 import core.entity.warrior.base.AbstractBaseWarriorClass;
 import core.entity.warrior.base.WarriorSBaseAttributesImpl;
 import core.entity.weapon.ShortSword;
 import core.entity.weapon.Sword;
+import core.system.ResultImpl;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -35,6 +38,12 @@ public class Vityaz extends AbstractBaseWarriorClass {
             ShortSword.class
             , Sword.class
     ).collect(Collectors.toList()));
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<AttackResult> innerWarriorUnderAttack(AttackResult attackResult) {
+    return ResultImpl.success(attackResult);
   }
 
 }

@@ -305,8 +305,17 @@ public class PlayerImpl implements Player {
 
   @Override
   public Result<AttackResult> innerWarriorUnderAttack(AttackResult attackResult) {
-    // TODO реализовать применение атаки
-    return ResultImpl.success(attackResult);
+    // возможность воину отбить удары и / или ослабить воздействие вредных влияний
+    return attackResult.getTarget().innerWarriorUnderAttack(attackResult)
+            // теперь рпименим оставшиеся влияния к воину
+            .map(fineAttackResult -> {
+              // собственно применим полученные поражения
+              fineAttackResult.getInfluencers().stream()
+                      // считаем, что уже все значения в модифиерах расчитаны жестко и не изменяются от запроса к запросу
+                      .filter(influencer -> influencer.getModifier().getLastCalculatedValue() > 0)
+                      .forEach(influencer -> influencer.applayToWarrior(attackResult));
+              return ResultImpl.success(attackResult);
+            });
   }
   //===================================================================================================
 

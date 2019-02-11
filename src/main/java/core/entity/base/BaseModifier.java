@@ -17,38 +17,49 @@ public class BaseModifier implements Modifier {
   protected int probability;
   protected int minValue, maxValue;
   protected Context context;
+  protected int calculatedValue;
+
+
+  public BaseModifier(){}
+  //===================================================================================================
 
   @Override
   public TargetTypeEnum getTarget() {
     return target;
   }
+  //===================================================================================================
 
   public BaseModifier(TargetTypeEnum target) {
     this.target = target;
   }
+  //===================================================================================================
 
   @Override
   public String getTitle() {
     return title;
   }
+  //===================================================================================================
 
   @Override
   public String getDescription() {
     return description;
   }
+  //===================================================================================================
 
   @Override
   public AttributeEnum getAttribute() {
     return attribute;
   }
+  //===================================================================================================
 
   @Override
   public int getProbability() {
     return 0;
   }
+  //===================================================================================================
 
   @Override
-  public Result<IntParam> getValue() {
+  public Result<Integer> getValue() {
     int calculatedValue = 0;
     if (probability == 100 || context.getCore().getRandom(0, 100) <= probability){
       calculatedValue = minValue == maxValue
@@ -58,16 +69,19 @@ public class BaseModifier implements Modifier {
     }
     return ResultImpl.success(calculatedValue);
   }
+  //===================================================================================================
 
   @Override
   public int getMinValue() {
     return minValue;
   }
+  //===================================================================================================
 
   @Override
   public int getMaxValue() {
     return maxValue;
   }
+  //===================================================================================================
 
   public BaseModifier(Context context
           , String title, String description, TargetTypeEnum target
@@ -82,13 +96,27 @@ public class BaseModifier implements Modifier {
     this.probability = probability;
     this.context = context;
   }
+  //===================================================================================================
+
 
   @Override
   public Context getContext() {
     return context;
   }
+  //===================================================================================================
 
-  public BaseModifier(){}
+  @Override
+  public int getLastCalculatedValue() {
+    return calculatedValue;
+  }
+  //===================================================================================================
+
+  @Override
+  public Modifier setLastCalculatedValue(int value) {
+    this.calculatedValue = value;
+    return this;
+  }
+  //===================================================================================================
 
 
 }

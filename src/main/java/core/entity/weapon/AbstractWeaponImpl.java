@@ -253,6 +253,8 @@ public abstract class AbstractWeaponImpl implements Weapon {
   }
   //===================================================================================================
 
+  // TODO Учесть кол-во потраченных единиц действия.
+  // TODO разбить единицы действия по 2м (только двум !!!) рукам
   @Override
   public Result<AttackResult> attack(Warrior targetWarrior) {
 

@@ -92,7 +92,7 @@ public interface Warrior extends BaseEntityHeader, HasCoordinates {
    *
    * @return
    */
-  Result<WarriorSBaseAttributes> getAttributes();
+  WarriorSBaseAttributes getAttributes();
 
   /**
    * Подготовка воина перед ходом игрока. Восстановление различных параметров до нормальных значений
@@ -116,6 +116,14 @@ public interface Warrior extends BaseEntityHeader, HasCoordinates {
    * @return
    */
   Result<AttackResult> attackWarrior(Warrior targetWarrior, String weaponId);
+
+  /**
+   * Этот метод вызывается когда воин игрока атакуется. В этом методе происходит анализ всех нанесенныхз уронов,
+   * перерасчет их (в случае наличия сопротивления, брони и прочее)
+   * @param attackResult
+   * @return
+   */
+  Result<AttackResult> innerWarriorUnderAttack(AttackResult attackResult);
 
   /**
    * добавить влияние юниту

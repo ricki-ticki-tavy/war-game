@@ -4,16 +4,18 @@ import api.core.Result;
 import api.entity.ability.Modifier;
 import api.entity.warrior.Influencer;
 import api.entity.warrior.Warrior;
+import api.entity.warrior.WarriorSBaseAttributes;
 import api.enums.EventType;
 import api.enums.LifeTimeUnit;
 import api.game.Event;
+import api.game.EventDataContainer;
+import api.game.action.AttackResult;
 import core.system.ResultImpl;
+import core.system.event.EventImpl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public class InfluencerImpl implements Influencer {
   private LifeTimeUnit lifeTimeUnit;
@@ -65,7 +67,8 @@ public class InfluencerImpl implements Influencer {
   }
   //===================================================================================================
 
-  /** TODO добавить собственно действие по изменению некоторых атрибутов, как здоровье, магия и т.п., если оно есть
+  /**
+   * TODO добавить собственно действие по изменению некоторых атрибутов, как здоровье, магия и т.п., если оно есть
    * срабатывает когда наступает событие, по которому измеряется время жизни
    *
    * @param event
@@ -98,7 +101,7 @@ public class InfluencerImpl implements Influencer {
   @Override
   public Result<Influencer> removeFromWarrior(boolean silent) {
     unsubscribe();
-    ((WarriorImpl)targetWarrior).innerRemoveInfluencerFromWarrior(this, silent);
+    ((WarriorImpl) targetWarrior).innerRemoveInfluencerFromWarrior(this, silent);
     return ResultImpl.success(this);
   }
   //===================================================================================================
@@ -119,6 +122,26 @@ public class InfluencerImpl implements Influencer {
   @Override
   public Modifier getModifier() {
     return modifier;
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Warrior> applayToWarrior(AttackResult attackResult) {
+    // TODO Реализовать применение влияния на воина
+    WarriorSBaseAttributes attributes = targetWarrior.getAttributes();
+    // Уже всерассчитано. Применяем значение, рассчитанное заранее (getLastCalculatedValue())
+    switch (modifier.getAttribute()) {
+      case HEALTH:
+        attributes.addHealth(- modifier.getLastCalculatedValue());
+        // Отправим сообщение
+        targetWarrior.getContext()
+                .fireGameEvent(null
+                        , EventType.WARRIOR_WAS_ATTACKED_BY_ENEMY
+                        , new EventDataContainer(attackResult, modifier)
+                        , null);
+        break;
+    }
+    return ResultImpl.success(targetWarrior);
   }
   //===================================================================================================
 
