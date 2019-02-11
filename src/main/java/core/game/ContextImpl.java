@@ -5,10 +5,12 @@ import api.core.Core;
 import api.core.Result;
 import api.entity.warrior.Influencer;
 import api.entity.warrior.Warrior;
+import api.entity.weapon.Weapon;
 import api.enums.EventType;
 import api.game.Coords;
 import api.game.Event;
 import api.game.EventDataContainer;
+import api.game.action.AttackResult;
 import api.game.map.LevelMap;
 import api.game.map.Player;
 import api.game.map.metadata.GameRules;
@@ -94,7 +96,7 @@ public class ContextImpl implements Context {
   public Result<Context> initDelete() {
     return deleting.get()
             ? ResultImpl.fail(CONTEXT_DELETE_ALREADY_IN_PROGRESS.getError(getGameName(), getContextId()))
-            : ResultImpl.success(this).doIfSuccess(context -> deleting.set(true));
+            : ResultImpl.success(this).peak(context -> deleting.set(true));
   }
   //===================================================================================================
 
@@ -189,6 +191,13 @@ public class ContextImpl implements Context {
   }
   //===================================================================================================
 
+  @Override
+  public Result<Warrior> findWarriorById(String warriorId) {
+    return ifGameDeleting(false)
+            .map(fineContext -> getLevelMap().findWarriorById(warriorId));
+  }
+  //===================================================================================================
+
 
   @Override
   public Result<Warrior> createWarrior(String userName, String warriorClassName, Coords coords) {
@@ -196,6 +205,14 @@ public class ContextImpl implements Context {
             .map(thisContext1 -> thisContext1.ifGameDeleting(false))
             .map(fineContext -> fineContext.findUserByName(userName))
             .map(player -> getLevelMap().createWarrior(player, warriorClassName, coords));
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<AttackResult> attackWarrior(String userName, String attackerWarriorId, String targetWarriorId, String weaponId) {
+    return ifGameDeleting(false)
+            .map(fineContext -> fineContext.findUserByName(userName))
+            .map(player -> getLevelMap().attackWarrior(player, attackerWarriorId, targetWarriorId, weaponId));
   }
   //===================================================================================================
 
@@ -224,7 +241,7 @@ public class ContextImpl implements Context {
   public Result<Context> ifGameRan(boolean state) {
     return isGameRan() == state ? ResultImpl.success(this) : ResultImpl.fail(
             state
-                    ? CONTEXT_NOT_IN_GAME_RAN_STATE.getError(getGameName(), getContextId())
+                    ? CONTEXT_GAME_NOT_STARTED.getError(getGameName(), getContextId())
                     : CONTEXT_IN_GAME_RAN_STATE.getError(getGameName(), getContextId()));
   }
   //===================================================================================================
@@ -296,10 +313,18 @@ public class ContextImpl implements Context {
   //===================================================================================================
 
   @Override
+  public Result<Warrior> ifWarriorCanActsAtThisTurn(String userName, String warriorId) {
+    return ifGameDeleting(false)
+            .map(fineContext -> fineContext.findUserByName(userName))
+            .map(player -> getLevelMap().ifWarriorCanActsAtThisTurn(player, warriorId));
+  }
+  //===================================================================================================
+
+  @Override
   public Result<Warrior> moveWarriorTo(String userName, String warriorId, Coords coords) {
     return ifGameDeleting(false)
             .map(fineContext -> fineContext.findUserByName(userName)
-            .map(player -> fineContext.getLevelMap().moveWarriorTo(player, warriorId, coords)));
+                    .map(player -> fineContext.getLevelMap().moveWarriorTo(player, warriorId, coords)));
   }
   //===================================================================================================
 
@@ -355,6 +380,23 @@ public class ContextImpl implements Context {
   //===================================================================================================
 
   @Override
+  public Result<Weapon> giveWeaponToWarrior(String userName, String warriorId, Class<? extends Weapon> weaponClass) {
+    return ifGameDeleting(false)
+            .map(fineContext -> findUserByName(userName))
+            .map(player -> ifGameRan(false)
+                    .map(context -> context.getLevelMap().giveWeaponToWarrior(player, warriorId, weaponClass)));
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Weapon> findWeaponById(String userName, String warriorId, String weaponId) {
+    return ifGameDeleting(false)
+            .map(context -> context.findUserByName(userName))
+            .map(player -> getLevelMap().findWeaponById(player, warriorId, weaponId));
+  }
+  //===================================================================================================
+
+  @Override
   public Result<Player> nextTurn(String userName) {
     return ifGameRan(true)
             .map(fineContext -> fineContext.findUserByName(userName))
@@ -366,6 +408,13 @@ public class ContextImpl implements Context {
   public Result<List<Influencer>> getWarriorSInfluencers(String userName, String warriorId) {
     return findUserByName(userName)
             .map(player -> getLevelMap().getWarriorSInfluencers(player, warriorId));
+  }
+  //===================================================================================================
+
+  @Override
+  public int calcDistanceTo(Coords from, Coords to) {
+    return (int) Math.round(Math.sqrt((double) ((from.getX() - to.getX()) * (from.getX() - to.getX())
+            + (from.getY() - to.getY()) * (from.getY() - to.getY()))));
   }
   //===================================================================================================
 }

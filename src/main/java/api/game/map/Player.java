@@ -6,9 +6,11 @@ import api.entity.ability.Modifier;
 import api.entity.base.BaseEntityHeader;
 import api.entity.warrior.Influencer;
 import api.entity.warrior.Warrior;
+import api.entity.weapon.Weapon;
 import api.enums.LifeTimeUnit;
 import api.game.Coords;
 import api.game.Rectangle;
+import api.game.action.AttackResult;
 
 import java.util.List;
 import java.util.Map;
@@ -35,11 +37,13 @@ public interface Player extends BaseEntityHeader {
   List<Warrior> getWarriors();
 
   /**
-   * Вернуть всех воинов
+   * Вернуть всех воинов.Не копирует список в новый лист. Это оригинальный MAP с юнитами.
+   * Только для внутреннего использования
    *
    * @return
    */
-  Map<String, Warrior> getAllWarriors();
+  @Deprecated
+  Map<String, Warrior> getOriginWarriors();
 
   /**
    * Задать зону выставления воинов
@@ -119,11 +123,18 @@ public interface Player extends BaseEntityHeader {
   Result<Warrior> rollbackMove(String warriorId);
 
   /**
-   * Проверяет возможно ли движение данного югита в принципе
+   * Проверяет возможно ли движение данного югита в этом ходе
    * @param warrior
    * @return
    */
-  Result<Warrior> ifCanMoveWarrior(Warrior warrior);
+  Result<Warrior> ifWarriorCanMoveAtThisTurn(Warrior warrior);
+
+  /**
+   * Проверяет возможно ли выполнение атаки или применения способности данным юнитом в этом ходе
+   * @param warrior
+   * @return
+   */
+  Result<Warrior> ifWarriorCanActsAtThisTurn(Warrior warrior);
 
   /**
    * очищает воинов, артефакты и прочее у игрока
@@ -140,6 +151,13 @@ public interface Player extends BaseEntityHeader {
    */
   Result<Warrior> removeWarrior(String warriorId);
 
+  /**
+   * Вооружить воина предметом
+   * @param warriorId
+   * @param weaponClass
+   * @return
+   */
+  Result<Weapon> giveWeaponToWarrior(String warriorId, Class<? extends Weapon> weaponClass);
 
   /**
    * Подготовка воина перед ходом игрока. Восстановление различных параметров до нормальных значений
@@ -157,6 +175,30 @@ public interface Player extends BaseEntityHeader {
   Result<Player> prepareToDefensePhase();
 
   /**
+   * Атаковать выбранным оружием другого воина
+   * @param attackerWarriorId
+   * @param targetWarriorId
+   * @param weaponId
+   * @return
+   */
+  Result<AttackResult> attackWarrior(String attackerWarriorId, String targetWarriorId, String weaponId);
+
+  /**
+   * Метод вызывается после того, как атакующим воином выполнены все расчеты оказываемых на атакуемого воина воздействий
+   * тут плеер может добавить что-то еще от себя.
+   * @return
+   */
+  Result<AttackResult> innerAttachToAttackToWarrior(AttackResult attackResult);
+
+  /**
+   * Этот метод вызывается когда воин игрока атакуется. В этом методе происходит анализ всех нанесенныхз уронов,
+   * перерасчет их (в случае наличия сопротивления, брони и прочее) и применение урона и влияний к воину
+   * @param attackResult
+   * @return
+   */
+  Result<AttackResult> innerWarriorUnderAttack(AttackResult attackResult);
+
+  /**
    * добавить влияние юниту
    *
    * @param modifier
@@ -172,17 +214,14 @@ public interface Player extends BaseEntityHeader {
    */
   Result<List<Warrior>> getWarriorsTouchedAtThisTurn();
 
+  /**
+   * Найти оружие по его id
+   * @param warriorId
+   * @param weaponId
+   * @return
+   */
+  Result<Weapon> findWeaponById(String warriorId, String weaponId);
 
-//  /**
-//   * Удалить влияние у юнита
-//   * @param influencer
-//   * @return
-//   */
-//  Result<Influencer> removeInfluencerFromWarrior(String warriorId, Influencer influencer);
 
-//  /**
-//   * Получить список оказываемых влияний на юнит
-//   * @return
-//   */
-//  Result<List<Influencer>> getWarriorSInfluencers();
+
 }

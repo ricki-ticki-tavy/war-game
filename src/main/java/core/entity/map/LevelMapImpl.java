@@ -5,10 +5,13 @@ import api.core.Result;
 import api.entity.ability.Modifier;
 import api.entity.warrior.Influencer;
 import api.entity.warrior.Warrior;
+import api.entity.weapon.Weapon;
 import api.enums.LifeTimeUnit;
+import api.enums.TargetTypeEnum;
 import api.game.Coords;
 import api.game.EventDataContainer;
 import api.game.Rectangle;
+import api.game.action.AttackResult;
 import api.game.map.LevelMap;
 import api.game.map.Player;
 import api.game.map.metadata.LevelMapMetaDataXml;
@@ -25,13 +28,12 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
 import static api.enums.EventType.*;
+import static api.enums.TargetTypeEnum.ANY;
 import static core.system.error.GameErrors.*;
 
 /**
@@ -153,8 +155,8 @@ public class LevelMapImpl implements LevelMap {
   //===================================================================================================
 
   @Override
-  public List<Warrior> getWarriors(Coords center, int radius) {
-    return null;
+  public List<Warrior> getWarriors(Coords center, int radiusInPixels, TargetTypeEnum warriorsType, Player alliedPlayer) {
+    return new ArrayList<>(innerGetAllWarriorsOnMap(center, radiusInPixels, warriorsType, alliedPlayer).values());
   }
   //===================================================================================================
 
@@ -175,6 +177,12 @@ public class LevelMapImpl implements LevelMap {
     if (players.containsKey(player.getId())) {
       // игрок есть.
       result = ResultImpl.success(player);
+      // проверим, что он подключился к тому же контексту, что и ранее, если ранее уже было подключение к контексту
+      player.findContext()
+              // контексты не совпали
+              .map(oldContext -> oldContext != context
+                      ? player.replaceContext(context)
+                      : ResultImpl.success(context));
       context.fireGameEvent(null, PLAYER_RECONNECTED, new EventDataContainer(player, result), null);
     } else {
       if (maxPlayersCount >= players.size()) {
@@ -247,10 +255,48 @@ public class LevelMapImpl implements LevelMap {
   }
   //===================================================================================================
 
+  @Override
+  public Result<Weapon> giveWeaponToWarrior(Player player, String warriorId, Class<? extends Weapon> weaponClass) {
+    return player.giveWeaponToWarrior(warriorId, weaponClass);
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Weapon> findWeaponById(Player player, String warriorId, String weaponId) {
+    return player.findWeaponById(warriorId, weaponId);
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Warrior> findWarriorById(String warriorId) {
+    Optional<Optional<Warrior>> warriorOptional = players.values().stream()
+            .map(player -> player.getOriginWarriors().values().stream()
+                    .parallel()
+                    .filter(nextWarrior -> nextWarrior.getId().equals(warriorId)).findFirst())
+            .filter(nextWarriorOptional -> nextWarriorOptional.isPresent()).findFirst();
+
+    return (warriorOptional == null) || (!warriorOptional.isPresent())
+            // "Игра %s (id %s) не имеет воина с id %s"
+            ? ResultImpl.fail(WARRIOR_NOT_FOUND_ON_THE_MAP.getError(context.getGameName()
+            , context.getContextId()
+            , warriorId))
+            : ResultImpl.success(warriorOptional.get().get());
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<AttackResult> attackWarrior(Player player, String attackerWarriorId, String targetWarriorId, String weaponId) {
+    // активна игра, а не режим расстановки
+    return context.ifGameRan(true)
+            // ход именно этого игрока
+            .map(fineContext -> fineContext.ifPlayerOwnsTheTurnEqualsTo(player, String.format(" атаковать воином %s воина %s", attackerWarriorId, targetWarriorId))
+                    .map(finePlayer -> finePlayer.attackWarrior(attackerWarriorId, targetWarriorId, weaponId)));
+  }
+  //===================================================================================================
 
   protected Result<Warrior> innerMoveWarriorTo(Player player, String warriorId, Coords newCoords) {
     return player.findWarriorById(warriorId)
-            .map(warrior -> player.ifCanMoveWarrior(warrior))
+            .map(warrior -> player.ifWarriorCanMoveAtThisTurn(warrior))
             .map(warrior -> innerWhatIfMoveWarriorTo(player, warrior, newCoords)
                     .map(coords -> {
                       // кинем сообщение, что юнит перемещен
@@ -291,6 +337,13 @@ public class LevelMapImpl implements LevelMap {
     return !warrior.isTouchedAtThisTurn() || warrior.isMoveLocked() || !warrior.isRollbackAvailable()
             ? ResultImpl.success(new Coords(warrior.getCoords()))
             : ResultImpl.success(warrior.getOriginalCoords());
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Warrior> ifWarriorCanActsAtThisTurn(Player player, String warriorId) {
+    return player.findWarriorById(warriorId)
+            .map(warrior -> player.ifWarriorCanActsAtThisTurn(warrior));
   }
   //===================================================================================================
 
@@ -349,14 +402,36 @@ public class LevelMapImpl implements LevelMap {
   }
   //===================================================================================================
 
-  public Map<String, Warrior> innerGetAllWarriorsOnMap(Coords coords, int radiusInMapUnits){
-    Map<String, Warrior> allWarriors;
-    if (coords == null){
+  public Map<String, Warrior> innerGetAllWarriorsOnMap(Coords from, int radiusInPixels, TargetTypeEnum warriorsType, Player alliedPlayer) {
+    final Map<String, Warrior> allWarriors;
+    // в зависимости от типа искомых юнитов будем готовить разный поток пользователей для сбора воинов
+    Stream<Player> sourcePlayersStream = null;
+    switch (warriorsType) {
+      case ANY:
+        sourcePlayersStream = players.values().stream();
+        break;
+      case ENEMY_WARRIOR:
+        sourcePlayersStream = players.values().stream().filter(player -> player != alliedPlayer);
+        break;
+      case ALLIED_WARRIOR:
+        sourcePlayersStream = players.values().stream().filter(player -> player == alliedPlayer);
+        break;
+      default:
+        // "Недопустимое значение параметра %s (%s). %s"
+        throw SYSTEM_BAD_PARAMETER.getError("warriorsType", warriorsType == null ? "null" : warriorsType.getCaption(),
+                "Допустимы: ANY, ENEMY_WARRIOR, ALLIED_WARRIOR");
+    }
+    if (from == null) {
       allWarriors = new HashMap<>(100);
-      players.values().stream().forEach(player -> allWarriors.putAll(player.getAllWarriors()));
+      sourcePlayersStream.forEach(player -> allWarriors.putAll(player.getOriginWarriors()));
     } else {
-      // TODO дописать
-      allWarriors = null;
+      allWarriors = new ConcurrentHashMap<>(100);
+      // сбор юнитов по радиусу от точки
+      sourcePlayersStream
+              .forEach(player -> player.getOriginWarriors().values().stream()
+                      .parallel()
+                      .filter(warrior -> context.calcDistanceTo(from, warrior.getTranslatedToGameCoords()) <= radiusInPixels)
+                      .forEach(warrior -> allWarriors.put(warrior.getId(), warrior)));
     }
     return allWarriors;
   }
@@ -433,7 +508,7 @@ public class LevelMapImpl implements LevelMap {
     final int pwrObjectSize = objectSize * objectSize;
     final Coords copyOfTo = new Coords(to);
     Coords to_ = new Coords(to);
-    return innerGetAllWarriorsOnMap(null, 0).values().stream()
+    return innerGetAllWarriorsOnMap(null, 0, ANY, null).values().stream()
             .filter(nextWarrior -> warrior != nextWarrior && pwrObjectSize > calcQuadOfWayLength(nextWarrior.getCoords(), copyOfTo))
             .findFirst()
             .map(foundWarrior -> ResultImpl.fail(WARRIOR_CAN_T_MOVE_TO_THIS_POINT.getError(

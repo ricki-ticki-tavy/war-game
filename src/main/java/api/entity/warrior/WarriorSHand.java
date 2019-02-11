@@ -36,6 +36,13 @@ public interface WarriorSHand {
   boolean hasWeapon(String weaponInstanceId);
 
   /**
+   * Вернуть оружие с заданным id
+   * @param weaponInstanceId
+   * @return
+   */
+  Weapon getWeaponById(String weaponInstanceId);
+
+  /**
    * Признак, что рука своодна
    * @return
    */

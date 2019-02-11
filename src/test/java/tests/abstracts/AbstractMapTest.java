@@ -1,3 +1,5 @@
+package tests.abstracts;
+
 import api.core.Context;
 import api.core.Result;
 import api.entity.warrior.Warrior;
@@ -55,21 +57,25 @@ public abstract class AbstractMapTest {
     Result<Warrior> warriorResult = gameWrapper.createWarrior(gameContext, player1, Vityaz.CLASS_NAME
             , new Coords(200, 400));
     assertSuccess(warriorResult);
+    warriorResult.getResult().setTitle("Гоша 1");
     warrior1p1 = warriorResult.getResult().getId();
 
     warriorResult = gameWrapper.createWarrior(gameContext, player1, Viking.CLASS_NAME
             , new Coords(800, 400));
     assertSuccess(warriorResult);
+    warriorResult.getResult().setTitle("Гоша 2");
     warrior2p1 = warriorResult.getResult().getId();
 
     warriorResult = gameWrapper.createWarrior(gameContext, player2, Skeleton.CLASS_NAME
             , new Coords(200, 600));
     assertSuccess(warriorResult);
+    warriorResult.getResult().setTitle("Кеша 1");
     warrior1p2 = warriorResult.getResult().getId();
 
     warriorResult = gameWrapper.createWarrior(gameContext, player2, Skeleton.CLASS_NAME
             , new Coords(800, 600));
     assertSuccess(warriorResult);
+    warriorResult.getResult().setTitle("Кеша 2");
     warrior2p2 = warriorResult.getResult().getId();
 
     assertSuccess(warriorResult);

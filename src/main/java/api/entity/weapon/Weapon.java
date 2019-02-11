@@ -1,7 +1,11 @@
 package api.entity.weapon;
 
+import api.core.Result;
 import api.entity.ability.Modifier;
 import api.entity.base.BaseEntityHeader;
+import api.entity.warrior.Warrior;
+import api.game.action.AttackResult;
+import api.game.map.Player;
 
 import java.util.List;
 
@@ -30,9 +34,14 @@ public interface Weapon extends BaseEntityHeader{
   int getRangedMaxDamage();
 
   /**
-   * Стоимость атаки в единицах действия
+   * Стоимость дистанционной атаки в единицах действия
    */
-  int getBitCost();
+  int getRangedAttackCost();
+
+  /**
+   * Стоимость рукопашной атаки в единицах действия
+   */
+  int getMeleeAttackCost();
 
   /**
    * Дополнительные влияния
@@ -59,12 +68,18 @@ public interface Weapon extends BaseEntityHeader{
   /**
    * Минимальный расстояние для атаки
    */
-  int getMinRange();
+  int getRangedAttackMinRange();
 
   /**
    * Максимальное расстояние для атаки
    */
-  int getMaxRange();
+  int getRangedAttackMaxRange();
+
+  /**
+   * Дистанция с которой уже может наноситься рукопашная атака
+   * @return
+   */
+  int getMeleeAttackRange();
 
   /**
    * Дальность начала спадания поражения
@@ -93,5 +108,30 @@ public interface Weapon extends BaseEntityHeader{
    * @return
    */
   int getNeededHandsCountToTakeWeapon();
+
+  /**
+   * Получить воина, владеющего снаряжением
+   * @return
+   */
+  Warrior getOwner();
+
+  /**
+   * Атаковать противника
+   * @param targetWarrior
+   */
+  Result<AttackResult> attack(Warrior targetWarrior);
+
+  /**
+   * задать  владельца снаряжения
+   * @param owner
+   * @return
+   */
+  Weapon setOwner(Warrior owner);
+
+  /**
+   * Название для ближнего боя, примененного оружием дальнего боя, если дистанция слишком мала
+   * @return
+   */
+  String getSecondWeaponName();
 
 }

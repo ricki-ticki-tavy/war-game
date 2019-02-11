@@ -5,9 +5,12 @@ import api.core.Result;
 import api.entity.ability.Modifier;
 import api.entity.warrior.Influencer;
 import api.entity.warrior.Warrior;
+import api.entity.weapon.Weapon;
 import api.enums.LifeTimeUnit;
+import api.enums.TargetTypeEnum;
 import api.game.Coords;
 import api.game.Rectangle;
+import api.game.action.AttackResult;
 import api.game.map.metadata.LevelMapMetaDataXml;
 import core.game.GameProcessData;
 
@@ -67,10 +70,12 @@ public interface LevelMap {
   /**
    * Получить список воинов в окружности заданным радиусом
    * @param center координата центра
-   * @param radius радиус окружности. 0 - все воины
+   * @param radiusInPixels радиус окружности в "пикселях". 0 - все воины
+   * @param warriorsType Тип собираемых воинов. Все, враги, свои
+   * @param alliedPlayer если warriorsType не ANY, то игрок, который ищет других воинов. Дружественный игрок
    * @return
    */
-  List<Warrior> getWarriors(Coords center, int radius);
+  List<Warrior> getWarriors(Coords center, int radiusInPixels, TargetTypeEnum warriorsType, Player alliedPlayer);
 
   /**
    * Добавить воина в заданные координаты заданному игроку
@@ -113,7 +118,39 @@ public interface LevelMap {
    */
   Result<Warrior> removeWarrior(Player player, String warriorId);
 
+  /**
+   * Вооружить воина предметом
+   * @param player
+   * @param warriorId
+   * @param weaponClass
+   * @return
+   */
+  Result<Weapon> giveWeaponToWarrior(Player player, String warriorId, Class<? extends Weapon> weaponClass);
 
+  /**
+   * Найти оружие по его id
+   * @param player
+   * @param warriorId
+   * @param weaponId
+   * @return
+   */
+  Result<Weapon> findWeaponById(Player player, String warriorId, String weaponId);
+
+  /**
+   * Найти юнит по его коду независимо от того, какому игроку он принадлежит
+   * @param warriorId
+   * @return
+   */
+  Result<Warrior> findWarriorById(String warriorId);
+
+  /**
+   * Атаковать выбранным оружием другого воина
+   * @param attackerWarriorId
+   * @param targetWarriorId
+   * @param weaponId
+   * @return
+   */
+  Result<AttackResult> attackWarrior(Player player, String attackerWarriorId, String targetWarriorId, String weaponId);
 
   /**
    * Добавить игрока в игру
@@ -183,6 +220,14 @@ public interface LevelMap {
    * @return
    */
    Result<Coords> getWarriorSOriginCoords(Warrior warrior);
+
+  /**
+   * Проверяет возможно ли выполнение атаки или применения способности данным юнитом в этом ходе
+   * @param player
+   * @param warriorId
+   * @return
+   */
+  Result<Warrior> ifWarriorCanActsAtThisTurn(Player player, String warriorId);
 
   /**
    * Получить игрока, выполняющего ход в данное время

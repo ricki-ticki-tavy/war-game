@@ -174,8 +174,8 @@
             <damageAngle>0</damageAngle>
             <mustAttackAllCreatures>false</mustAttackAllCreatures>
             <costActionPoints>120</costActionPoints>
-            <minRange>2</minRange>
-            <maxRange>40</maxRange>
+            <minRangedAttackRange>2</minRangedAttackRange>
+            <maxRangedAttackRange>40</maxRangedAttackRange>
             <fadeRangeStart>20</fadeRangeStart>
             <fadeDamagePercentPerLength>2</fadeDamagePercentPerLength>
         </distanceWeapon>

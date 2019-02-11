@@ -1,6 +1,8 @@
 package api.entity.ability;
 
 import api.core.Context;
+import api.core.IntParam;
+import api.core.Result;
 import api.enums.AttributeEnum;
 import api.enums.TargetTypeEnum;
 
@@ -43,7 +45,7 @@ public interface Modifier {
    * Возвращает значение.
    * @return
    */
-  int getValue();
+  Result<Integer> getValue();
 
   /**
    * минимальное значение влияния. - уменьшает + увеличивает
@@ -62,4 +64,17 @@ public interface Modifier {
    * @return
    */
   Context getContext();
+
+  /**
+   * Получить фиксированное значение последнего результата вычисления размера влияния модификатора
+   * @return
+   */
+  int getLastCalculatedValue();
+
+  /**
+   * Установить фиксированное значение последнего результата вычисления размера влияния модификатора
+   * @param value
+   * @return
+   */
+  Modifier setLastCalculatedValue(int value);
 }

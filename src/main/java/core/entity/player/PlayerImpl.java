@@ -5,10 +5,12 @@ import api.core.Result;
 import api.entity.ability.Modifier;
 import api.entity.warrior.Influencer;
 import api.entity.warrior.Warrior;
+import api.entity.weapon.Weapon;
 import api.enums.LifeTimeUnit;
 import api.game.Coords;
 import api.game.EventDataContainer;
 import api.game.Rectangle;
+import api.game.action.AttackResult;
 import api.game.map.Player;
 import core.system.ResultImpl;
 import org.springframework.beans.factory.BeanFactory;
@@ -67,7 +69,7 @@ public class PlayerImpl implements Player {
   //===================================================================================================
 
   @Override
-  public Map<String, Warrior> getAllWarriors() {
+  public Map<String, Warrior> getOriginWarriors() {
     return warriors;
   }
   //===================================================================================================
@@ -110,7 +112,7 @@ public class PlayerImpl implements Player {
         return result;
     }
 
-    this.context = newContext;
+    replaceContextSilent(newContext);
     return ResultImpl.success(this);
   }
   //===================================================================================================
@@ -118,6 +120,9 @@ public class PlayerImpl implements Player {
   @Override
   public Result<Player> replaceContextSilent(Context newContext) {
     this.context = newContext;
+    this.readyToPlay = false;
+    this.warriors.clear();
+    this.startZone = null;
     return ResultImpl.success(this);
   }
   //===================================================================================================
@@ -180,12 +185,12 @@ public class PlayerImpl implements Player {
   @Override
   public Result<Warrior> rollbackMove(String warriorId) {
     return findWarriorById(warriorId)
-    .map(warrior -> warrior.rollbackMove());
+            .map(warrior -> warrior.rollbackMove());
   }
   //===================================================================================================
 
   @Override
-  public Result<Warrior> ifCanMoveWarrior(Warrior warrior) {
+  public Result<Warrior> ifWarriorCanMoveAtThisTurn(Warrior warrior) {
     return context.isGameRan()
             // и этим юнитом не делалось движений
             && !warrior.isTouchedAtThisTurn()
@@ -194,6 +199,24 @@ public class PlayerImpl implements Player {
             ? ResultImpl.fail(PLAYER_UNIT_MOVES_ON_THIS_TURN_ARE_EXCEEDED
             .getError(warrior.getOwner().getId(), String.valueOf(context.getGameRules().getMovesCountPerTurnForEachPlayer())))
             : ResultImpl.success(warrior);
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Warrior> ifWarriorCanActsAtThisTurn(Warrior warrior) {
+    return context.ifGameRan(true)
+            .map(fineContext ->
+                    // и этим юнитом не делалось движений
+                    !warrior.isTouchedAtThisTurn()
+                            // и предел используемых за ход юнитов достигнут
+                            && getWarriorsTouchedAtThisTurn().getResult().size() < context.getGameRules().getMovesCountPerTurnForEachPlayer()
+                            // или юнит уже задействован в этом ходе
+                            || warrior.isTouchedAtThisTurn()
+                            ? ResultImpl.success(warrior)
+                            : ResultImpl.fail(PLAYER_UNIT_MOVES_ON_THIS_TURN_ARE_EXCEEDED
+                            .getError(
+                                    warrior.getOwner().getId()
+                                    , String.valueOf(context.getGameRules().getMovesCountPerTurnForEachPlayer()))));
   }
   //===================================================================================================
 
@@ -212,7 +235,7 @@ public class PlayerImpl implements Player {
     warriors.remove(warrior.getId());
     // отписаться ото всех событий котрые должны удалять влияния на юнит
     warrior.getWarriorSInfluencers()
-            .doIfSuccess(influencers -> influencers.stream().forEach(influencer -> influencer.removeFromWarrior(true)));
+            .peak(influencers -> influencers.stream().forEach(influencer -> influencer.removeFromWarrior(true)));
     //  пошлем событие
     Result<Warrior> result = ResultImpl.success(warrior);
     context.fireGameEvent(null, WARRIOR_REMOVED, new EventDataContainer(warrior, result), null);
@@ -230,6 +253,20 @@ public class PlayerImpl implements Player {
   //===================================================================================================
 
   @Override
+  public Result<Weapon> giveWeaponToWarrior(String warriorId, Class<? extends Weapon> weaponClass) {
+    return findWarriorById(warriorId)
+            .map(foundWarrior -> foundWarrior.takeWeapon(weaponClass));
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Weapon> findWeaponById(String warriorId, String weaponId) {
+    return findWarriorById(warriorId)
+            .map(foundWarrior -> foundWarrior.findWeaponById(weaponId));
+  }
+  //===================================================================================================
+
+  @Override
   public Result<Player> prepareToDefensePhase() {
     Result<Warrior> warriorResult;
     // восстановим значения воинов. свои влияния воин собирает сам
@@ -240,10 +277,45 @@ public class PlayerImpl implements Player {
 
     // TODO применить артефакты и способности игрока
 
-      // Отправим сообщение о завершении хода
+    // Отправим сообщение о завершении хода
     context.fireGameEvent(null, PLAYER_LOOSE_TURN, new EventDataContainer(this), null);
 
     return ResultImpl.success(this);
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<AttackResult> attackWarrior(String attackerWarriorId, String targetWarriorId, String weaponId) {
+    // Найти юнит, который будем атаковать
+    return context.getLevelMap().findWarriorById(targetWarriorId)
+            // найти юнит которым будем атаковать
+            .map(targetWarrior -> findWarriorById(attackerWarriorId)
+                    // проверить, что этот юнит может атаковать в этом ходу
+                    .map(attackerWarrior -> ifWarriorCanActsAtThisTurn(attackerWarrior)
+                            // Атаковать
+                            .map(fineAttackerWarrior -> fineAttackerWarrior.attackWarrior(targetWarrior, weaponId))));
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<AttackResult> innerAttachToAttackToWarrior(AttackResult attackResult) {
+    return ResultImpl.success(attackResult); // TODO добавить сбор с артефактов всяких полезностей
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<AttackResult> innerWarriorUnderAttack(AttackResult attackResult) {
+    // возможность воину отбить удары и / или ослабить воздействие вредных влияний
+    return attackResult.getTarget().innerWarriorUnderAttack(attackResult)
+            // теперь рпименим оставшиеся влияния к воину
+            .map(fineAttackResult -> {
+              // собственно применим полученные поражения
+              fineAttackResult.getInfluencers().stream()
+                      // считаем, что уже все значения в модифиерах расчитаны жестко и не изменяются от запроса к запросу
+//                      .filter(influencer -> influencer.getModifier().getLastCalculatedValue() > 0)
+                      .forEach(influencer -> influencer.applyToWarrior(attackResult));
+              return ResultImpl.success(attackResult);
+            });
   }
   //===================================================================================================
 
@@ -270,7 +342,8 @@ public class PlayerImpl implements Player {
     return findWarriorById(warriorId)
             .map(warrior -> warrior.addInfluenceToWarrior(modifier, source, lifeTimeUnit, lifeTime))
             // добавить слушатель события
-            .doIfSuccess(influencer -> {});
+            .peak(influencer -> {
+            });
   }
   //===================================================================================================
 

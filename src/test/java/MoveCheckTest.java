@@ -10,6 +10,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.util.Assert;
+import tests.CreateWarriorsWeaponsUsersTest;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {CreateWarriorsWeaponsUsersTest.class})

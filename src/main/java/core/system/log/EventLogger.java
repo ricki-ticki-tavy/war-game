@@ -1,11 +1,13 @@
-package core.system.eco;
+package core.system.log;
 
 import api.core.Context;
 import api.core.Result;
+import api.entity.ability.Modifier;
 import api.entity.warrior.Influencer;
 import api.entity.warrior.Warrior;
 import api.entity.weapon.Weapon;
 import api.game.Event;
+import api.game.action.AttackResult;
 import api.game.map.Player;
 import core.game.CoreImpl;
 import core.system.error.GameErrors;
@@ -170,6 +172,20 @@ public class EventLogger {
                 , event.getSource(Warrior.class).getTitle()
                 , event.getSource(Warrior.class).getWarriorBaseClass().getTitle()
                 , event.getSource(Warrior.class).getId()));
+        break;
+      }
+      case WARRIOR_WAS_ATTACKED_BY_ENEMY: {
+        //   "В игре '%s' воин '%s %s' игрока '%s' нанес оружием %s воину '%s %s' игрока %s %s единиц урона"
+        logger.info(event.getEventType().getFormattedMessage(
+                event.getSourceContext().getGameName()
+                , event.getSource(AttackResult.class).getAttacker().getWarriorBaseClass().getTitle()
+                , event.getSource(AttackResult.class).getAttacker().getTitle()
+                , event.getSource(AttackResult.class).getAttacker().getOwner().getTitle()
+                , event.getSource(Modifier.class).getTitle()
+                , event.getSource(AttackResult.class).getTarget().getWarriorBaseClass().getTitle()
+                , event.getSource(AttackResult.class).getTarget().getTitle()
+                , event.getSource(AttackResult.class).getTarget().getOwner().getTitle()
+                , String.valueOf(event.getSource(Modifier.class).getLastCalculatedValue())));
         break;
       }
       case WEAPON_TAKEN: {

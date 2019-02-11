@@ -9,8 +9,10 @@ import api.enums.LifeTimeUnit;
 import api.enums.PlayerPhaseType;
 import api.game.Coords;
 import api.game.EventDataContainer;
+import api.game.action.AttackResult;
 import api.game.map.Player;
 import core.system.ResultImpl;
+import core.system.error.GameError;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -99,6 +101,16 @@ public class WarriorImpl implements Warrior {
   //===================================================================================================
 
   @Override
+  public Result<Weapon> findWeaponById(String weaponId) {
+    return hands.values().stream()
+            .filter(warriorSHand -> warriorSHand.hasWeapon(weaponId))
+            .findFirst().map(warriorSHand -> warriorSHand.getWeaponById(weaponId))
+            .map(weapon -> ResultImpl.success(weapon))
+            .orElse(ResultImpl.fail(generateWeapoNotFoundError(weaponId)));
+  }
+  //===================================================================================================
+
+  @Override
   public String getId() {
     return id;
   }
@@ -119,7 +131,7 @@ public class WarriorImpl implements Warrior {
   private Coords innerGetTranslatedToGameCoords() {
     // если игра уже в стадии игры, а не расстановки, юнит не трогали или если не заблокирована возможность отката, то
     // берем OriginalCoords в противном случае берем Coords
-    return getOwner().findContext().getResult().isGameRan()
+    return gameContext.isGameRan()
             // игра идет
             && isRollbackAvailable() && !isMoveLocked()
             ? originalCoords
@@ -138,7 +150,13 @@ public class WarriorImpl implements Warrior {
     Coords from = innerGetTranslatedToGameCoords();
 
     return (int) Math.round((double) getWarriorSMoveCost() * Math.sqrt((double) ((from.getX() - to.getX()) * (from.getX() - to.getX())
-            + (from.getY() - to.getY()) * (from.getY() - to.getY()))) / (double) getOwner().findContext().getResult().getLevelMap().getSimpleUnitSize());
+            + (from.getY() - to.getY()) * (from.getY() - to.getY()))) / (double) gameContext.getLevelMap().getSimpleUnitSize());
+  }
+  //===================================================================================================
+
+  @Override
+  public int calcDistanceTo(Coords to) {
+    return gameContext.calcDistanceTo(innerGetTranslatedToGameCoords(), to);
   }
   //===================================================================================================
 
@@ -158,8 +176,8 @@ public class WarriorImpl implements Warrior {
                       getWarriorBaseClass().getTitle()
                       , getId()
                       , getOwner().getId()
-                      , getOwner().findContext().getResult().getGameName()
-                      , getOwner().findContext().getResult().getContextId()));
+                      , gameContext.getGameName()
+                      , gameContext.getContextId()));
     }
     return result;
   }
@@ -168,6 +186,12 @@ public class WarriorImpl implements Warrior {
   @Override
   public Player getOwner() {
     return owner;
+  }
+  //===================================================================================================
+
+  @Override
+  public Context getContext() {
+    return gameContext;
   }
   //===================================================================================================
 
@@ -181,17 +205,16 @@ public class WarriorImpl implements Warrior {
   public Result takeWeapon(Class<? extends Weapon> weaponClass) {
     Result result = null;
     Weapon weapon = beanFactory.getBean(weaponClass);
-    try {
-      if (weapon.getNeededHandsCountToTakeWeapon() > 0) {
-        int freePoints = 2 - hands.values().stream().map(hand -> hand.isFree() ? 0 : 1).reduce(0, (acc, chg) -> acc += chg);
-        if (freePoints < weapon.getNeededHandsCountToTakeWeapon()) {
-          result = ResultImpl.fail(WARRIOR_HANDS_NO_FREE_SLOTS.getError(String.valueOf(freePoints)
-                  , weapon.getTitle()
-                  , String.valueOf(weapon.getNeededHandsCountToTakeWeapon())));
-          return result;
-        }
+    if (weapon.getNeededHandsCountToTakeWeapon() > 0) {
+      int freePoints = 2 - hands.values().stream().map(hand -> hand.isFree() ? 0 : 1).reduce(0, (acc, chg) -> acc += chg);
+      if (freePoints < weapon.getNeededHandsCountToTakeWeapon()) {
+        result = ResultImpl.fail(WARRIOR_HANDS_NO_FREE_SLOTS.getError(String.valueOf(freePoints)
+                , weapon.getTitle()
+                , String.valueOf(weapon.getNeededHandsCountToTakeWeapon())));
       }
+    }
 
+    if (result == null) {
       AtomicInteger points = new AtomicInteger(weapon.getNeededHandsCountToTakeWeapon());
       // место есть в руках. Ищем свободную руку
       hands.values().stream()
@@ -199,12 +222,12 @@ public class WarriorImpl implements Warrior {
               .forEach(hand -> {
                 points.decrementAndGet();
                 hand.addWeapon(weapon);
+                weapon.setOwner(this);
               });
       result = ResultImpl.success(weapon);
-      return result;
-    } finally {
-      gameContext.fireGameEvent(null, WEAPON_TAKEN, new EventDataContainer(this, weapon, result), null);
     }
+    gameContext.fireGameEvent(null, WEAPON_TAKEN, new EventDataContainer(this, weapon, result), null);
+    return result;
   }
   //===================================================================================================
 
@@ -212,7 +235,7 @@ public class WarriorImpl implements Warrior {
   public Result<Weapon> dropWeapon(String weaponInstanceId) {
     Result result = hands.values().stream().filter(hand -> hand.hasWeapon(weaponInstanceId)).findFirst()
             .map(warriorSHand -> ResultImpl.success(warriorSHand.removeWeapon(weaponInstanceId)))
-            .orElse(ResultImpl.fail(WARRIOR_WEAPON_NOT_FOUND.getError(weaponInstanceId)));
+            .orElse(ResultImpl.fail(generateWeapoNotFoundError(weaponInstanceId)));
 
     gameContext.fireGameEvent(null
             , result.isSuccess() ? WEAPON_DROPED : WEAPON_TRY_TO_DROP
@@ -223,9 +246,77 @@ public class WarriorImpl implements Warrior {
   }
   //===================================================================================================
 
+  public Result<Warrior> ifWarriorAlied(Warrior warrior, boolean isAllied) {
+    Result<Warrior> warriorResult = owner.findWarriorById(warrior.getId());
+    if (warriorResult.isSuccess() == isAllied) {
+      // утверждение совпало
+      warriorResult = ResultImpl.success(warrior);
+    } else {
+      warriorResult = isAllied
+              // ждали дружественного, а он - враг
+              // "В игре %s (id %s)  воин '%s %s' (id %s) не является врагом для воина '%s %s' (id %s) игрока %s %s"
+              ? ResultImpl.fail(WARRIOR_ATTACK_TARGET_WARRIOR_IS_NOT_ALIED.getError(
+              gameContext.getGameName()
+              , gameContext.getContextId()
+              , warrior.getWarriorBaseClass().getTitle()
+              , warrior.getTitle()
+              , warrior.getId()
+              , getWarriorBaseClass().getTitle()
+              , getTitle()
+              , getId()
+              , getOwner().getId()
+              , ""))
+              // "В игре %s (id %s)  воин '%s %s' (id %s) является враждебным для воина '%s %s' (id %s) игрока %s %s"
+              : ResultImpl.fail(WARRIOR_ATTACK_TARGET_WARRIOR_IS_ALIED.getError(
+              gameContext.getGameName()
+              , gameContext.getContextId()
+              , warrior.getWarriorBaseClass().getTitle()
+              , warrior.getTitle()
+              , warrior.getId()
+              , getWarriorBaseClass().getTitle()
+              , getTitle()
+              , getId()
+              , getOwner().getId()
+              , ""));
+    }
+    return warriorResult;
+  }
+  //===================================================================================================
+
+  public Result<AttackResult> attackWarrior(Warrior targetWarrior, String weaponId) {
+    // проверим, что это не дружественный воин
+    return ifWarriorAlied(targetWarrior, false)
+            // Найдем у своего воинаоружие
+            .map(fineTargetWarrior -> findWeaponById(weaponId)
+                    // вдарим
+                    .map(weapon -> weapon.attack(fineTargetWarrior)));
+  }
+  //===================================================================================================
+
   @Override
-  public Result<WarriorSBaseAttributes> getAttributes() {
-    return ResultImpl.success(attributes);
+  public Result<AttackResult> innerWarriorUnderAttack(AttackResult attackResult) {
+    // TODO реализовать рассчет защиты и особенностей воина
+    return ResultImpl.success(attackResult);
+  }
+  //===================================================================================================
+
+  private GameError generateWeapoNotFoundError(String weaponId) {
+    //"В игре %s (id %s) у игрока %s воин '%s %s' (id %s) не имеет оружия с id '%s'"
+    return WARRIOR_WEAPON_NOT_FOUND.getError(
+            gameContext.getGameName()
+            , gameContext.getContextId()
+            , getOwner().getId()
+            , getWarriorBaseClass().getTitle()
+            , getTitle()
+            , getId()
+            , weaponId);
+
+  }
+  //===================================================================================================
+
+  @Override
+  public WarriorSBaseAttributes getAttributes() {
+    return attributes;
   }
   //===================================================================================================
 
@@ -275,8 +366,8 @@ public class WarriorImpl implements Warrior {
   private Result<Warrior> prepareToPhase(PlayerPhaseType playerPhaseType) {
     restoreAttributesAvailableForRestoration(playerPhaseType);
     return applayInfluences(playerPhaseType)
-            .doIfSuccess(warrior -> warrior.getOwner().findContext()
-                    .doIfSuccess(context -> context.fireGameEvent(null
+            .peak(warrior -> warrior.getOwner().findContext()
+                    .peak(context -> context.fireGameEvent(null
                             , playerPhaseType == PlayerPhaseType.PLAYER_PHASE_TYPE_DEFENSE ? WARRIOR_PREPARED_TO_DEFENCE : WARRIOR_PREPARED_TO_ATTACK
                             , new EventDataContainer(this), null)));
   }
@@ -296,9 +387,9 @@ public class WarriorImpl implements Warrior {
 
   @Override
   public Result<Influencer> addInfluenceToWarrior(Modifier modifier, Object source, LifeTimeUnit lifeTimeUnit, int lifeTime) {
-    Influencer influencer = new InfluencerImpl(this, modifier, source, lifeTimeUnit, lifeTime);
+    Influencer influencer = new InfluencerImpl(this, source, lifeTimeUnit, lifeTime, modifier);
     influencers.put(influencer.getId(), influencer);
-    getOwner().findContext().getResult().fireGameEvent(null, WARRIOR_INFLUENCER_ADDED
+    gameContext.fireGameEvent(null, WARRIOR_INFLUENCER_ADDED
             , new EventDataContainer(influencer, this), null);
     return ResultImpl.success(influencer);
   }
@@ -319,7 +410,7 @@ public class WarriorImpl implements Warrior {
   void innerRemoveInfluencerFromWarrior(Influencer influencer, boolean silent) {
     influencers.remove(influencer.getId());
     if (!silent) {
-      getOwner().findContext().getResult().fireGameEvent(null, WARRIOR_INFLUENCER_REMOVED
+      gameContext.fireGameEvent(null, WARRIOR_INFLUENCER_REMOVED
               , new EventDataContainer(influencer, this), null);
     }
   }
@@ -354,8 +445,8 @@ public class WarriorImpl implements Warrior {
 
   @Override
   public int getWarriorSMoveCost() {
-    return getAttributes().getResult().getArmorClass().getMoveCost()
-            + getAttributes().getResult().getDeltaCostMove();
+    return getAttributes().getArmorClass().getMoveCost()
+            + getAttributes().getDeltaCostMove();
   }
   //===================================================================================================
 
@@ -374,6 +465,9 @@ public class WarriorImpl implements Warrior {
   @Override
   public void lockRollback() {
     this.rollbackAvailable = false;
+    // спишем очки за еремещение
+    attributes.addActionPoints(-treatedActionPointsForMove);
+    treatedActionPointsForMove = 0;
     this.originalCoords = new Coords(coords);
   }
   //===================================================================================================
@@ -391,7 +485,7 @@ public class WarriorImpl implements Warrior {
 
       result = ResultImpl.success(this);
       // уведомление
-      getOwner().findContext().getResult().fireGameEvent(null
+      gameContext.fireGameEvent(null
               , WARRIOR_MOVE_ROLLEDBACK
               , new EventDataContainer(this, result)
               , null);
@@ -433,6 +527,13 @@ public class WarriorImpl implements Warrior {
   @Override
   public int getTreatedActionPointsForMove() {
     return treatedActionPointsForMove;
+  }
+  //===================================================================================================
+
+  @Override
+  public Warrior setTitle(String title) {
+    this.title = title;
+    return this;
   }
   //===================================================================================================
 

@@ -3,10 +3,12 @@ package api.core;
 import api.entity.warrior.Influencer;
 import api.entity.warrior.Warrior;
 import api.entity.warrior.WarriorBaseClass;
+import api.entity.weapon.Weapon;
 import api.enums.EventType;
 import api.game.Coords;
 import api.game.Event;
 import api.game.EventDataContainer;
+import api.game.action.AttackResult;
 import api.game.map.LevelMap;
 import api.game.map.Player;
 import api.game.map.metadata.GameRules;
@@ -88,6 +90,14 @@ public interface Context {
   Result<Context> ifNewWarriorSCoordinatesAreAvailable(Warrior warrior, Coords newCoords);
 
   /**
+   * Проверяет возможно ли выполнение атаки или применения способности данным юнитом в этом ходе
+   * @param userName
+   * @param warriorId
+   * @return
+   */
+  Result<Warrior> ifWarriorCanActsAtThisTurn(String userName, String warriorId);
+
+  /**
    * возвращает текущий статус игры
    * @return
    */
@@ -164,12 +174,29 @@ public interface Context {
   Result disconnectPlayer(Player player);
 
   /**
+   * Найти юнит по его коду независимо от того, какому игроку он принадлежит
+   * @param warriorId
+   * @return
+   */
+  Result<Warrior> findWarriorById(String warriorId);
+
+  /**
    * Создать воина на карте при начальной расстановке
    *
    * @param baseWarriorClass
    * @return
    */
   Result<Warrior> createWarrior(String userName, String baseWarriorClass, Coords coords);
+
+  /**
+   * Атаковать выбранным оружием другого воина
+   * @param userName
+   * @param attackerWarriorId
+   * @param targetWarriorId
+   * @param weaponId
+   * @return
+   */
+  Result<AttackResult> attackWarrior(String userName, String attackerWarriorId, String targetWarriorId, String weaponId);
 
   /**
    * Переместить юнит на новые координаты
@@ -202,6 +229,24 @@ public interface Context {
    * @return
    */
   Result<Warrior> removeWarrior(String userName, String warriorId);
+
+  /**
+   * Вооружить воина предметом
+   * @param userName
+   * @param warriorId
+   * @param weaponClass
+   * @return
+   */
+  Result<Weapon> giveWeaponToWarrior(String userName, String warriorId, Class<? extends Weapon> weaponClass);
+
+  /**
+   * Найти оружие по его id
+   * @param userName
+   * @param warriorId
+   * @param weaponId
+   * @return
+   */
+  Result<Weapon> findWeaponById(String userName, String warriorId, String weaponId);
 
   /**
    * Получить пользователя - создателя игры
@@ -247,14 +292,6 @@ public interface Context {
    */
   Result<Player> ifPlayerOwnsTheTurnEqualsTo(Player player, String... args);
 
-//  /**
-//   * проверяет может ли ходящий сейчас игрок переместить данный юнит. Проверка права игрока ходить, контексты и прочее
-//   * перед этим вызовом уже должно быть проверено.
-//   *
-//   * @param warrior
-//   */
-//  Result<Warrior> ifUnitCanMove(Warrior warrior);
-//
   /**
    * Передача хода следующему игроку
    * @param userName
@@ -267,5 +304,15 @@ public interface Context {
    * @return
    */
   Result<List<Influencer>> getWarriorSInfluencers(String userName, String warriorId);
+
+  /**
+   * Получить расстояние в "пикелях" от координаты FROM до  координаты TO.
+   * @param from
+   * @param to
+   * @return
+   */
+  int calcDistanceTo(Coords from, Coords to);
+
+
 
 }
