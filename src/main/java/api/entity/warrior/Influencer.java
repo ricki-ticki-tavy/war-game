@@ -48,5 +48,5 @@ public interface Influencer extends BaseEntityHeader {
    * @param attackResult
    * @return
    */
-  Result<Warrior> applayToWarrior(AttackResult attackResult);
+  Result<Warrior> applyToWarrior(AttackResult attackResult);
 }

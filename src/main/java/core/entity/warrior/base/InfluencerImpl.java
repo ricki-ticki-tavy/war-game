@@ -7,6 +7,7 @@ import api.entity.warrior.Warrior;
 import api.entity.warrior.WarriorSBaseAttributes;
 import api.enums.EventType;
 import api.enums.LifeTimeUnit;
+import api.enums.TargetTypeEnum;
 import api.game.Event;
 import api.game.EventDataContainer;
 import api.game.action.AttackResult;
@@ -126,20 +127,22 @@ public class InfluencerImpl implements Influencer {
   //===================================================================================================
 
   @Override
-  public Result<Warrior> applayToWarrior(AttackResult attackResult) {
+  public Result<Warrior> applyToWarrior(AttackResult attackResult) {
     // TODO Реализовать применение влияния на воина
     WarriorSBaseAttributes attributes = targetWarrior.getAttributes();
     // Уже всерассчитано. Применяем значение, рассчитанное заранее (getLastCalculatedValue())
-    switch (modifier.getAttribute()) {
-      case HEALTH:
-        attributes.addHealth(- modifier.getLastCalculatedValue());
-        // Отправим сообщение
-        targetWarrior.getContext()
-                .fireGameEvent(null
-                        , EventType.WARRIOR_WAS_ATTACKED_BY_ENEMY
-                        , new EventDataContainer(attackResult, modifier)
-                        , null);
-        break;
+    if (modifier.getTarget() == TargetTypeEnum.ENEMY_WARRIOR) {
+      switch (modifier.getAttribute()) {
+        case HEALTH:
+          attributes.addHealth(-modifier.getLastCalculatedValue());
+          // Отправим сообщение
+          targetWarrior.getContext()
+                  .fireGameEvent(null
+                          , EventType.WARRIOR_WAS_ATTACKED_BY_ENEMY
+                          , new EventDataContainer(attackResult, modifier)
+                          , null);
+          break;
+      }
     }
     return ResultImpl.success(targetWarrior);
   }

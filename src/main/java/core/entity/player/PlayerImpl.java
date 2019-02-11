@@ -312,8 +312,8 @@ public class PlayerImpl implements Player {
               // собственно применим полученные поражения
               fineAttackResult.getInfluencers().stream()
                       // считаем, что уже все значения в модифиерах расчитаны жестко и не изменяются от запроса к запросу
-                      .filter(influencer -> influencer.getModifier().getLastCalculatedValue() > 0)
-                      .forEach(influencer -> influencer.applayToWarrior(attackResult));
+//                      .filter(influencer -> influencer.getModifier().getLastCalculatedValue() > 0)
+                      .forEach(influencer -> influencer.applyToWarrior(attackResult));
               return ResultImpl.success(attackResult);
             });
   }

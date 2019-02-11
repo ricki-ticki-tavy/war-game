@@ -181,7 +181,7 @@ public class EventLogger {
                 , event.getSource(AttackResult.class).getAttacker().getWarriorBaseClass().getTitle()
                 , event.getSource(AttackResult.class).getAttacker().getTitle()
                 , event.getSource(AttackResult.class).getAttacker().getOwner().getTitle()
-                , event.getSource(AttackResult.class).getAttackerWeapon().getTitle()
+                , event.getSource(Modifier.class).getTitle()
                 , event.getSource(AttackResult.class).getTarget().getWarriorBaseClass().getTitle()
                 , event.getSource(AttackResult.class).getTarget().getTitle()
                 , event.getSource(AttackResult.class).getTarget().getOwner().getTitle()

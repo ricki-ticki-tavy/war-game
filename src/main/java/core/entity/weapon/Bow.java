@@ -15,6 +15,7 @@ import java.util.UUID;
 public class Bow extends AbstractWeaponImpl {
 
   public static final String CLASS_NAME = "Простой лук";
+  public static final String SECOND_WEAPON_NAME = "острие лука";
   private final String OUID = "WepBow_" + UUID.randomUUID().toString();
 
   public Bow() {
@@ -39,6 +40,7 @@ public class Bow extends AbstractWeaponImpl {
     this.fadeRangeStart = 20;
     this.fadeDamagePercentPerLength = 3;
     this.neededHandsCountToTakeWeapon = 2;
+    this.secondWeaponName = SECOND_WEAPON_NAME;
   }
 
 }

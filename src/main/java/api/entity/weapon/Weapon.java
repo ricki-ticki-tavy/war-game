@@ -128,4 +128,10 @@ public interface Weapon extends BaseEntityHeader{
    */
   Weapon setOwner(Warrior owner);
 
+  /**
+   * Название для ближнего боя, примененного оружием дальнего боя, если дистанция слишком мала
+   * @return
+   */
+  String getSecondWeaponName();
+
 }

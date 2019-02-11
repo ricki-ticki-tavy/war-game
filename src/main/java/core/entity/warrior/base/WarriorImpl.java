@@ -465,6 +465,9 @@ public class WarriorImpl implements Warrior {
   @Override
   public void lockRollback() {
     this.rollbackAvailable = false;
+    // спишем очки за еремещение
+    attributes.addActionPoints(-treatedActionPointsForMove);
+    treatedActionPointsForMove = 0;
     this.originalCoords = new Coords(coords);
   }
   //===================================================================================================

@@ -63,4 +63,10 @@ public interface AttackResult {
    */
   AttackResult addInfluencer(Influencer influencer);
 
+  /**
+   * Получить кол-во очков, затраченных на атаку
+   * @return
+   */
+  int getConsumedActionPoints();
 }
+

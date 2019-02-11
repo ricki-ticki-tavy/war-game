@@ -95,12 +95,10 @@ public class WeaponsTest extends AbstractMapTest {
     Assert.isTrue(attackResult.isFail(CONTEXT_GAME_NOT_STARTED), "Атака при не начатой игре удалась");
 
     // Игрок 1 готов
-    Result<Player> playerResult = gameWrapper.playerReady(player1, true);
-    assertSuccess(playerResult);
+    assertSuccess(gameWrapper.playerReady(player1, true));
 
     // Игрок 2 готов
-    playerResult = gameWrapper.playerReady(player2, true);
-    assertSuccess(playerResult);
+    assertSuccess(gameWrapper.playerReady(player2, true));
 
     // Пробуем атаковать воином 1 игрока 2 воина 2 игрока 1. Это не должно выйти так как ход не игрока 2
     attackResult = gameWrapper.attackWarrior(gameContext, player2, warrior1p2, warrior2p1, swordWarrior1p2);
@@ -110,24 +108,44 @@ public class WeaponsTest extends AbstractMapTest {
     attackResult = gameWrapper.attackWarrior(gameContext, player1, warrior2p1, warrior1p1, bowWarrior2p1);
     Assert.isTrue(attackResult.isFail(WARRIOR_ATTACK_TARGET_WARRIOR_IS_ALIED), "Атака дружественного воина удалась");
 
-    // Пробуем атаковать воином 2 игрока 1 воина 2 игрока 2. Это не должно выйти так как слишком близко стоит враг
+    // Пробуем атаковать воином 2 игрока 1 воина 2 игрока 2. должно выйти, но атака будет ближнеей так как слишком
+    // близко стоит цель
     attackResult = gameWrapper.attackWarrior(gameContext, player1, warrior2p1, warrior1p2, bowWarrior2p1);
-    Assert.isTrue(attackResult.isFail(WARRIOR_ATTACK_RANGED_NOT_POSIBLE_ENEMYS_IS_NEAR_ATTACKER), "Дистанционная атака при наличии рядом врага удалась");
+    assertSuccess(attackResult);
+    Assert.isTrue(attackResult.getResult().getInfluencers().get(0).getModifier().getTitle().equals(Bow.SECOND_WEAPON_NAME), "Дистанционная атака должна была быть изменена на рукопашную");
 
     // Пробуем атаковать воином 1 игрока 1 воина 1 игрока 2 оружием воина 2 игрока 1. Это не должно выйти
     attackResult = gameWrapper.attackWarrior(gameContext, player1, warrior1p1, warrior1p2, bowWarrior2p1);
     Assert.isTrue(attackResult.isFail(WARRIOR_WEAPON_NOT_FOUND), "Дистанционная атака при наличии рядом врага удалась");
 
     // Пробуем атаковать воином 1 игрока 1 воина 1 игрока 2. Это должно выйти
-//    attackResult = gameWrapper.attackWarrior(gameContext, player1, warrior1p1, warrior1p2, bowWarrior1p1);
-//    Assert.isTrue(attackResult.isFail(WARRIOR_ATTACK_RANGED_NOT_POSIBLE_ENEMYS_IS_NEAR_ATTACKER), "Дистанционная атака при наличии рядом врага удалась");
+    attackResult = gameWrapper.attackWarrior(gameContext, player1, warrior1p1, warrior1p2, bowWarrior1p1);
+    assertSuccess(attackResult);
+    Assert.isTrue(warriorImpl1p1.getAttributes().getActionPoints() == 120, "Не списаны очки за выстрел луком");
 
     // Пробуем атаковать воином 1 игрока 1 воина 2 игрока 2. Это должно выйти
     attackResult = gameWrapper.attackWarrior(gameContext, player1, warrior1p1, warrior2p2, bowWarrior1p1);
-    Assert.isTrue(attackResult.isFail(WARRIOR_ATTACK_RANGED_NOT_POSIBLE_ENEMYS_IS_NEAR_ATTACKER), "Дистанционная атака при наличии рядом врага удалась");
+    assertSuccess(attackResult);
+    Assert.isTrue(warriorImpl1p1.getAttributes().getActionPoints() == 0, "Не списаны очки за второй выстрел луком");
 
-    Result r = gameWrapper.getCore().removeGameContext(gameContext);
-    assertSuccess(r);
+
+    // переходы ходом опять до воина 1
+    assertSuccess(gameWrapper.nextTurn(gameContext, player1));
+    assertSuccess(gameWrapper.nextTurn(gameContext, player2));
+
+    Assert.isTrue(warriorImpl1p1.getAttributes().getActionPoints() == 240, "Не восстановились очки действия");
+
+    // Переместим немного воина 1 игрока 1, чтобы очки действия списались немного
+    warriorResult = gameWrapper.moveWarriorTo(gameContext, player1, warrior1p1, new Coords(460, 460));
+    assertSuccess(warriorResult);
+    Assert.isTrue(warriorResult.getResult().getCoords().equals(new Coords(460, 460)), "Неверные координаты перемещения воина 2 игрока 1 на втором ходе. возможно неверная стоимость перемещения");
+
+    // Пробуем атаковать воином 1 игрока 1 воина 2 игрока 2. Это должно выйти
+    attackResult = gameWrapper.attackWarrior(gameContext, player1, warrior1p1, warrior2p2, bowWarrior1p1);
+    assertSuccess(attackResult);
+    Assert.isTrue(warriorImpl1p1.getAttributes().getActionPoints() == 82, "Не списаны очки за второй выстрел луком");
+
+    assertSuccess(gameWrapper.getCore().removeGameContext(gameContext));
   }
 
 //  @Test

@@ -8,6 +8,7 @@ import api.enums.AttributeEnum;
 import api.enums.LifeTimeUnit;
 import api.enums.TargetTypeEnum;
 import api.game.action.AttackResult;
+import api.game.map.Player;
 import core.entity.base.BaseModifier;
 import core.entity.warrior.base.InfluencerImpl;
 import core.game.action.AttackResultImpl;
@@ -45,6 +46,7 @@ public abstract class AbstractWeaponImpl implements Weapon {
   protected int fadeRangeStart;
   protected int fadeDamagePercentPerLength;
   protected int neededHandsCountToTakeWeapon;
+  protected String secondWeaponName;
 
   protected Warrior owner;
 
@@ -223,6 +225,12 @@ public abstract class AbstractWeaponImpl implements Weapon {
   //===================================================================================================
 
   @Override
+  public String getSecondWeaponName() {
+    return secondWeaponName;
+  }
+  //===================================================================================================
+
+  @Override
   public Warrior getOwner() {
     return owner;
   }
@@ -269,13 +277,15 @@ public abstract class AbstractWeaponImpl implements Weapon {
     // Размер воина (в "пикселях")
     int warriorSize = owner.getContext().getGameRules().getWarriorSize();
 
-    // рассчитанный физический урон
-    int dealDamage = 0;
-
     // расстояние до цели. при этом считаем не расстояние между центрами юнитов, а расстояния от края юнита до края
     // юнита. При условии, что они круглые расстояние сократится с расстояния между центрами на два радиуса фигур
     // или, что равнозначно на размер юнита
     int distanceToTarget = owner.calcDistanceTo(targetWarrior.getCoords()) - warriorSize;
+
+    // название оружия, которым нанесено поражение
+    String weaponName = "";
+
+    int maxDmg = 0, minDmg = 0;
 
     // если есть у оружия дистанционная атака и на нее хватает действия, то пробуем применить ее
     if (canDealRangedDamage && availableActionPoints >= rangedAttackCost) {
@@ -307,7 +317,6 @@ public abstract class AbstractWeaponImpl implements Weapon {
             // проверки пройдены. Можно атаковать дистанционно
             // если расстояние до цели более расстояния, после которого урон спадает, то пересчитаем максимальный и
             // минимальный уроны
-            int maxDmg, minDmg;
             if (distanceToTarget > fadeRangeStart * mapUnitSize) {
               // да. Надо пересчитывать макс и мин уроны
               int fadeCoef = 100 - ((distanceToTarget - fadeRangeStart * mapUnitSize) * fadeDamagePercentPerLength + mapUnitSize / 2 + 1)
@@ -318,41 +327,44 @@ public abstract class AbstractWeaponImpl implements Weapon {
               maxDmg = rangedMaxDamage;
               minDmg = rangedMinDamage;
             }
-            dealDamage = owner.getContext().getCore().getRandom(minDmg < 1 ? 1 : minDmg, maxDmg < 1 ? 1 : maxDmg);
             attackResult = ResultImpl.success(new AttackResultImpl(owner.getOwner(), owner
-                    , this, targetWarrior.getOwner(), targetWarrior, null));
+                    , this, targetWarrior.getOwner(), targetWarrior, rangedAttackCost));
+            weaponName = title;
           }
         }
       }
-    } else if (canDealRangedDamage) {
-      // нет рукопашной атаки или не хватает единиц действия
-      // если оружие дистанционное, то дистанцией для рукопашки берем не параметры рукопашной атаки, а минимальную
-      // дистанцию дистанционно атаки.
-      int innerMeleeAttackRange = canDealRangedDamage ? minRangedAttackRange : meleeAttackRange;
+    }
+    // если мы тут , то либо не вышло с дистанционкой, либо ее нет у этого оружия
+    if (attackResult == null) {
+      if (canDealRangedDamage) {
+        // нет рукопашной атаки или не хватает единиц действия
+        // если оружие дистанционное, то дистанцией для рукопашки берем не параметры рукопашной атаки, а минимальную
+        // дистанцию дистанционно атаки.
+        int innerMeleeAttackRange = canDealRangedDamage ? minRangedAttackRange : meleeAttackRange;
 
-      // проверим, что очков действия для атаки хватает
-      if (availableActionPoints < meleeAttackCost) {
+        // проверим, что очков действия для атаки хватает
+        if (availableActionPoints < meleeAttackCost) {
+          attackResult = generateAttackError(WARRIOR_ATTACK_THERE_IS_NOT_ENOUGH_ACTION_POINTS, targetWarrior);
+        } else {
+          // очков хватает. Проверим расстояние до цели
+          if (distanceToTarget >= innerMeleeAttackRange * mapUnitSize) {
+            // расстояние велико для рукопашной атаки
+            attackResult = generateAttackError(WARRIOR_ATTACK_TARGET_IS_OUT_OF_RANGE, targetWarrior);
+          } else {
+            // проверки пройдены. Можно атаковать
+            maxDmg = rangedMaxDamage;
+            minDmg = rangedMinDamage;
+            attackResult = ResultImpl.success(new AttackResultImpl(owner.getOwner(), owner
+                    , this, targetWarrior.getOwner(), targetWarrior, meleeAttackCost));
+            weaponName = canDealRangedDamage ? secondWeaponName : title;
+          }
+        }
+      } else if (canDealRangedDamage) {
+        // если мы тут, то значит не хватило очков для дистанционки и нет рукопашной атаки
         attackResult = generateAttackError(WARRIOR_ATTACK_THERE_IS_NOT_ENOUGH_ACTION_POINTS, targetWarrior);
       } else {
-        // очков хватает. Проверим расстояние до цели
-        if (distanceToTarget >= innerMeleeAttackRange * mapUnitSize) {
-          // расстояние велико для рукопашной атаки
-          attackResult = generateAttackError(WARRIOR_ATTACK_TARGET_IS_OUT_OF_RANGE, targetWarrior);
-        } else {
-          // проверки пройдены. Можно атаковать
-          int maxDmg, minDmg;
-          maxDmg = rangedMaxDamage;
-          minDmg = rangedMinDamage;
-          dealDamage = owner.getContext().getCore().getRandom(minDmg < 1 ? 1 : minDmg, maxDmg < 1 ? 1 : maxDmg);
-          attackResult = ResultImpl.success(new AttackResultImpl(owner.getOwner(), owner
-                  , this, targetWarrior.getOwner(), targetWarrior, null));
-        }
+        attackResult = generateAttackError(WARRIOR_ATTACK_UNKNOW_REASON_SHAISE, targetWarrior);
       }
-    } else if (canDealRangedDamage) {
-      // если мы тут, то значит не хватило очков для дистанционки и нет рукопашной атаки
-      attackResult = generateAttackError(WARRIOR_ATTACK_THERE_IS_NOT_ENOUGH_ACTION_POINTS, targetWarrior);
-    } else {
-      attackResult = generateAttackError(WARRIOR_ATTACK_UNKNOW_REASON_SHAISE, targetWarrior);
     }
 
     if (attackResult.isSuccess()) {
@@ -361,12 +373,12 @@ public abstract class AbstractWeaponImpl implements Weapon {
               owner, this, LifeTimeUnit.JUST_NOW, 1
               , new BaseModifier(
               owner.getContext()
-              , "Урон от " + title
-              , "Урон от " + title
+              , weaponName
+              , weaponName
               , ENEMY_WARRIOR
               , HEALTH
-              , dealDamage
-              , dealDamage
+              , minDmg < 1 ? 1 : minDmg
+              , maxDmg < 1 ? 1 : maxDmg
               , 100)));
 
       // отправим своему плееру на возможное добавление влияний
@@ -376,8 +388,16 @@ public abstract class AbstractWeaponImpl implements Weapon {
       // произошел разбор всех влияний в том числе и физического урона
 
       // отправить атаку плееру атакуемого воина
-      targetWarrior.getOwner().innerWarriorUnderAttack(attackResult.getResult());
-
+      attackResult = targetWarrior.getOwner().innerWarriorUnderAttack(attackResult.getResult())
+              .map(proceededAttackResult -> {
+                // спишем очки, затраченные на атаку
+                owner.getAttributes().addActionPoints(-proceededAttackResult.getConsumedActionPoints());
+                // заблокируем откат
+                owner.lockRollback();
+                // заблокируем перемещение
+                owner.lockMove();
+                return ResultImpl.success(proceededAttackResult);
+              });
     }
     return attackResult;
 

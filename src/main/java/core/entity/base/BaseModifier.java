@@ -60,7 +60,6 @@ public class BaseModifier implements Modifier {
 
   @Override
   public Result<Integer> getValue() {
-    int calculatedValue = 0;
     if (probability == 100 || context.getCore().getRandom(0, 100) <= probability){
       calculatedValue = minValue == maxValue
               ? minValue
@@ -95,6 +94,7 @@ public class BaseModifier implements Modifier {
     this.maxValue = maxValue;
     this.probability = probability;
     this.context = context;
+    getValue();
   }
   //===================================================================================================
 
@@ -117,6 +117,5 @@ public class BaseModifier implements Modifier {
     return this;
   }
   //===================================================================================================
-
 
 }
