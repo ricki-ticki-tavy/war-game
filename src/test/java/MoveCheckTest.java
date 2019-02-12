@@ -1,5 +1,5 @@
-import api.game.Coords;
-import api.game.Rectangle;
+import api.geo.Coords;
+import api.geo.Rectangle;
 import api.game.map.LevelMap;
 import core.entity.map.LevelMapImpl;
 import org.junit.Test;

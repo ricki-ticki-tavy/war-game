@@ -1,13 +1,10 @@
 package api.core;
 
-import api.entity.warrior.Influencer;
 import api.entity.warrior.Warrior;
-import api.entity.warrior.WarriorBaseClass;
 import api.entity.weapon.Weapon;
 import api.enums.EventType;
-import api.game.Coords;
-import api.game.Event;
-import api.game.EventDataContainer;
+import api.geo.Coords;
+import api.game.Influencer;
 import api.game.action.AttackResult;
 import api.game.map.LevelMap;
 import api.game.map.Player;

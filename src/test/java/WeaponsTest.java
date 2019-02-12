@@ -3,7 +3,7 @@ import api.core.Context;
 import api.core.Result;
 import api.entity.warrior.Warrior;
 import api.entity.weapon.Weapon;
-import api.game.Coords;
+import api.geo.Coords;
 import api.game.action.AttackResult;
 import api.game.wraper.GameWrapper;
 import org.junit.Test;
@@ -157,7 +157,7 @@ public class WeaponsTest extends AbstractMapTest {
     // Пробуем атаковать воином 1 игрока 1 воина 2 игрока 2. Это должно выйти
     attackResult = gameWrapper.attackWarrior(gameContext, player1, warrior1p1, warrior2p2, bowWarrior1p1);
     assertSuccess(attackResult);
-    Assert.isTrue(warriorImpl1p1.getAttributes().getActionPoints() == 82, "Не списаны очки за второй выстрел луком");
+    Assert.isTrue(warriorImpl1p1.getAttributes().getActionPoints() == 82, "Не списаны очки за выстрел луком или за предыдущее перемещение");
 
     assertSuccess(gameWrapper.getCore().removeGameContext(gameContext));
   }

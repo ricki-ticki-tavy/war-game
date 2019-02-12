@@ -1,18 +1,17 @@
 package core.entity.warrior.base;
 
 import api.core.Result;
-import api.entity.ability.Modifier;
-import api.entity.warrior.Influencer;
+import api.game.ability.Modifier;
+import api.game.Influencer;
 import api.entity.warrior.Warrior;
 import api.entity.warrior.WarriorSBaseAttributes;
 import api.enums.EventType;
 import api.enums.LifeTimeUnit;
 import api.enums.TargetTypeEnum;
-import api.game.Event;
-import api.game.EventDataContainer;
+import api.core.Event;
+import api.core.EventDataContainer;
 import api.game.action.AttackResult;
 import core.system.ResultImpl;
-import core.system.event.EventImpl;
 
 import java.util.ArrayList;
 import java.util.List;

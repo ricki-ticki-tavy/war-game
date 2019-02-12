@@ -1,9 +1,9 @@
 package core.game.action;
 
-import api.entity.warrior.Influencer;
+import api.game.Influencer;
 import api.entity.warrior.Warrior;
 import api.entity.weapon.Weapon;
-import api.game.Event;
+import api.core.Event;
 import api.game.action.AttackResult;
 import api.game.map.Player;
 

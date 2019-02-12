@@ -1,4 +1,4 @@
-package api.entity.ability;
+package api.game.ability;
 
 import api.core.Context;
 import api.entity.base.BaseEntityHeader;

@@ -3,7 +3,7 @@ package tests.abstracts;
 import api.core.Context;
 import api.core.Result;
 import api.entity.warrior.Warrior;
-import api.game.Coords;
+import api.geo.Coords;
 import api.game.map.Player;
 import api.game.map.metadata.GameRules;
 import api.game.wraper.GameWrapper;

@@ -1,7 +1,7 @@
 
 import api.core.Result;
 import api.entity.warrior.Warrior;
-import api.game.Coords;
+import api.geo.Coords;
 import api.game.map.Player;
 import api.game.wraper.GameWrapper;
 import core.system.ResultImpl;

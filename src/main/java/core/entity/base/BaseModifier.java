@@ -1,10 +1,10 @@
 package core.entity.base;
 
 import api.core.Context;
-import api.core.IntParam;
 import api.core.Result;
-import api.entity.ability.Modifier;
+import api.game.ability.Modifier;
 import api.enums.AttributeEnum;
+import api.enums.ModifierClass;
 import api.enums.TargetTypeEnum;
 import core.system.ResultImpl;
 
@@ -18,19 +18,19 @@ public class BaseModifier implements Modifier {
   protected int minValue, maxValue;
   protected Context context;
   protected int calculatedValue;
+  protected ModifierClass modifierClass;
+  protected int luck;
+  protected boolean luckyRollOfDice = false;
+  protected boolean hitSuccess = false;
 
 
-  public BaseModifier(){}
+  public BaseModifier() {
+  }
   //===================================================================================================
 
   @Override
   public TargetTypeEnum getTarget() {
     return target;
-  }
-  //===================================================================================================
-
-  public BaseModifier(TargetTypeEnum target) {
-    this.target = target;
   }
   //===================================================================================================
 
@@ -60,11 +60,20 @@ public class BaseModifier implements Modifier {
 
   @Override
   public Result<Integer> getValue() {
-    if (probability == 100 || context.getCore().getRandom(0, 100) <= probability){
+    luckyRollOfDice = luck > 0 && luck >= context.getCore().getRandom(1, 100);
+    hitSuccess = probability == 100 || context.getCore().getRandom(0, 100) <= probability;
+    // вероятность попадания или удача
+    if (hitSuccess || luckyRollOfDice) {
       calculatedValue = minValue == maxValue
               ? minValue
               : context.getCore().getRandom(minValue, maxValue);
-
+      // если была удача, то удвоим его, либо сделаем результат максимальным, если удвенное значение менее максимума
+      if (luckyRollOfDice) {
+        calculatedValue *= 2;
+        if (calculatedValue < maxValue) {
+          calculatedValue = maxValue;
+        }
+      }
     }
     return ResultImpl.success(calculatedValue);
   }
@@ -84,8 +93,9 @@ public class BaseModifier implements Modifier {
 
   public BaseModifier(Context context
           , String title, String description, TargetTypeEnum target
+          , ModifierClass modifierClass
           , AttributeEnum attribute, int minValue, int maxValue
-          , int probability) {
+          , int probability, int luck) {
     this.target = target;
     this.title = title;
     this.description = description;
@@ -94,6 +104,8 @@ public class BaseModifier implements Modifier {
     this.maxValue = maxValue;
     this.probability = probability;
     this.context = context;
+    this.modifierClass = modifierClass;
+    this.luck = luck;
     getValue();
   }
   //===================================================================================================
@@ -114,6 +126,37 @@ public class BaseModifier implements Modifier {
   @Override
   public Modifier setLastCalculatedValue(int value) {
     this.calculatedValue = value;
+    return this;
+  }
+  //===================================================================================================
+
+  @Override
+  public ModifierClass getModifierClass() {
+    return modifierClass;
+  }
+  //===================================================================================================
+
+  @Override
+  public int getLuck() {
+    return luck;
+  }
+  //===================================================================================================
+
+  @Override
+  public boolean isLuckyRollOfDice() {
+    return luckyRollOfDice;
+  }
+  //===================================================================================================
+
+  @Override
+  public boolean isHitSuccess() {
+    return hitSuccess;
+  }
+  //===================================================================================================
+
+  @Override
+  public Modifier addLuck(int delta) {
+    luck += delta;
     return this;
   }
   //===================================================================================================

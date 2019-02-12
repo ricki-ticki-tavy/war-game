@@ -1,8 +1,9 @@
-package api.entity.warrior;
+package api.game;
 
 import api.core.Result;
-import api.entity.ability.Modifier;
+import api.game.ability.Modifier;
 import api.entity.base.BaseEntityHeader;
+import api.entity.warrior.Warrior;
 import api.game.action.AttackResult;
 
 import java.util.List;

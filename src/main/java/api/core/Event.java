@@ -1,6 +1,5 @@
-package api.game;
+package api.core;
 
-import api.core.Context;
 import api.enums.EventType;
 
 import java.util.Map;

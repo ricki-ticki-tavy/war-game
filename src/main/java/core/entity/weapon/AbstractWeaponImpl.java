@@ -1,14 +1,13 @@
 package core.entity.weapon;
 
+import api.core.EventDataContainer;
 import api.core.Result;
-import api.entity.ability.Modifier;
+import api.game.ability.Modifier;
 import api.entity.warrior.Warrior;
 import api.entity.weapon.Weapon;
-import api.enums.AttributeEnum;
 import api.enums.LifeTimeUnit;
-import api.enums.TargetTypeEnum;
+import api.enums.ModifierClass;
 import api.game.action.AttackResult;
-import api.game.map.Player;
 import core.entity.base.BaseModifier;
 import core.entity.warrior.base.InfluencerImpl;
 import core.game.action.AttackResultImpl;
@@ -18,6 +17,9 @@ import core.system.error.GameErrors;
 import java.util.*;
 
 import static api.enums.AttributeEnum.HEALTH;
+import static api.enums.EventType.WARRIOR_ATTACK_LUCK;
+import static api.enums.EventType.WARRIOR_ATTACK_MISS;
+import static api.enums.EventType.WARRIOR_ATTACK_MISS_BUT_LUCK;
 import static api.enums.TargetTypeEnum.ENEMY_WARRIOR;
 import static core.system.error.GameErrors.*;
 
@@ -287,6 +289,9 @@ public abstract class AbstractWeaponImpl implements Weapon {
 
     int maxDmg = 0, minDmg = 0;
 
+    // удача.для каждого вида атаки своя
+    int luck = 0;
+
     // если есть у оружия дистанционная атака и на нее хватает действия, то пробуем применить ее
     if (canDealRangedDamage && availableActionPoints >= rangedAttackCost) {
       // вроде можно и очков хватает. дистанционное оружие дествует только на дистанции. Если расстояние
@@ -327,6 +332,7 @@ public abstract class AbstractWeaponImpl implements Weapon {
               maxDmg = rangedMaxDamage;
               minDmg = rangedMinDamage;
             }
+            luck = owner.getAttributes().getLuckRangeAtack();
             attackResult = ResultImpl.success(new AttackResultImpl(owner.getOwner(), owner
                     , this, targetWarrior.getOwner(), targetWarrior, rangedAttackCost));
             weaponName = title;
@@ -357,6 +363,7 @@ public abstract class AbstractWeaponImpl implements Weapon {
             attackResult = ResultImpl.success(new AttackResultImpl(owner.getOwner(), owner
                     , this, targetWarrior.getOwner(), targetWarrior, meleeAttackCost));
             weaponName = canDealRangedDamage ? secondWeaponName : title;
+            luck = owner.getAttributes().getLuckMeleeAtack();
           }
         }
       } else if (canDealRangedDamage) {
@@ -369,17 +376,32 @@ public abstract class AbstractWeaponImpl implements Weapon {
 
     if (attackResult.isSuccess()) {
       // если не было никаких ошибок, то физический урон подсчитан. Поместим его в итог атаки
-      attackResult.getResult().addInfluencer(new InfluencerImpl(
-              owner, this, LifeTimeUnit.JUST_NOW, 1
-              , new BaseModifier(
+      Modifier modifier = new BaseModifier(
               owner.getContext()
               , weaponName
               , weaponName
               , ENEMY_WARRIOR
+              , ModifierClass.PHYSICAL
               , HEALTH
               , minDmg < 1 ? 1 : minDmg
               , maxDmg < 1 ? 1 : maxDmg
-              , 100)));
+              , 100
+              , luck);
+
+      attackResult.getResult().addInfluencer(new InfluencerImpl(
+              owner, this, LifeTimeUnit.JUST_NOW, 1
+              , modifier));
+
+      if (modifier.isHitSuccess() && modifier.isLuckyRollOfDice()){
+        // попал и улыбнулась удача
+        owner.getContext().fireGameEvent(null, WARRIOR_ATTACK_LUCK, new EventDataContainer(attackResult, modifier), null);
+      } else if (!modifier.isHitSuccess() && modifier.isLuckyRollOfDice()){
+        // не попал, но удача все переграла
+        owner.getContext().fireGameEvent(null, WARRIOR_ATTACK_MISS_BUT_LUCK, new EventDataContainer(attackResult, modifier), null);
+      } else if (!modifier.isHitSuccess() && !modifier.isLuckyRollOfDice()){
+        // не попал и неудачлив
+        owner.getContext().fireGameEvent(null, WARRIOR_ATTACK_MISS, new EventDataContainer(attackResult, modifier), null);
+      }
 
       // отправим своему плееру на возможное добавление влияний
       attackResult = owner.getOwner().innerAttachToAttackToWarrior(attackResult.getResult());
@@ -388,7 +410,7 @@ public abstract class AbstractWeaponImpl implements Weapon {
       // произошел разбор всех влияний в том числе и физического урона
 
       // отправить атаку плееру атакуемого воина
-      attackResult = targetWarrior.getOwner().innerWarriorUnderAttack(attackResult.getResult())
+      attackResult = targetWarrior.getOwner().defenceWarrior(attackResult.getResult())
               .map(proceededAttackResult -> {
                 // спишем очки, затраченные на атаку
                 owner.getAttributes().addActionPoints(-proceededAttackResult.getConsumedActionPoints());

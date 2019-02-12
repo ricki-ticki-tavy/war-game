@@ -2,14 +2,14 @@ package api.game.map;
 
 import api.core.Context;
 import api.core.Result;
-import api.entity.ability.Modifier;
+import api.game.ability.Modifier;
 import api.entity.base.BaseEntityHeader;
-import api.entity.warrior.Influencer;
+import api.game.Influencer;
 import api.entity.warrior.Warrior;
 import api.entity.weapon.Weapon;
 import api.enums.LifeTimeUnit;
-import api.game.Coords;
-import api.game.Rectangle;
+import api.geo.Coords;
+import api.geo.Rectangle;
 import api.game.action.AttackResult;
 
 import java.util.List;
@@ -196,7 +196,7 @@ public interface Player extends BaseEntityHeader {
    * @param attackResult
    * @return
    */
-  Result<AttackResult> innerWarriorUnderAttack(AttackResult attackResult);
+  Result<AttackResult> defenceWarrior(AttackResult attackResult);
 
   /**
    * добавить влияние юниту

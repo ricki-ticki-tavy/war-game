@@ -1,11 +1,10 @@
 package api.entity.weapon;
 
 import api.core.Result;
-import api.entity.ability.Modifier;
+import api.game.ability.Modifier;
 import api.entity.base.BaseEntityHeader;
 import api.entity.warrior.Warrior;
 import api.game.action.AttackResult;
-import api.game.map.Player;
 
 import java.util.List;
 

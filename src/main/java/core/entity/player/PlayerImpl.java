@@ -2,14 +2,14 @@ package core.entity.player;
 
 import api.core.Context;
 import api.core.Result;
-import api.entity.ability.Modifier;
-import api.entity.warrior.Influencer;
+import api.game.ability.Modifier;
+import api.game.Influencer;
 import api.entity.warrior.Warrior;
 import api.entity.weapon.Weapon;
 import api.enums.LifeTimeUnit;
-import api.game.Coords;
-import api.game.EventDataContainer;
-import api.game.Rectangle;
+import api.geo.Coords;
+import api.core.EventDataContainer;
+import api.geo.Rectangle;
 import api.game.action.AttackResult;
 import api.game.map.Player;
 import core.system.ResultImpl;
@@ -304,9 +304,9 @@ public class PlayerImpl implements Player {
   //===================================================================================================
 
   @Override
-  public Result<AttackResult> innerWarriorUnderAttack(AttackResult attackResult) {
+  public Result<AttackResult> defenceWarrior(AttackResult attackResult) {
     // возможность воину отбить удары и / или ослабить воздействие вредных влияний
-    return attackResult.getTarget().innerWarriorUnderAttack(attackResult)
+    return attackResult.getTarget().defenceWarrior(attackResult)
             // теперь рпименим оставшиеся влияния к воину
             .map(fineAttackResult -> {
               // собственно применим полученные поражения
