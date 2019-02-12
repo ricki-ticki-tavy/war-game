@@ -72,7 +72,7 @@ public class CoreImpl implements Core {
    * @param className
    * @param warriorBaseClass
    */
-  private void registerWarriorBaseClass(String className, Class<? extends WarriorBaseClass> warriorBaseClass) {
+  public void registerWarriorBaseClass(String className, Class<? extends WarriorBaseClass> warriorBaseClass) {
     registeredWarriorBaseClasses.put(className, warriorBaseClass);
   }
   //===================================================================================================
@@ -83,7 +83,7 @@ public class CoreImpl implements Core {
    * @param className
    * @param weaponClass
    */
-  private void registerWeaponClass(String className, Class<? extends Weapon> weaponClass) {
+  public void registerWeaponClass(String className, Class<? extends Weapon> weaponClass) {
     registeredWeaponClasses.put(className, weaponClass);
   }
   //===================================================================================================

@@ -1,9 +1,14 @@
-package tests;
-
 import api.core.Result;
 import api.enums.EventType;
 import api.game.map.Player;
 import api.game.wraper.GameWrapper;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.util.Assert;
 import tests.abstracts.AbstractMapTest;
 
@@ -12,12 +17,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Проверка подписывания и отписывания от событий.
  */
-//@RunWith(SpringRunner.class)
-//@SpringBootTest(classes = {tests.StartGameWith2PlayersAndMovesTest.class})
-//@ContextConfiguration(loader = AnnotationConfigContextLoader.class, classes = TestContextConfiguration.class)
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = {EventRoutinesTest.class})
+@ContextConfiguration(loader = AnnotationConfigContextLoader.class, classes = tests.config.TestContextConfiguration.class)
 public class EventRoutinesTest extends AbstractMapTest {
 
-//  @Autowired
+  @Autowired
   GameWrapper gameWrapper;
 
   public EventRoutinesTest setGameWrapper(GameWrapper gameWrapper){
@@ -26,7 +31,7 @@ public class EventRoutinesTest extends AbstractMapTest {
   }
 
   public void innerDoTest(){
-    initMap(gameWrapper);
+    initMap(gameWrapper, "EventRoutinesTest_user1", "EventRoutinesTest_User2");
 
     // Проверка отработки события готовности к игре
     AtomicBoolean eventDone = new AtomicBoolean(false);
@@ -64,8 +69,8 @@ public class EventRoutinesTest extends AbstractMapTest {
 
   }
 
-//  @Test
-//  public void doTest(){
-//    innerDoTest();
-//  }
+  @Test
+  public void doTest(){
+    innerDoTest();
+  }
 }
