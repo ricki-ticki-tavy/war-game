@@ -130,20 +130,9 @@ public class InfluencerImpl implements Influencer {
     // TODO Реализовать применение влияния на воина
     WarriorSBaseAttributes attributes = targetWarrior.getAttributes();
     // Уже всерассчитано. Применяем значение, рассчитанное заранее (getLastCalculatedValue())
-    if (modifier.getTarget() == TargetTypeEnum.ENEMY_WARRIOR) {
-      switch (modifier.getAttribute()) {
-        case HEALTH:
-          attributes.addHealth(-modifier.getLastCalculatedValue());
-          // Отправим сообщение
-          targetWarrior.getContext()
-                  .fireGameEvent(null
-                          , EventType.WARRIOR_WAS_ATTACKED_BY_ENEMY
-                          , new EventDataContainer(attackResult, modifier)
-                          , null);
-          break;
-      }
-    }
-    return ResultImpl.success(targetWarrior);
+
+    return modifier.apply(attackResult)
+            .map(doneModifier -> ResultImpl.success(doneModifier.getTarget()));
   }
   //===================================================================================================
 

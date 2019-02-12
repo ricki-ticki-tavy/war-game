@@ -282,7 +282,7 @@ public abstract class AbstractWeaponImpl implements Weapon {
     // расстояние до цели. при этом считаем не расстояние между центрами юнитов, а расстояния от края юнита до края
     // юнита. При условии, что они круглые расстояние сократится с расстояния между центрами на два радиуса фигур
     // или, что равнозначно на размер юнита
-    int distanceToTarget = owner.calcDistanceTo(targetWarrior.getCoords()) - warriorSize;
+    int distanceToTarget = owner.calcDistanceToTarget(targetWarrior.getCoords()) - warriorSize;
 
     // название оружия, которым нанесено поражение
     String weaponName = "";
@@ -389,18 +389,18 @@ public abstract class AbstractWeaponImpl implements Weapon {
               , luck);
 
       attackResult.getResult().addInfluencer(new InfluencerImpl(
-              owner, this, LifeTimeUnit.JUST_NOW, 1
+              targetWarrior, this, LifeTimeUnit.JUST_NOW, 1
               , modifier));
 
       if (modifier.isHitSuccess() && modifier.isLuckyRollOfDice()){
         // попал и улыбнулась удача
-        owner.getContext().fireGameEvent(null, WARRIOR_ATTACK_LUCK, new EventDataContainer(attackResult, modifier), null);
+        owner.getContext().fireGameEvent(null, WARRIOR_ATTACK_LUCK, new EventDataContainer(attackResult.getResult(), modifier), null);
       } else if (!modifier.isHitSuccess() && modifier.isLuckyRollOfDice()){
         // не попал, но удача все переграла
-        owner.getContext().fireGameEvent(null, WARRIOR_ATTACK_MISS_BUT_LUCK, new EventDataContainer(attackResult, modifier), null);
+        owner.getContext().fireGameEvent(null, WARRIOR_ATTACK_MISS_BUT_LUCK, new EventDataContainer(attackResult.getResult(), modifier), null);
       } else if (!modifier.isHitSuccess() && !modifier.isLuckyRollOfDice()){
         // не попал и неудачлив
-        owner.getContext().fireGameEvent(null, WARRIOR_ATTACK_MISS, new EventDataContainer(attackResult, modifier), null);
+        owner.getContext().fireGameEvent(null, WARRIOR_ATTACK_MISS, new EventDataContainer(attackResult.getResult(), modifier), null);
       }
 
       // отправим своему плееру на возможное добавление влияний

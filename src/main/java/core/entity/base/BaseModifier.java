@@ -1,12 +1,18 @@
 package core.entity.base;
 
 import api.core.Context;
+import api.core.EventDataContainer;
 import api.core.Result;
+import api.entity.warrior.WarriorSBaseAttributes;
+import api.enums.EventType;
 import api.game.ability.Modifier;
 import api.enums.AttributeEnum;
 import api.enums.ModifierClass;
 import api.enums.TargetTypeEnum;
+import api.game.action.AttackResult;
 import core.system.ResultImpl;
+
+import static api.enums.AttributeEnum.HEALTH;
 
 public class BaseModifier implements Modifier {
 
@@ -158,6 +164,27 @@ public class BaseModifier implements Modifier {
   public Modifier addLuck(int delta) {
     luck += delta;
     return this;
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Modifier> apply(AttackResult attackResult) {
+    WarriorSBaseAttributes attributes = attackResult.getTarget().getAttributes();
+    // Уже всерассчитано. Применяем значение, рассчитанное заранее (getLastCalculatedValue())
+    if (getTarget() == TargetTypeEnum.ENEMY_WARRIOR) {
+      switch (getAttribute()) {
+        case HEALTH:
+          attributes.addHealth(- calculatedValue);
+          // Отправим сообщение
+          attackResult.getTarget().getContext()
+                  .fireGameEvent(null
+                          , EventType.WARRIOR_WAS_ATTACKED_BY_ENEMY
+                          , new EventDataContainer(attackResult, this)
+                          , null);
+          break;
+      }
+    }
+    return ResultImpl.success(this);
   }
   //===================================================================================================
 

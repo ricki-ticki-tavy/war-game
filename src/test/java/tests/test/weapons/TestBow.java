@@ -24,9 +24,9 @@ public class TestBow extends AbstractWeaponImpl {
     this.title = CLASS_NAME;
     this.description = "Простой лук. Двуручное оружие. При ближнем бое работает как кинжал";
     this.meleeMinDamage = 1;
-    this.meleeMaxDamage = 3;
+    this.meleeMaxDamage = 2;
     this.rangedMinDamage = 1;
-    this.rangedMaxDamage = 7;
+    this.rangedMaxDamage = 8;
     this.meleeAttackCost = 40;
     this.rangedAttackCost = 120;
     this.additionalModifiers = null;

@@ -162,6 +162,12 @@ public class WarriorImpl implements Warrior {
   //===================================================================================================
 
   @Override
+  public int calcDistanceToTarget(Coords to) {
+    return gameContext.calcDistanceTo(coords, to);
+  }
+  //===================================================================================================
+
+  @Override
   public Result<Warrior> moveWarriorTo(Coords to) {
     Result result;
     if (!moveLocked) {

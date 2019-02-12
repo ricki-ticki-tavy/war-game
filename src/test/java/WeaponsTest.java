@@ -150,15 +150,30 @@ public class WeaponsTest extends AbstractMapTest {
     Assert.isTrue(warriorImpl1p1.getAttributes().getActionPoints() == 240, "Не восстановились очки действия");
 
     // Переместим немного воина 1 игрока 1, чтобы очки действия списались немного
-    warriorResult = gameWrapper.moveWarriorTo(gameContext, player1, warrior1p1, new Coords(460, 460));
+    warriorResult = gameWrapper.moveWarriorTo(gameContext, player1, warrior1p1, new Coords(460, 475));
     assertSuccess(warriorResult);
-    Assert.isTrue(warriorResult.getResult().getCoords().equals(new Coords(460, 460)), "Неверные координаты перемещения воина 2 игрока 1 на втором ходе. возможно неверная стоимость перемещения");
+    Assert.isTrue(warriorResult.getResult().getCoords().equals(new Coords(460, 475)), "Неверные координаты перемещения воина 2 игрока 1 на втором ходе. возможно неверная стоимость перемещения");
 
     // Пробуем атаковать воином 1 игрока 1 воина 2 игрока 2. Это должно выйти
     attackResult = gameWrapper.attackWarrior(gameContext, player1, warrior1p1, warrior2p2, bowWarrior1p1);
     assertSuccess(attackResult);
-    Assert.isTrue(warriorImpl1p1.getAttributes().getActionPoints() == 82, "Не списаны очки за выстрел луком или за предыдущее перемещение");
+    Assert.isTrue(warriorImpl1p1.getAttributes().getActionPoints() == 98, "Не списаны очки за выстрел луком или за предыдущее перемещение");
 
+    // переходы ходом опять до воина 1
+    assertSuccess(gameWrapper.nextTurn(gameContext, player1));
+    assertSuccess(gameWrapper.nextTurn(gameContext, player2));
+
+    // поднимем удачу до 100% воину 1 игрока 1
+    warriorImpl1p1.getAttributes().setLuckRangeAtack(100);
+    warriorImpl1p1.getAttributes().setLuckMeleeAtack(100);
+
+    // Пробуем атаковать воином 1 игрока 1 воина 2 игрока 2. Это должно выйти и должна быть удача
+    attackResult = gameWrapper.attackWarrior(gameContext, player1, warrior1p1, warrior2p2, bowWarrior1p1);
+    assertSuccess(attackResult);
+    Assert.isTrue(attackResult.getResult().getInfluencers().get(0).getModifier().isLuckyRollOfDice(), "Удача не сработала");
+
+//    // Проверим, что воин 2
+//    Assert.isTrue();
     assertSuccess(gameWrapper.getCore().removeGameContext(gameContext));
   }
 

@@ -240,6 +240,14 @@ public interface Warrior extends BaseEntityHeader, HasCoordinates {
   int calcDistanceTo(Coords to);
 
   /**
+   * Получить расстояние в "пикелях" до указанной координаты. Рассчитывается на основании текущих РЕАЛЬНЫХ
+   * координат юнита. (getCoords)
+   * @param to
+   * @return
+   */
+  int calcDistanceToTarget(Coords to);
+
+  /**
    * Кол-во потраенных на перемещение единиц действия. Имеет смысл только до тех пор, пока можно выполнить откат
    * перемещения.
    * @return

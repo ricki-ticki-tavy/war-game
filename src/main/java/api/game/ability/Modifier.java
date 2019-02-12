@@ -5,6 +5,7 @@ import api.core.Result;
 import api.enums.AttributeEnum;
 import api.enums.ModifierClass;
 import api.enums.TargetTypeEnum;
+import api.game.action.AttackResult;
 
 /**
  * модификатор атрибута
@@ -127,5 +128,11 @@ public interface Modifier {
    */
   Modifier addLuck(int delta);
 
+  /**
+   * Применить в соответствие с атакой.
+   * @param attackResult
+   * @return
+   */
+  Result<Modifier> apply(AttackResult attackResult);
 
 }
