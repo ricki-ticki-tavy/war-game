@@ -1,5 +1,3 @@
-package tests;
-
 import api.core.Context;
 import api.core.Result;
 import api.entity.warrior.Warrior;
@@ -9,24 +7,34 @@ import api.game.map.Player;
 import api.game.map.metadata.GameRules;
 import api.game.wraper.GameWrapper;
 import core.entity.map.GameRulesImpl;
-import core.entity.warrior.Viking;
-import core.entity.weapon.Bow;
-import core.entity.weapon.ShortSword;
-import core.entity.weapon.Sword;
+import core.game.CoreImpl;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.util.Assert;
+import tests.test.warrior.TestSkeleton;
+import tests.test.warrior.TestViking;
+import tests.test.warrior.TestVityaz;
+import tests.test.weapons.TestBow;
+import tests.test.weapons.TestShortSword;
+import tests.test.weapons.TestSword;
 
 import java.util.List;
 
 
-//@RunWith(SpringRunner.class)
-//@SpringBootTest(classes = {tests.CreateWarriorsWeaponsUsersTest.class})
-//@ContextConfiguration(loader = AnnotationConfigContextLoader.class, classes = TestContextConfiguration.class)
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = {CreateWarriorsWeaponsUsersTest.class})
+@ContextConfiguration(loader = AnnotationConfigContextLoader.class, classes = tests.config.TestContextConfiguration.class)
 public class CreateWarriorsWeaponsUsersTest {
   private static final Logger logger = LoggerFactory.getLogger(CreateWarriorsWeaponsUsersTest.class);
 
-//  @Autowired
+  @Autowired
   GameWrapper gameWrapper;
 
   public CreateWarriorsWeaponsUsersTest setGameWrapper(GameWrapper gameWrapper){
@@ -35,6 +43,15 @@ public class CreateWarriorsWeaponsUsersTest {
   }
 
   public void innerDoTest(){
+
+    ((CoreImpl)gameWrapper.getCore()).registerWarriorBaseClass(TestSkeleton.CLASS_NAME, TestSkeleton.class);
+    ((CoreImpl)gameWrapper.getCore()).registerWarriorBaseClass(TestViking.CLASS_NAME, TestViking.class);
+    ((CoreImpl)gameWrapper.getCore()).registerWarriorBaseClass(TestVityaz.CLASS_NAME, TestVityaz.class);
+
+    ((CoreImpl)gameWrapper.getCore()).registerWeaponClass(TestBow.CLASS_NAME, TestBow.class);
+    ((CoreImpl)gameWrapper.getCore()).registerWeaponClass(TestShortSword.CLASS_NAME, TestShortSword.class);
+    ((CoreImpl)gameWrapper.getCore()).registerWeaponClass(TestSword.CLASS_NAME, TestSword.class);
+
 
     int step = 1;
     logger.info("step " + step++);
@@ -49,12 +66,12 @@ public class CreateWarriorsWeaponsUsersTest {
 
     logger.info("step " + step++);
     Result<Class<? extends WarriorBaseClass>> baseWarriorClassResult = gameWrapper.getCore()
-            .findWarriorBaseClassByName(Viking.CLASS_NAME);
+            .findWarriorBaseClassByName(TestViking.CLASS_NAME);
     Assert.isTrue(baseWarriorClassResult.isSuccess(), "Не найден базовый класс воина");
 
     logger.info("step " + step++);
     Result<Class<? extends Weapon>> baseWeaponClassResult = gameWrapper.getCore()
-            .findWeaponByName(Bow.CLASS_NAME);
+            .findWeaponByName(TestBow.CLASS_NAME);
     Assert.isTrue(baseWeaponClassResult.isSuccess(), "Не найден базовый класс оружия");
 
     logger.info("step " + step++);
@@ -92,7 +109,7 @@ public class CreateWarriorsWeaponsUsersTest {
     Assert.isTrue(((List<Context>) gameWrapper.getGamesList().getResult()).size() == 2, "Контекст 2 не появился в списке контекстов");
 
     logger.info("step " + step++);
-    Result<Warrior> warriorResult = gameWrapper.createWarrior(context1.getContextId(), player.getId(), Viking.CLASS_NAME, player.getStartZone().getBottomRightConner());
+    Result<Warrior> warriorResult = gameWrapper.createWarrior(context1.getContextId(), player.getId(), TestViking.CLASS_NAME, player.getStartZone().getBottomRightConner());
     Assert.notNull(warriorResult.isSuccess(), "Воин не создан");
     Assert.isTrue(warriorResult.getResult() == player.getWarriors().get(0), "Созданный воин и воин на карте не равны");
     Warrior warrior = warriorResult.getResult();
@@ -105,19 +122,19 @@ public class CreateWarriorsWeaponsUsersTest {
     Assert.isTrue(player.getWarriors().size() == 1, "Игрок был пересоздан на месте первого вместо переподключения");
 
     logger.info("step " + step++);
-    Result<Weapon> resultW1 = gameWrapper.giveWeaponToWarrior(context1.getContextId(), player.getId(), warrior.getId(), ShortSword.CLASS_NAME);
+    Result<Weapon> resultW1 = gameWrapper.giveWeaponToWarrior(context1.getContextId(), player.getId(), warrior.getId(), TestShortSword.CLASS_NAME);
     Assert.isTrue(resultW1.isSuccess(), "Ошибка добавления короткого меча (первого оружия)");
     Assert.isTrue(warrior.getWeapons().size() == 1, "У воина отсутствует добавленное оружие");
     Weapon weapon1 = resultW1.getResult();
 
     logger.info("step " + step++);
-    Result<Weapon> resultW2 = gameWrapper.giveWeaponToWarrior(context1.getContextId(), player.getId(), warrior.getId(), Sword.CLASS_NAME);
+    Result<Weapon> resultW2 = gameWrapper.giveWeaponToWarrior(context1.getContextId(), player.getId(), warrior.getId(), TestSword.CLASS_NAME);
     Assert.isTrue(resultW2.isSuccess(), "Ошибка добавления меча (второго оружия)");
     Assert.isTrue(warrior.getWeapons().size() == 2, "У воина отсутствует второе добавленное оружие");
     Weapon weapon2 = resultW2.getResult();
 
     logger.info("step " + step++);
-    Result<Weapon> resultW3 = gameWrapper.giveWeaponToWarrior(context1.getContextId(), player.getId(), warrior.getId(), Sword.CLASS_NAME);
+    Result<Weapon> resultW3 = gameWrapper.giveWeaponToWarrior(context1.getContextId(), player.getId(), warrior.getId(), TestSword.CLASS_NAME);
     Assert.isTrue(resultW3.isFail(), "Ошибка добавления меча (третьего оружия). Оружие не должно быть добавлено ");
     Assert.isTrue(warrior.getWeapons().size() == 2, "У воина присутствует третье добавленное оружие");
 
@@ -132,7 +149,7 @@ public class CreateWarriorsWeaponsUsersTest {
     Assert.isTrue(warrior.getWeapons().size() == 1, "У воина неверное кол-во оружияпосле удаления первое оружие");
 
     logger.info("step " + step++);
-    Result<Weapon> resultDropWeapon3 = gameWrapper.giveWeaponToWarrior(context1.getContextId(), player.getId(), warrior.getId(), Bow.CLASS_NAME);
+    Result<Weapon> resultDropWeapon3 = gameWrapper.giveWeaponToWarrior(context1.getContextId(), player.getId(), warrior.getId(), TestBow.CLASS_NAME);
     Assert.isTrue(resultDropWeapon3.isFail(), "Ошибка добавления лука (третьего оружия). Оружие не должно быть добавлено ");
     Assert.isTrue(warrior.getWeapons().size() == 1, "У воина присутствует лук. третье добавленное оружие");
 
@@ -142,13 +159,13 @@ public class CreateWarriorsWeaponsUsersTest {
     Assert.isTrue(warrior.getWeapons().size() == 0, "У воина присутствует удаленное второе оружие");
 
     logger.info("step " + step++);
-    resultDropWeapon3 = gameWrapper.giveWeaponToWarrior(context1.getContextId(), player.getId(), warrior.getId(), Bow.CLASS_NAME);
+    resultDropWeapon3 = gameWrapper.giveWeaponToWarrior(context1.getContextId(), player.getId(), warrior.getId(), TestBow.CLASS_NAME);
     Assert.isTrue(resultDropWeapon3.isSuccess(), "Ошибка добавления лука (единственного оружия)");
     Assert.isTrue(warrior.getWeapons().size() == 1, "У воина отсутствует лук");
     Weapon weapon3 = resultDropWeapon3.getResult();
 
     logger.info("step " + step++);
-    resultW2 = gameWrapper.giveWeaponToWarrior(context1.getContextId(), player.getId(), warrior.getId(), Sword.CLASS_NAME);
+    resultW2 = gameWrapper.giveWeaponToWarrior(context1.getContextId(), player.getId(), warrior.getId(), TestSword.CLASS_NAME);
     Assert.isTrue(resultW2.isFail(), "Ошибка добавления меча (третьего оружия). Оружие не должно быть добавлено ");
     Assert.isTrue(warrior.getWeapons().size() == 1, "У воина присутствует не добавленное оружие");
 
@@ -166,9 +183,9 @@ public class CreateWarriorsWeaponsUsersTest {
     Assert.isTrue(gameWrapper.getCore().findGameContextByUID(context1.getContextId()).isFail(), "Контекст не удален");
   }
 
-//  @Test
-//  public void test1() {
-//    innerDoTest();
-//  }
+  @Test
+  public void test1() {
+    innerDoTest();
+  }
 
 }

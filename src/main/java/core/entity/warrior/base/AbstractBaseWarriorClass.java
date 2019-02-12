@@ -2,13 +2,11 @@ package core.entity.warrior.base;
 
 
 import api.core.Context;
-import api.core.Result;
-import api.entity.ability.Ability;
+import api.game.ability.Ability;
 import api.entity.warrior.WarriorBaseClass;
 import api.entity.weapon.Weapon;
 import api.enums.EventType;
-import api.game.Event;
-import api.game.action.AttackResult;
+import api.core.Event;
 
 import java.util.List;
 import java.util.UUID;
@@ -108,13 +106,5 @@ public abstract class AbstractBaseWarriorClass implements WarriorBaseClass {
   public boolean isSummonable() {
     return false;
   }
-
-  /**
-   * Этот метод вызывается когда воин игрока атакуется. В этом методе происходит анализ всех нанесенныхз уронов,
-   * перерасчет их (в случае наличия сопротивления, брони и прочее) и применение урона и влияний к воину
-   * @param attackResult
-   * @return
-   */
-  public abstract Result<AttackResult> innerWarriorUnderAttack(AttackResult attackResult);
 
 }

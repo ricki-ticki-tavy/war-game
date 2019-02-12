@@ -1,4 +1,4 @@
-package api.game;
+package api.core;
 
 import org.springframework.util.ClassUtils;
 

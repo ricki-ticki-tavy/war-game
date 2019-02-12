@@ -1,18 +1,17 @@
 package core.entity.warrior.base;
 
 import api.core.Result;
-import api.entity.ability.Modifier;
-import api.entity.warrior.Influencer;
+import api.game.ability.Modifier;
+import api.game.Influencer;
 import api.entity.warrior.Warrior;
 import api.entity.warrior.WarriorSBaseAttributes;
 import api.enums.EventType;
 import api.enums.LifeTimeUnit;
 import api.enums.TargetTypeEnum;
-import api.game.Event;
-import api.game.EventDataContainer;
+import api.core.Event;
+import api.core.EventDataContainer;
 import api.game.action.AttackResult;
 import core.system.ResultImpl;
-import core.system.event.EventImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -131,20 +130,9 @@ public class InfluencerImpl implements Influencer {
     // TODO Реализовать применение влияния на воина
     WarriorSBaseAttributes attributes = targetWarrior.getAttributes();
     // Уже всерассчитано. Применяем значение, рассчитанное заранее (getLastCalculatedValue())
-    if (modifier.getTarget() == TargetTypeEnum.ENEMY_WARRIOR) {
-      switch (modifier.getAttribute()) {
-        case HEALTH:
-          attributes.addHealth(-modifier.getLastCalculatedValue());
-          // Отправим сообщение
-          targetWarrior.getContext()
-                  .fireGameEvent(null
-                          , EventType.WARRIOR_WAS_ATTACKED_BY_ENEMY
-                          , new EventDataContainer(attackResult, modifier)
-                          , null);
-          break;
-      }
-    }
-    return ResultImpl.success(targetWarrior);
+
+    return modifier.apply(attackResult)
+            .map(doneModifier -> ResultImpl.success(doneModifier.getTarget()));
   }
   //===================================================================================================
 

@@ -2,8 +2,8 @@ package core.system.event;
 
 import api.core.Context;
 import api.enums.EventType;
-import api.game.Event;
-import api.game.EventDataContainer;
+import api.core.Event;
+import api.core.EventDataContainer;
 
 import java.util.Collections;
 import java.util.Map;

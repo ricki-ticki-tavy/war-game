@@ -1,4 +1,6 @@
-package api.game;
+package api.geo;
+
+import api.geo.Coords;
 
 /**
  * Прямоугольник

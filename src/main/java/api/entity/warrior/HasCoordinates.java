@@ -1,6 +1,6 @@
 package api.entity.warrior;
 
-import api.game.Coords;
+import api.geo.Coords;
 
 /**
  * класс, имеющий координаты

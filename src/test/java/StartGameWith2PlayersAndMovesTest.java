@@ -1,15 +1,22 @@
-package tests;
 
 import api.core.Result;
 import api.entity.warrior.Warrior;
-import api.game.Coords;
+import api.geo.Coords;
 import api.game.map.Player;
 import api.game.wraper.GameWrapper;
 import core.system.ResultImpl;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.util.Assert;
 import tests.abstracts.AbstractMapTest;
+import tests.config.TestContextConfiguration;
 
 import static core.system.error.GameErrors.*;
 
@@ -18,22 +25,22 @@ import static core.system.error.GameErrors.*;
  * переход игроков в режим готовности, переход игры в режим ИГРА.
  */
 
-//@RunWith(SpringRunner.class)
-//@SpringBootTest(classes = {tests.StartGameWith2PlayersAndMovesTest.class})
-//@ContextConfiguration(loader = AnnotationConfigContextLoader.class, classes = TestContextConfiguration.class)
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = {StartGameWith2PlayersAndMovesTest.class})
+@ContextConfiguration(loader = AnnotationConfigContextLoader.class, classes = TestContextConfiguration.class)
 public class StartGameWith2PlayersAndMovesTest extends AbstractMapTest {
   private static final Logger logger = LoggerFactory.getLogger(StartGameWith2PlayersAndMovesTest.class);
 
-//  @Autowired
+  @Autowired
   GameWrapper gameWrapper;
 
-  public StartGameWith2PlayersAndMovesTest setGameWrapper(GameWrapper gameWrapper){
+  public StartGameWith2PlayersAndMovesTest setGameWrapper(GameWrapper gameWrapper) {
     this.gameWrapper = gameWrapper;
     return this;
   }
 
   public void innerDoTest() {
-    initMap(gameWrapper);
+    initMap(gameWrapper, "SGW2PlAMT_User1", "SGW2PlAMT_User2");
 
     // Двигаем воина 1 у игрока 1
     Result<Warrior> warriorResult = gameWrapper.moveWarriorTo(gameContext, player1, warrior1p1, new Coords(400, 400));
@@ -88,18 +95,24 @@ public class StartGameWith2PlayersAndMovesTest extends AbstractMapTest {
     // игрок 2 готов
     playerResult = gameWrapper.playerReady(player2, true);
     assertSuccess(playerResult);
-    r = gameWrapper.getCore().findGameContextByUID(gameContext)
+    assertSuccess(gameWrapper.getCore().findGameContextByUID(gameContext)
             .map(context -> context.findUserByName(player2)
                     .map(player -> player.isReadyToPlay()
                             ? ResultImpl.success(player)
                             : ResultImpl.fail(SYSTEM_USER_ERROR.getError("Пользователь " + player.getId()
-                            + " не перешел в состояние готовности"))));
-    assertSuccess(r);
+                            + " не перешел в состояние готовности")))));
 
     // игра перешла в режим ИГРА по готовности всех игроков
-    r = gameWrapper.getCore().findGameContextByUID(gameContext)
-            .map(context -> context.ifGameRan(true));
-    assertSuccess(r);
+    assertSuccess(gameWrapper.getCore().findGameContextByUID(gameContext)
+            .map(context -> context.ifGameRan(true)));
+
+    // если первым ходитигрок 2, то передаем ход игроку 1
+    gameWrapper.getGetPlayerOwnsTheRound(gameContext)
+            .peak(player -> {
+              if (player.getId().equals(player2)) {
+                assertSuccess(gameWrapper.nextTurn(gameContext, player2));
+              }
+            });
 
     // двигаем юнит 1 игрока 2.Должен быть отказ
     warriorResult = gameWrapper.moveWarriorTo(gameContext, player2, warrior1p2, new Coords(220, 610));
@@ -188,10 +201,10 @@ public class StartGameWith2PlayersAndMovesTest extends AbstractMapTest {
 
   }
 
-//  @Test
-//  public void startPlayTest() {
-//    innerDoTest();
-//  }
+  @Test
+  public void startPlayTest() {
+    innerDoTest();
+  }
 
 
 }

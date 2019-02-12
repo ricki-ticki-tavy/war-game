@@ -6,8 +6,8 @@ import api.core.Result;
 import api.entity.warrior.WarriorBaseClass;
 import api.entity.weapon.Weapon;
 import api.enums.EventType;
-import api.game.Event;
-import api.game.EventDataContainer;
+import api.core.Event;
+import api.core.EventDataContainer;
 import api.game.map.Player;
 import api.game.map.metadata.GameRules;
 import core.entity.warrior.Skeleton;
@@ -72,7 +72,7 @@ public class CoreImpl implements Core {
    * @param className
    * @param warriorBaseClass
    */
-  private void registerWarriorBaseClass(String className, Class<? extends WarriorBaseClass> warriorBaseClass) {
+  public void registerWarriorBaseClass(String className, Class<? extends WarriorBaseClass> warriorBaseClass) {
     registeredWarriorBaseClasses.put(className, warriorBaseClass);
   }
   //===================================================================================================
@@ -83,7 +83,7 @@ public class CoreImpl implements Core {
    * @param className
    * @param weaponClass
    */
-  private void registerWeaponClass(String className, Class<? extends Weapon> weaponClass) {
+  public void registerWeaponClass(String className, Class<? extends Weapon> weaponClass) {
     registeredWeaponClasses.put(className, weaponClass);
   }
   //===================================================================================================
@@ -153,7 +153,6 @@ public class CoreImpl implements Core {
   }
   //===================================================================================================
 
-  // TODO учесть параметр УДАЧА
   @Override
   public int getRandom(int min, int max) {
     synchronized (random) {

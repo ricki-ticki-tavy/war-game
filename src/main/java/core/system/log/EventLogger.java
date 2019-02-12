@@ -2,11 +2,11 @@ package core.system.log;
 
 import api.core.Context;
 import api.core.Result;
-import api.entity.ability.Modifier;
-import api.entity.warrior.Influencer;
+import api.game.ability.Modifier;
+import api.game.Influencer;
 import api.entity.warrior.Warrior;
 import api.entity.weapon.Weapon;
-import api.game.Event;
+import api.core.Event;
 import api.game.action.AttackResult;
 import api.game.map.Player;
 import core.game.CoreImpl;
@@ -14,6 +14,10 @@ import core.system.error.GameErrors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import static api.enums.EventType.WARRIOR_ATTACK_LUCK;
+import static api.enums.EventType.WARRIOR_ATTACK_MISS;
+import static api.enums.EventType.WARRIOR_ATTACK_MISS_BUT_LUCK;
 
 /**
  * Логирование игровых событий
@@ -186,6 +190,17 @@ public class EventLogger {
                 , event.getSource(AttackResult.class).getTarget().getTitle()
                 , event.getSource(AttackResult.class).getTarget().getOwner().getTitle()
                 , String.valueOf(event.getSource(Modifier.class).getLastCalculatedValue())));
+        break;
+      }
+      case WARRIOR_ATTACK_MISS:
+      case WARRIOR_ATTACK_MISS_BUT_LUCK:
+      case WARRIOR_ATTACK_LUCK: {
+        //   "В игре '%s' у игрока '%s' воин '%s %s' хорошо метил, но промахнулся"
+        logger.info(event.getEventType().getFormattedMessage(
+                event.getSourceContext().getGameName()
+                , event.getSource(AttackResult.class).getAttacker().getOwner().getTitle()
+                , event.getSource(AttackResult.class).getAttacker().getWarriorBaseClass().getTitle()
+                , event.getSource(AttackResult.class).getAttacker().getTitle()));
         break;
       }
       case WEAPON_TAKEN: {

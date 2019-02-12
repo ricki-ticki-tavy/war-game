@@ -1,5 +1,5 @@
-import api.game.Coords;
-import api.game.Rectangle;
+import api.geo.Coords;
+import api.geo.Rectangle;
 import api.game.map.LevelMap;
 import core.entity.map.LevelMapImpl;
 import org.junit.Test;
@@ -10,10 +10,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.util.Assert;
-import tests.CreateWarriorsWeaponsUsersTest;
+import tests.config.TestContextConfiguration;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {CreateWarriorsWeaponsUsersTest.class})
+@SpringBootTest(classes = {MoveCheckTest.class})
 @ContextConfiguration(loader = AnnotationConfigContextLoader.class, classes = TestContextConfiguration.class)
 public class MoveCheckTest {
 

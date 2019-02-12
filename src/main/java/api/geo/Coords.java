@@ -1,6 +1,4 @@
-package api.game;
-
-import org.apache.logging.log4j.util.Strings;
+package api.geo;
 
 /**
  * Координаты

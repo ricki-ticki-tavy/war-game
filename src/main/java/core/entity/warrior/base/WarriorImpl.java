@@ -1,14 +1,15 @@
 package core.entity.warrior.base;
 
 import api.core.Context;
+import api.game.Influencer;
 import api.core.Result;
-import api.entity.ability.Modifier;
+import api.game.ability.Modifier;
 import api.entity.warrior.*;
 import api.entity.weapon.Weapon;
 import api.enums.LifeTimeUnit;
 import api.enums.PlayerPhaseType;
-import api.game.Coords;
-import api.game.EventDataContainer;
+import api.geo.Coords;
+import api.core.EventDataContainer;
 import api.game.action.AttackResult;
 import api.game.map.Player;
 import core.system.ResultImpl;
@@ -161,6 +162,12 @@ public class WarriorImpl implements Warrior {
   //===================================================================================================
 
   @Override
+  public int calcDistanceToTarget(Coords to) {
+    return gameContext.calcDistanceTo(coords, to);
+  }
+  //===================================================================================================
+
+  @Override
   public Result<Warrior> moveWarriorTo(Coords to) {
     Result result;
     if (!moveLocked) {
@@ -294,8 +301,9 @@ public class WarriorImpl implements Warrior {
   //===================================================================================================
 
   @Override
-  public Result<AttackResult> innerWarriorUnderAttack(AttackResult attackResult) {
+  public Result<AttackResult> defenceWarrior(AttackResult attackResult) {
     // TODO реализовать рассчет защиты и особенностей воина
+
     return ResultImpl.success(attackResult);
   }
   //===================================================================================================

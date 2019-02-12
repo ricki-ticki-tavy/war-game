@@ -3,7 +3,6 @@ package api.core;
 import api.entity.warrior.WarriorBaseClass;
 import api.entity.weapon.Weapon;
 import api.enums.EventType;
-import api.game.Event;
 import api.game.map.Player;
 import api.game.map.metadata.GameRules;
 
