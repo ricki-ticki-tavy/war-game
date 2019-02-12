@@ -1,6 +1,10 @@
 package core.entity.modifiers;
 
+import api.core.Context;
+import api.enums.AttributeEnum;
 import api.enums.LifeTimeUnit;
+import api.enums.ModifierClass;
+import api.enums.TargetTypeEnum;
 import core.entity.base.BaseModifier;
 
 /**
@@ -14,16 +18,13 @@ public class FireModifier extends BaseModifier {
    * @param luck
    * @param minDamage
    * @param maxDamage
-   * @param lifeTimeUnit
-   * @param lifeTime
    */
   public FireModifier(
-          int probability
+          Context context
+          , int probability
           , int luck
           , int minDamage
-          , int maxDamage
-          , LifeTimeUnit lifeTimeUnit
-          , int lifeTime) {
-
+          , int maxDamage) {
+    super(context, "Огонь", "Урон огнем", TargetTypeEnum.ENEMY_WARRIOR, ModifierClass.FIRE, AttributeEnum.HEALTH, minDamage, maxDamage, probability, luck);
   }
 }
