@@ -86,18 +86,6 @@ public class WeaponsWithAbilitiesTest extends AbstractMapTest {
     Assert.isTrue(warriorResult.getResult().getTranslatedToGameCoords().equals(new Coords(770, 770)), "Неверные координаты перемещения. возможно неверная стоимость перемещения");
     Warrior warriorImpl2p2 = warriorResult.getResult();
 
-//    Assert.isTrue(warriorImpl1p1.calcDistanceTo(warriorImpl1p2.getTranslatedToGameCoords()) >
-//                    context.getGameRules().getWarriorSize() + 2 * context.getLevelMap().getSimpleUnitSize()
-//            , "Расстояние от воина 1 игрока 1 до воина 1 игрока 2 должно быть более 2-х клеток");
-//
-//    Assert.isTrue(warriorImpl1p1.calcDistanceTo(warriorImpl2p1.getTranslatedToGameCoords()) <
-//                    context.getGameRules().getWarriorSize() + 2 * context.getLevelMap().getSimpleUnitSize()
-//            , "Расстояние от воина 1 игрока 1 до воина 2 должно быть менее 2-х клеток");
-//
-//    Assert.isTrue(warriorImpl2p1.calcDistanceTo(warriorImpl1p2.getTranslatedToGameCoords()) <
-//                    context.getGameRules().getWarriorSize() + 2 * context.getLevelMap().getSimpleUnitSize()
-//            , "Расстояние от воина 2 игрока 1 до воина 1 игрока 2 должно быть менее 2-х клеток");
-
     // Игрок 1 готов
     assertSuccess(gameWrapper.playerReady(player1, true));
 
