@@ -1,10 +1,16 @@
 package tests.test.weapons;
 
+import api.game.ability.Ability;
 import core.entity.weapon.AbstractWeaponImpl;
+import core.game.ability.FireArrow;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import java.util.UUID;
 
 /**
@@ -14,9 +20,19 @@ import java.util.UUID;
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class TestFireBow extends AbstractWeaponImpl {
 
+  @Autowired
+  BeanFactory beanFactory;
+
   public static final String CLASS_NAME = "Тестовый Огненный лук";
   public static final String SECOND_WEAPON_NAME = "Тестовое острие огненного лука";
   private final String OUID = "WepFireBow_" + UUID.randomUUID().toString();
+
+  @PostConstruct
+  private void initAbilities(){
+    Ability fireArrowAbility = beanFactory.getBean(FireArrow.class, this, 1, -1, -1);
+    this.abilities.put("Огненная стрела", fireArrowAbility);
+
+  }
 
   public TestFireBow() {
     super();
@@ -29,7 +45,6 @@ public class TestFireBow extends AbstractWeaponImpl {
     this.rangedMaxDamage = 7;
     this.meleeAttackCost = 40;
     this.rangedAttackCost = 120;
-    this.additionalModifiers = null;
     this.unrejectable = false;
     this.useCountPerRound = -1;
     this.totalRangedUseCount = -1;
@@ -42,7 +57,6 @@ public class TestFireBow extends AbstractWeaponImpl {
     this.neededHandsCountToTakeWeapon = 2;
     this.secondWeaponName = SECOND_WEAPON_NAME;
 
-//    this.additionalModifiers.put("Огненная стрела", )
   }
 
 }

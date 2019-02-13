@@ -28,7 +28,6 @@ public class TestShortSword extends AbstractWeaponImpl {
     this.rangedMaxDamage = 0;
     this.meleeAttackCost = 30;
     this.rangedAttackCost = 0;
-    this.additionalModifiers = null;
     this.unrejectable = false;
     this.useCountPerRound = 0;
     this.totalRangedUseCount = 0;

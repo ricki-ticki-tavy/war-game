@@ -1,6 +1,7 @@
 package core.entity.map;
 
 import api.core.Context;
+import api.core.Owner;
 import api.core.Result;
 import api.game.ability.Modifier;
 import api.game.Influencer;
@@ -348,7 +349,7 @@ public class LevelMapImpl implements LevelMap {
   //===================================================================================================
 
   @Override
-  public Result<Influencer> addInfluenceToWarrior(Player player, String warriorId, Modifier modifier, Object source, LifeTimeUnit lifeTimeUnit, int lifeTime) {
+  public Result<Influencer> addInfluenceToWarrior(Player player, String warriorId, Modifier modifier, Owner source, LifeTimeUnit lifeTimeUnit, int lifeTime) {
     return player.addInfluenceToWarrior(warriorId, modifier, source, lifeTimeUnit, lifeTime);
   }
   //===================================================================================================

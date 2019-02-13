@@ -157,8 +157,8 @@ public class CoreImpl implements Core {
   public int getRandom(int min, int max) {
     synchronized (random) {
       return max == min
-              ? random.nextInt(max) + 1
-              : random.nextInt(max - min) + min;
+              ? random.nextInt(max + 1) + 1
+              : random.nextInt(max - min + 1) + min;
     }
   }
   //===================================================================================================

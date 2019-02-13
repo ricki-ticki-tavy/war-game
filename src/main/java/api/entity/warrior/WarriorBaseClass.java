@@ -1,5 +1,6 @@
 package api.entity.warrior;
 
+import api.core.Owner;
 import api.core.Result;
 import api.game.action.AttackResult;
 import core.entity.warrior.base.WarriorSBaseAttributesImpl;
@@ -11,6 +12,7 @@ import api.entity.base.BaseEntityHeader;
 import api.enums.EventType;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Базовый класс воина
@@ -26,7 +28,7 @@ public interface WarriorBaseClass extends BaseEntityHeader {
    * ВОзвращает способности воина
    * @return
    */
-  List<Ability> getAbilities(EventType triggerType);
+  Map<String, Ability> getAbilities();
 
   /**
    * Завершить раунд игрока

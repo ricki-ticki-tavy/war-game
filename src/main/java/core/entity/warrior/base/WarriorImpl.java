@@ -1,8 +1,10 @@
 package core.entity.warrior.base;
 
 import api.core.Context;
+import api.core.Owner;
 import api.game.Influencer;
 import api.core.Result;
+import api.game.ability.Ability;
 import api.game.ability.Modifier;
 import api.entity.warrior.*;
 import api.entity.weapon.Weapon;
@@ -50,6 +52,8 @@ public class WarriorImpl implements Warrior {
   protected volatile boolean rollbackAvailable;
   protected volatile int treatedActionPointsForMove;
 
+  protected final Map<String, Class<? extends Ability>> unsupportedAbilities = new ConcurrentHashMap<>(20);
+
 
   @Autowired
   private BeanFactory beanFactory;
@@ -57,6 +61,7 @@ public class WarriorImpl implements Warrior {
   //===================================================================================================
   //===================================================================================================
 
+  // TODO убрать gameContext так как Owner умеет его добыть
   public WarriorImpl(Context gameContext, Player owner, WarriorBaseClass warriorBaseClass, String title, Coords coords, boolean summoned) {
     this.warriorBaseClass = warriorBaseClass;
     this.attributes = warriorBaseClass.getBaseAttributes().clone();
@@ -363,6 +368,14 @@ public class WarriorImpl implements Warrior {
     originalCoords = new Coords(coords);
     // не использовался в этом ходе / защите
     setTouchedOnThisTurn(false);
+
+    // обновить спосоности
+    warriorBaseClass.getAbilities().values().stream().forEach(ability -> ability.revival());
+
+    // восстановить оружие. На двуручном и более-ручном оружии могут быть кратные срабатывания восстановления. TODO поправить
+    hands.values().stream()
+            .forEach(warriorSHand -> warriorSHand.getWeapons()
+            .stream().forEach(weapon -> weapon.revival()));
   }
   //===================================================================================================
 
@@ -394,7 +407,7 @@ public class WarriorImpl implements Warrior {
   //===================================================================================================
 
   @Override
-  public Result<Influencer> addInfluenceToWarrior(Modifier modifier, Object source, LifeTimeUnit lifeTimeUnit, int lifeTime) {
+  public Result<Influencer> addInfluenceToWarrior(Modifier modifier, Owner source, LifeTimeUnit lifeTimeUnit, int lifeTime) {
     Influencer influencer = new InfluencerImpl(this, source, lifeTimeUnit, lifeTime, modifier);
     influencers.put(influencer.getId(), influencer);
     gameContext.fireGameEvent(null, WARRIOR_INFLUENCER_ADDED
@@ -542,6 +555,12 @@ public class WarriorImpl implements Warrior {
   public Warrior setTitle(String title) {
     this.title = title;
     return this;
+  }
+  //===================================================================================================
+
+  @Override
+  public Map<String, Class<? extends Ability>> getUnavailableAbilities() {
+    return new HashMap<>(unsupportedAbilities);
   }
   //===================================================================================================
 

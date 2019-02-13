@@ -1,6 +1,7 @@
 package api.game.map;
 
 import api.core.Context;
+import api.core.Owner;
 import api.core.Result;
 import api.game.ability.Modifier;
 import api.game.Influencer;
@@ -249,7 +250,7 @@ public interface LevelMap {
    * @param lifeTime
    * @return
    */
-  Result<Influencer> addInfluenceToWarrior(Player player, String warriorId, Modifier modifier, Object source, LifeTimeUnit lifeTimeUnit, int lifeTime);
+  Result<Influencer> addInfluenceToWarrior(Player player, String warriorId, Modifier modifier, Owner source, LifeTimeUnit lifeTimeUnit, int lifeTime);
 
   /**
    * Получить список оказываемых влияний на юнит

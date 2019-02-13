@@ -28,7 +28,7 @@ public class GameMetadataLoader {
 //            })));
 //
 //    // из оружия
-//    gameRawMetadata.weapons.stream().forEach(weapon -> Optional.ofNullable(weapon.additionalModifiers)
+//    gameRawMetadata.weapons.stream().forEach(weapon -> Optional.ofNullable(weapon.abilities)
 //            .ifPresent(modifiersList -> modifiersList.stream().forEach(modifier -> {
 //              if (StringUtils.isEmpty(modifier.ref)) gamePreparedMetadata.addModifier(modifier);
 //            })));
@@ -51,7 +51,7 @@ public class GameMetadataLoader {
 //                Optional.ofNullable(hand.weapons).ifPresent(weapons ->
 //                        weapons.stream().forEach(weapon -> {
 //                          if (StringUtils.isEmpty(weapon.ref)) {
-//                            Optional.ofNullable(weapon.additionalModifiers)
+//                            Optional.ofNullable(weapon.abilities)
 //                                    .ifPresent(weaponModifiers -> weaponModifiers.stream().forEach(modifier -> {
 //                                      if (StringUtils.isEmpty(modifier.ref)) gamePreparedMetadata.addModifier(modifier);
 //                                    }));

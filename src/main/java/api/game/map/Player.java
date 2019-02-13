@@ -1,6 +1,7 @@
 package api.game.map;
 
 import api.core.Context;
+import api.core.Owner;
 import api.core.Result;
 import api.game.ability.Modifier;
 import api.entity.base.BaseEntityHeader;
@@ -18,7 +19,7 @@ import java.util.Map;
 /**
  * Игрок
  */
-public interface Player extends BaseEntityHeader {
+public interface Player extends Owner {
 
   /**
    * Добавить в коллекцию воина
@@ -206,7 +207,7 @@ public interface Player extends BaseEntityHeader {
    * @param lifeTime
    * @return
    */
-  Result<Influencer> addInfluenceToWarrior(String warriorId, Modifier modifier, Object source, LifeTimeUnit lifeTimeUnit, int lifeTime);
+  Result<Influencer> addInfluenceToWarrior(String warriorId, Modifier modifier, Owner source, LifeTimeUnit lifeTimeUnit, int lifeTime);
 
   /**
    * получитьсписок воинов, участвовавших в этом ходе / защите

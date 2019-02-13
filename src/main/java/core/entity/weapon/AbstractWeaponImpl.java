@@ -1,7 +1,10 @@
 package core.entity.weapon;
 
+import api.core.Context;
 import api.core.EventDataContainer;
 import api.core.Result;
+import api.game.Influencer;
+import api.game.ability.Ability;
 import api.game.ability.Modifier;
 import api.entity.warrior.Warrior;
 import api.entity.weapon.Weapon;
@@ -15,6 +18,7 @@ import core.system.ResultImpl;
 import core.system.error.GameErrors;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static api.enums.AttributeEnum.HEALTH;
 import static api.enums.EventType.WARRIOR_ATTACK_LUCK;
@@ -37,7 +41,7 @@ public abstract class AbstractWeaponImpl implements Weapon {
   protected int rangedMaxDamage;
   protected int rangedAttackCost;
   protected int meleeAttackCost;
-  protected Map<String, Modifier> additionalModifiers;
+  protected final Map<String, Ability> abilities = new ConcurrentHashMap<>(10);
   protected boolean unrejectable;
   protected int useCountPerRound;
   protected int totalRangedUseCount;
@@ -63,7 +67,7 @@ public abstract class AbstractWeaponImpl implements Weapon {
           , int rangedMaxDamage
           , int rangedAttackCost
           , int meleeAttackCost
-          , Map<String, Modifier> additionalModifiers
+          , Map<String, Ability> abilities
           , boolean unrejectable
           , int useCountPerRound
           , int totalRangedUseCount
@@ -84,7 +88,7 @@ public abstract class AbstractWeaponImpl implements Weapon {
     this.rangedMaxDamage = rangedMaxDamage;
     this.rangedAttackCost = rangedAttackCost;
     this.meleeAttackCost = meleeAttackCost;
-    this.additionalModifiers = additionalModifiers;
+    this.abilities.putAll(abilities);
     this.unrejectable = unrejectable;
     this.useCountPerRound = useCountPerRound;
     this.totalRangedUseCount = totalRangedUseCount;
@@ -155,8 +159,8 @@ public abstract class AbstractWeaponImpl implements Weapon {
   //===================================================================================================
 
   @Override
-  public List<Modifier> getAdditionalModifiers() {
-    return new ArrayList(additionalModifiers.values());
+  public List<Ability> getAbilities() {
+    return new ArrayList(abilities.values());
   }
   //===================================================================================================
 
@@ -259,6 +263,13 @@ public abstract class AbstractWeaponImpl implements Weapon {
       throw GameErrors.SYSTEM_OBJECT_ALREADY_INITIALIZED.getError("warrior.owner", owner.toString());
     }
     this.owner = owner;
+    return this;
+  }
+  //===================================================================================================
+
+  @Override
+  public Weapon revival() {
+    abilities.values().stream().forEach(ability -> ability.revival());
     return this;
   }
   //===================================================================================================
@@ -388,41 +399,57 @@ public abstract class AbstractWeaponImpl implements Weapon {
               , 100
               , luck);
 
-      attackResult.getResult().addInfluencer(new InfluencerImpl(
+      Influencer influencer = new InfluencerImpl(
               targetWarrior, this, LifeTimeUnit.JUST_NOW, 1
-              , modifier));
+              , modifier);
+      attackResult.getResult().addInfluencer(influencer);
 
-      if (modifier.isHitSuccess() && modifier.isLuckyRollOfDice()){
+      if (modifier.isHitSuccess() && modifier.isLuckyRollOfDice()) {
         // попал и улыбнулась удача
         owner.getContext().fireGameEvent(null, WARRIOR_ATTACK_LUCK, new EventDataContainer(attackResult.getResult(), modifier), null);
-      } else if (!modifier.isHitSuccess() && modifier.isLuckyRollOfDice()){
+      } else if (!modifier.isHitSuccess() && modifier.isLuckyRollOfDice()) {
         // не попал, но удача все переграла
         owner.getContext().fireGameEvent(null, WARRIOR_ATTACK_MISS_BUT_LUCK, new EventDataContainer(attackResult.getResult(), modifier), null);
-      } else if (!modifier.isHitSuccess() && !modifier.isLuckyRollOfDice()){
+      } else if (!modifier.isHitSuccess() && !modifier.isLuckyRollOfDice()) {
         // не попал и неудачлив
         owner.getContext().fireGameEvent(null, WARRIOR_ATTACK_MISS, new EventDataContainer(attackResult.getResult(), modifier), null);
+        return attackResult;
       }
 
-      // отправим своему плееру на возможное добавление влияний
-      attackResult = owner.getOwner().innerAttachToAttackToWarrior(attackResult.getResult());
+      if (modifier.isLuckyRollOfDice() || modifier.isHitSuccess()) {
+        // если попал, то смотрим далее способности
 
-      // теперь отправим игроку-владельцу атакуемого юнита результат атаки, чтобы там уже и
-      // произошел разбор всех влияний в том числе и физического урона
+        // получим влияния, имеющиеся, возможно, у оружия
+        abilities.values().stream().forEach(ability -> influencer.addChildren(ability.buildForTarget(targetWarrior)));
 
-      // отправить атаку плееру атакуемого воина
-      attackResult = targetWarrior.getOwner().defenceWarrior(attackResult.getResult())
-              .map(proceededAttackResult -> {
-                // спишем очки, затраченные на атаку
-                owner.getAttributes().addActionPoints(-proceededAttackResult.getConsumedActionPoints());
-                // заблокируем откат
-                owner.lockRollback();
-                // заблокируем перемещение
-                owner.lockMove();
-                return ResultImpl.success(proceededAttackResult);
-              });
+        // отправим своему плееру на возможное добавление влияний
+        attackResult = owner.getOwner().innerAttachToAttackToWarrior(attackResult.getResult());
+
+        // теперь отправим игроку-владельцу атакуемого юнита результат атаки, чтобы там уже и
+        // произошел разбор всех влияний в том числе и физического урона
+
+        // отправить атаку плееру атакуемого воина
+        attackResult = targetWarrior.getOwner().defenceWarrior(attackResult.getResult())
+                .map(proceededAttackResult -> {
+                  // спишем очки, затраченные на атаку
+                  owner.getAttributes().addActionPoints(-proceededAttackResult.getConsumedActionPoints());
+                  // заблокируем откат
+                  owner.lockRollback();
+                  // заблокируем перемещение
+                  owner.lockMove();
+                  return ResultImpl.success(proceededAttackResult);
+                });
+      }
     }
+
     return attackResult;
 
+  }
+  //===================================================================================================
+
+  @Override
+  public Context getContext() {
+    return owner.getContext();
   }
   //===================================================================================================
 }

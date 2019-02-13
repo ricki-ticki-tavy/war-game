@@ -28,6 +28,8 @@ public enum GameErrors {
   , WARRIOR_ATTACK_THERE_IS_NOT_ENOUGH_ACTION_POINTS("WR-35", "В игре %s (id %s)  воин '%s %s' (id %s) не может атаковать воина '%s %s' (id %s) игрока %s так как не хватает очков действия")
   , WARRIOR_ATTACK_UNKNOW_REASON_SHAISE("WR-35", "В игре %s (id %s)  воин '%s %s' (id %s) не может атаковать воина '%s %s' (id %s) игрока %s так как не ясно почему. Шайсе...")
 
+  , ABILITY_USE_COUNT_PER_TURN_HAS_EXCEEDED("AB-1", "В игре %s способность %s не может быть применена более %s раз")
+
   , WEAPON_BASE_CLASS_NOT_FOUND_BY_NAME("WP-1", "Класс оружия с именем %s не существует")
 
   , MAP_LOAD_ERROR("M-1", "Ошибка загрузки карты: %s")

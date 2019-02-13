@@ -1,6 +1,5 @@
 package core.entity.weapon;
 
-import api.entity.warrior.Warrior;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -28,7 +27,6 @@ public class ShortSword extends AbstractWeaponImpl {
     this.rangedMaxDamage = 0;
     this.meleeAttackCost = 30;
     this.rangedAttackCost = 0;
-    this.additionalModifiers = null;
     this.unrejectable = false;
     this.useCountPerRound = 0;
     this.totalRangedUseCount = 0;
