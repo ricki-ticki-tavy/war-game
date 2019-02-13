@@ -5,10 +5,10 @@ import api.core.Owner;
 import api.core.Result;
 import api.entity.weapon.Weapon;
 import api.enums.LifeTimeUnit;
-import api.game.Influencer;
+import api.game.ability.Influencer;
 import api.game.ability.Ability;
 import api.game.ability.Modifier;
-import api.game.action.AttackResult;
+import api.game.action.InfluenceResult;
 import api.game.map.Player;
 import api.geo.Coords;
 
@@ -118,7 +118,7 @@ public interface Warrior extends Owner, HasCoordinates {
    * @param weaponId
    * @return
    */
-  Result<AttackResult> attackWarrior(Warrior targetWarrior, String weaponId);
+  Result<InfluenceResult> attackWarrior(Warrior targetWarrior, String weaponId);
 
   /**
    * Этот метод вызывается когда воин игрока атакуется. В этом методе происходит анализ всех нанесенныхз уронов,
@@ -126,7 +126,7 @@ public interface Warrior extends Owner, HasCoordinates {
    * @param attackResult
    * @return
    */
-  Result<AttackResult> defenceWarrior(AttackResult attackResult);
+  Result<InfluenceResult> defenceWarrior(InfluenceResult attackResult);
 
   /**
    * добавить влияние юниту

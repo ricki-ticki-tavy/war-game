@@ -2,10 +2,12 @@ package api.game.ability;
 
 import api.core.Context;
 import api.core.Result;
+import api.entity.warrior.Warrior;
 import api.enums.AttributeEnum;
+import api.enums.ManifestationOfInfluenceEnum;
 import api.enums.ModifierClass;
 import api.enums.TargetTypeEnum;
-import api.game.action.AttackResult;
+import api.game.action.InfluenceResult;
 
 /**
  * модификатор атрибута
@@ -31,7 +33,7 @@ public interface Modifier {
    *
    * @return
    */
-  TargetTypeEnum getTarget();
+  TargetTypeEnum getTargetType();
 
   /**
    * На какой атрибут влияет
@@ -130,9 +132,15 @@ public interface Modifier {
 
   /**
    * Применить в соответствие с атакой.
-   * @param attackResult
+   * @param influenceResult
    * @return
    */
-  Result<Modifier> apply(AttackResult attackResult);
+  Result<Modifier> applyAttack(InfluenceResult influenceResult);
+
+  /**
+   * Возвращает тип влияния: положительный или отрицательный
+   * @return
+   */
+  ManifestationOfInfluenceEnum getManifestationOfInfluence();
 
 }

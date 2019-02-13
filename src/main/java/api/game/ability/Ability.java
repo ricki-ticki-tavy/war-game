@@ -2,16 +2,15 @@ package api.game.ability;
 
 import api.core.Context;
 import api.core.Owner;
-import api.core.Result;
-import api.entity.base.BaseEntityHeader;
 import api.entity.warrior.Warrior;
 import api.entity.warrior.WarriorBaseClass;
-import api.enums.ActorTypeEnum;
+import api.enums.OwnerTypeEnum;
 import api.enums.EventType;
+import api.enums.PlayerPhaseType;
 import api.enums.TargetTypeEnum;
-import api.game.Influencer;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Способность. класс высшего уровня. Представляет собой способность влиять на один или несколько параметров юнита или
@@ -94,7 +93,7 @@ public interface Ability extends Owner {
    *
    * @return
    */
-  ActorTypeEnum getActorType();
+  OwnerTypeEnum getOwnerType();
 
   /**
    * Восстановиться после хода
@@ -102,4 +101,10 @@ public interface Ability extends Owner {
    * @return
    */
   Ability revival();
+
+  /**
+   * Возвращает фазы, когда способность активна. Актуально для способностей юнита.
+   * @return
+   */
+  Set<PlayerPhaseType> getActivePhase();
 }

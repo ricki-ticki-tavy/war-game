@@ -3,11 +3,11 @@ package api.game.wraper;
 import api.core.Context;
 import api.core.Core;
 import api.core.Result;
-import api.game.Influencer;
+import api.game.ability.Influencer;
 import api.entity.warrior.Warrior;
 import api.entity.weapon.Weapon;
 import api.geo.Coords;
-import api.game.action.AttackResult;
+import api.game.action.InfluenceResult;
 import api.game.map.Player;
 import api.game.map.metadata.GameRules;
 
@@ -70,7 +70,7 @@ public interface GameWrapper {
    * @param weaponId
    * @return
    */
-  Result<AttackResult> attackWarrior(String contextId, String userName, String attackerWarriorId, String targetWarriorId, String weaponId);
+  Result<InfluenceResult> attackWarrior(String contextId, String userName, String attackerWarriorId, String targetWarriorId, String weaponId);
 
   /**
    * Переместить юнит на заданные координаты

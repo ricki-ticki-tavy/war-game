@@ -2,9 +2,8 @@ import api.core.Context;
 import api.core.Result;
 import api.entity.warrior.Warrior;
 import api.entity.weapon.Weapon;
-import api.game.Influencer;
-import api.game.ability.Modifier;
-import api.game.action.AttackResult;
+import api.game.ability.Influencer;
+import api.game.action.InfluenceResult;
 import api.game.wraper.GameWrapper;
 import api.geo.Coords;
 import org.junit.Test;
@@ -20,8 +19,6 @@ import tests.config.TestContextConfiguration;
 import tests.test.weapons.TestBow;
 import tests.test.weapons.TestFireBow;
 import tests.test.weapons.TestSword;
-
-import static core.system.error.GameErrors.*;
 
 /**
  * Проверка подписывания и отписывания от событий.
@@ -103,7 +100,7 @@ public class WeaponsWithAbilitiesTest extends AbstractMapTest {
     // Пробуем атаковать воином 1 игрока 1 воина 1 игрока 2. Это должно выйти. Заодно проверим, что огнем
     // урон нанесен тоже
     int hp = warriorImpl1p2.getAttributes().getHealth();
-    Result<AttackResult> attackResult = gameWrapper.attackWarrior(gameContext, player1, warrior1p1, warrior1p2, bowWarrior1p1);
+    Result<InfluenceResult> attackResult = gameWrapper.attackWarrior(gameContext, player1, warrior1p1, warrior1p2, bowWarrior1p1);
     assertSuccess(attackResult);
     Assert.isTrue(warriorImpl1p1.getAttributes().getActionPoints() == 120, "Не списаны очки за выстрел луком");
     Influencer influencer = attackResult.getResult().getInfluencers().get(0);

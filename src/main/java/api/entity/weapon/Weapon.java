@@ -3,10 +3,8 @@ package api.entity.weapon;
 import api.core.Owner;
 import api.core.Result;
 import api.game.ability.Ability;
-import api.game.ability.Modifier;
-import api.entity.base.BaseEntityHeader;
 import api.entity.warrior.Warrior;
-import api.game.action.AttackResult;
+import api.game.action.InfluenceResult;
 
 import java.util.List;
 
@@ -120,7 +118,7 @@ public interface Weapon extends Owner{
    * Атаковать противника
    * @param targetWarrior
    */
-  Result<AttackResult> attack(Warrior targetWarrior);
+  Result<InfluenceResult> attack(Warrior targetWarrior);
 
   /**
    * задать  владельца снаряжения

@@ -1,15 +1,13 @@
 package api.entity.warrior;
 
-import api.core.Owner;
 import api.core.Result;
-import api.game.action.AttackResult;
+import api.game.action.InfluenceResult;
 import core.entity.warrior.base.WarriorSBaseAttributesImpl;
 import api.core.Context;
 import api.entity.weapon.Weapon;
 import api.core.Event;
 import api.game.ability.Ability;
 import api.entity.base.BaseEntityHeader;
-import api.enums.EventType;
 
 import java.util.List;
 import java.util.Map;
@@ -87,7 +85,7 @@ public interface WarriorBaseClass extends BaseEntityHeader {
    * @param attackResult
    * @return
    */
-  Result<AttackResult> innerWarriorUnderAttack(AttackResult attackResult);
+  Result<InfluenceResult> innerWarriorUnderAttack(InfluenceResult attackResult);
 
   /**
    * Возвращает количество рук воина

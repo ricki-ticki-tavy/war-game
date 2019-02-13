@@ -2,7 +2,8 @@ package core.entity.warrior.base;
 
 import api.core.Context;
 import api.core.Owner;
-import api.game.Influencer;
+import api.enums.OwnerTypeEnum;
+import api.game.ability.Influencer;
 import api.core.Result;
 import api.game.ability.Ability;
 import api.game.ability.Modifier;
@@ -12,8 +13,9 @@ import api.enums.LifeTimeUnit;
 import api.enums.PlayerPhaseType;
 import api.geo.Coords;
 import api.core.EventDataContainer;
-import api.game.action.AttackResult;
+import api.game.action.InfluenceResult;
 import api.game.map.Player;
+import core.game.action.InfluenceResultImpl;
 import core.system.ResultImpl;
 import core.system.error.GameError;
 import org.springframework.beans.factory.BeanFactory;
@@ -295,7 +297,7 @@ public class WarriorImpl implements Warrior {
   }
   //===================================================================================================
 
-  public Result<AttackResult> attackWarrior(Warrior targetWarrior, String weaponId) {
+  public Result<InfluenceResult> attackWarrior(Warrior targetWarrior, String weaponId) {
     // проверим, что это не дружественный воин
     return ifWarriorAlied(targetWarrior, false)
             // Найдем у своего воинаоружие
@@ -306,7 +308,7 @@ public class WarriorImpl implements Warrior {
   //===================================================================================================
 
   @Override
-  public Result<AttackResult> defenceWarrior(AttackResult attackResult) {
+  public Result<InfluenceResult> defenceWarrior(InfluenceResult attackResult) {
     // TODO реализовать рассчет защиты и особенностей воина
 
     return ResultImpl.success(attackResult);
@@ -353,7 +355,7 @@ public class WarriorImpl implements Warrior {
    */
   private void restoreAttributesAvailableForRestoration(PlayerPhaseType playerPhaseType) {
     attributes.setAbilityActionPoints(attributes.getMaxAbilityActionPoints());
-    attributes.setActionPoints(playerPhaseType == PlayerPhaseType.PLAYER_PHASE_TYPE_ATACK ? attributes.getMaxActionPoints() : attributes.getMaxDefenseActionPoints());
+    attributes.setActionPoints(playerPhaseType == PlayerPhaseType.ATACK_PHASE ? attributes.getMaxActionPoints() : attributes.getMaxDefenseActionPoints());
     attributes.setLuckMeleeAtack(getWarriorBaseClass().getBaseAttributes().getLuckMeleeAtack());
     attributes.setLuckRangeAtack(getWarriorBaseClass().getBaseAttributes().getLuckRangeAtack());
     attributes.setLuckDefense(getWarriorBaseClass().getBaseAttributes().getLuckDefense());
@@ -375,7 +377,16 @@ public class WarriorImpl implements Warrior {
     // восстановить оружие. На двуручном и более-ручном оружии могут быть кратные срабатывания восстановления. TODO поправить
     hands.values().stream()
             .forEach(warriorSHand -> warriorSHand.getWeapons()
-            .stream().forEach(weapon -> weapon.revival()));
+                    .stream().forEach(weapon -> weapon.revival()));
+
+    // применить способности класса воина
+    InfluenceResult influenceResult = new InfluenceResultImpl(this.getOwner(), this, null, this.getOwner(), this, 0);
+    warriorBaseClass.getAbilities().values().stream()
+            .filter(ability -> ability.getOwnerType().equals(OwnerTypeEnum.WARRIOR))
+            .forEach(ability -> ability.buildForTarget(this).stream()
+                    .forEach(influencer -> influencer.applyToWarrior(influenceResult)));
+
+    // TODO применить влияния артефактов
   }
   //===================================================================================================
 
@@ -389,20 +400,20 @@ public class WarriorImpl implements Warrior {
     return applayInfluences(playerPhaseType)
             .peak(warrior -> warrior.getOwner().findContext()
                     .peak(context -> context.fireGameEvent(null
-                            , playerPhaseType == PlayerPhaseType.PLAYER_PHASE_TYPE_DEFENSE ? WARRIOR_PREPARED_TO_DEFENCE : WARRIOR_PREPARED_TO_ATTACK
+                            , playerPhaseType == PlayerPhaseType.DEFENSE_PHASE ? WARRIOR_PREPARED_TO_DEFENCE : WARRIOR_PREPARED_TO_ATTACK
                             , new EventDataContainer(this), null)));
   }
   //===================================================================================================
 
   @Override
   public Result<Warrior> prepareToDefensePhase() {
-    return prepareToPhase(PlayerPhaseType.PLAYER_PHASE_TYPE_DEFENSE);
+    return prepareToPhase(PlayerPhaseType.DEFENSE_PHASE);
   }
   //===================================================================================================
 
   @Override
   public Result<Warrior> prepareToAttackPhase() {
-    return prepareToPhase(PlayerPhaseType.PLAYER_PHASE_TYPE_ATACK);
+    return prepareToPhase(PlayerPhaseType.ATACK_PHASE);
   }
   //===================================================================================================
 

@@ -4,14 +4,14 @@ import api.core.Context;
 import api.core.Owner;
 import api.core.Result;
 import api.game.ability.Modifier;
-import api.game.Influencer;
+import api.game.ability.Influencer;
 import api.entity.warrior.Warrior;
 import api.entity.weapon.Weapon;
 import api.enums.LifeTimeUnit;
 import api.geo.Coords;
 import api.core.EventDataContainer;
 import api.geo.Rectangle;
-import api.game.action.AttackResult;
+import api.game.action.InfluenceResult;
 import api.game.map.Player;
 import core.system.ResultImpl;
 import org.springframework.beans.factory.BeanFactory;
@@ -291,7 +291,7 @@ public class PlayerImpl implements Player {
   //===================================================================================================
 
   @Override
-  public Result<AttackResult> attackWarrior(String attackerWarriorId, String targetWarriorId, String weaponId) {
+  public Result<InfluenceResult> attackWarrior(String attackerWarriorId, String targetWarriorId, String weaponId) {
     // Найти юнит, который будем атаковать
     return context.getLevelMap().findWarriorById(targetWarriorId)
             // найти юнит которым будем атаковать
@@ -304,14 +304,14 @@ public class PlayerImpl implements Player {
   //===================================================================================================
 
   @Override
-  public Result<AttackResult> innerAttachToAttackToWarrior(AttackResult attackResult) {
+  public Result<InfluenceResult> innerAttachToAttackToWarrior(InfluenceResult attackResult) {
     return ResultImpl.success(attackResult); // TODO добавить сбор с артефактов всяких полезностей
   }
   //===================================================================================================
 
   // TODO сделать УМИРАНИЕ юнита
   @Override
-  public Result<AttackResult> defenceWarrior(AttackResult attackResult) {
+  public Result<InfluenceResult> defenceWarrior(InfluenceResult attackResult) {
     // возможность воину отбить удары и / или ослабить воздействие вредных влияний
     return attackResult.getTarget().defenceWarrior(attackResult)
             // теперь рпименим оставшиеся влияния к воину

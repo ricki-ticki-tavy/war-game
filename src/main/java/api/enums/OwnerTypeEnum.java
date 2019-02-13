@@ -3,7 +3,7 @@ package api.enums;
 /**
  * Тип активатора действия, способности
  */
-public enum ActorTypeEnum {
+public enum OwnerTypeEnum {
   PLAYER("Игрок")
   , WARRIOR("Воин")
   , WEAPON("Оружие")
@@ -14,7 +14,7 @@ public enum ActorTypeEnum {
     return title;
   }
 
-  private ActorTypeEnum(String title){
+  private OwnerTypeEnum(String title){
     this.title = title;
   }
 }

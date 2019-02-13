@@ -3,13 +3,13 @@ package core.game.wraper;
 import api.core.Context;
 import api.core.Core;
 import api.core.Result;
-import api.game.Influencer;
+import api.game.ability.Influencer;
 import api.entity.warrior.Warrior;
 import api.entity.weapon.Weapon;
 import api.enums.EventType;
 import api.geo.Coords;
 import api.core.EventDataContainer;
-import api.game.action.AttackResult;
+import api.game.action.InfluenceResult;
 import api.game.map.Player;
 import api.game.map.metadata.GameRules;
 import api.game.wraper.GameWrapper;
@@ -95,7 +95,7 @@ public class GameWrapperImpl implements GameWrapper {
 //===================================================================================================
 
   @Override
-  public Result<AttackResult> attackWarrior(String contextId, String userName, String attackerWarriorId, String targetWarriorId, String weaponId) {
+  public Result<InfluenceResult> attackWarrior(String contextId, String userName, String attackerWarriorId, String targetWarriorId, String weaponId) {
     return core.findGameContextByUID(contextId)
             .mapSafe(context -> context.attackWarrior(userName, attackerWarriorId, targetWarriorId, weaponId))
             .logIfError(logger);

@@ -2,12 +2,11 @@ package core.entity.warrior.base;
 
 import api.core.*;
 import api.game.ability.Modifier;
-import api.game.Influencer;
+import api.game.ability.Influencer;
 import api.entity.warrior.Warrior;
-import api.entity.warrior.WarriorSBaseAttributes;
 import api.enums.EventType;
 import api.enums.LifeTimeUnit;
-import api.game.action.AttackResult;
+import api.game.action.InfluenceResult;
 import core.system.ResultImpl;
 
 import java.util.ArrayList;
@@ -72,12 +71,11 @@ public class InfluencerImpl implements Influencer {
   //===================================================================================================
 
   /**
-   * TODO добавить собственно действие по изменению некоторых атрибутов, как здоровье, магия и т.п., если оно есть
    * срабатывает когда наступает событие, по которому измеряется время жизни
    *
    * @param event
    */
-  public void onTimeEvent(Event event) {
+  private void onTimeEvent(Event event) {
     if (owner == event.getSource(owner.getClass())) {
       // событие пришло от нашего источника
       if (--lifeTime <= 0) {
@@ -137,15 +135,15 @@ public class InfluencerImpl implements Influencer {
   //===================================================================================================
 
   @Override
-  public Result<Warrior> applyToWarrior(AttackResult attackResult) {
+  public Result<Warrior> applyToWarrior(InfluenceResult influenceResult) {
     // Уже всерассчитано. Применяем значение, рассчитанное заранее (getLastCalculatedValue())
     Result<Warrior> result;
     if (modifier.isLuckyRollOfDice() || modifier.isHitSuccess()) {
-      result = modifier.apply(attackResult)
+      result = modifier.applyAttack(influenceResult)
               .map(fineModifier -> {
                 children.stream()
-                        .forEach(child -> child.applyToWarrior(attackResult));
-                return ResultImpl.success(fineModifier.getTarget());
+                        .forEach(child -> child.applyToWarrior(influenceResult));
+                return ResultImpl.success(fineModifier.getTargetType());
               });
 
     } else {

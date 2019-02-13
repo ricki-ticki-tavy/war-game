@@ -4,7 +4,7 @@ import api.core.Context;
 import api.core.Owner;
 import api.core.Result;
 import api.game.ability.Modifier;
-import api.game.Influencer;
+import api.game.ability.Influencer;
 import api.entity.warrior.Warrior;
 import api.entity.weapon.Weapon;
 import api.enums.LifeTimeUnit;
@@ -12,7 +12,7 @@ import api.enums.TargetTypeEnum;
 import api.geo.Coords;
 import api.core.EventDataContainer;
 import api.geo.Rectangle;
-import api.game.action.AttackResult;
+import api.game.action.InfluenceResult;
 import api.game.map.LevelMap;
 import api.game.map.Player;
 import api.game.map.metadata.LevelMapMetaDataXml;
@@ -286,7 +286,7 @@ public class LevelMapImpl implements LevelMap {
   //===================================================================================================
 
   @Override
-  public Result<AttackResult> attackWarrior(Player player, String attackerWarriorId, String targetWarriorId, String weaponId) {
+  public Result<InfluenceResult> attackWarrior(Player player, String attackerWarriorId, String targetWarriorId, String weaponId) {
     // активна игра, а не режим расстановки
     return context.ifGameRan(true)
             // ход именно этого игрока

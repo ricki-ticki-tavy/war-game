@@ -3,14 +3,14 @@ package core.game;
 import api.core.Context;
 import api.core.Core;
 import api.core.Result;
-import api.game.Influencer;
+import api.game.ability.Influencer;
 import api.entity.warrior.Warrior;
 import api.entity.weapon.Weapon;
 import api.enums.EventType;
 import api.geo.Coords;
 import api.core.Event;
 import api.core.EventDataContainer;
-import api.game.action.AttackResult;
+import api.game.action.InfluenceResult;
 import api.game.map.LevelMap;
 import api.game.map.Player;
 import api.game.map.metadata.GameRules;
@@ -209,7 +209,7 @@ public class ContextImpl implements Context {
   //===================================================================================================
 
   @Override
-  public Result<AttackResult> attackWarrior(String userName, String attackerWarriorId, String targetWarriorId, String weaponId) {
+  public Result<InfluenceResult> attackWarrior(String userName, String attackerWarriorId, String targetWarriorId, String weaponId) {
     return ifGameDeleting(false)
             .map(fineContext -> fineContext.findUserByName(userName))
             .map(player -> getLevelMap().attackWarrior(player, attackerWarriorId, targetWarriorId, weaponId));

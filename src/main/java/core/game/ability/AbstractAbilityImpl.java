@@ -4,10 +4,11 @@ import api.core.Context;
 import api.core.Owner;
 import api.entity.warrior.Warrior;
 import api.entity.warrior.WarriorBaseClass;
-import api.enums.ActorTypeEnum;
+import api.enums.OwnerTypeEnum;
 import api.enums.EventType;
+import api.enums.PlayerPhaseType;
 import api.enums.TargetTypeEnum;
-import api.game.Influencer;
+import api.game.ability.Influencer;
 import api.game.ability.Ability;
 
 import java.util.*;
@@ -23,13 +24,14 @@ public abstract class AbstractAbilityImpl implements Ability {
   protected String id;
   protected String title;
   protected String description;
-  protected ActorTypeEnum actorType;
+  protected OwnerTypeEnum ownerType;
   protected TargetTypeEnum targetType;
   protected final Map<String, Class<? extends WarriorBaseClass>> unsupportedWarriorBaseClasses = new ConcurrentHashMap<>(10);
   protected AtomicInteger useCount = new AtomicInteger(0);
   protected final int useCountPerRound;
   private AtomicInteger currentUseCountPerPeriod = new AtomicInteger(0);
   protected Owner owner;
+  protected Set<PlayerPhaseType> activePhases = new HashSet<>(2);
 
   /**
    * @param useCountPerRound максимальное кол-во использований за ход
@@ -79,8 +81,8 @@ public abstract class AbstractAbilityImpl implements Ability {
   //===================================================================================================
 
   @Override
-  public ActorTypeEnum getActorType() {
-    return actorType;
+  public OwnerTypeEnum getOwnerType() {
+    return ownerType;
   }
   //===================================================================================================
 
@@ -162,6 +164,12 @@ public abstract class AbstractAbilityImpl implements Ability {
       currentUseCountPerPeriod.set(useCountPerRound);
     }
     return this;
+  }
+  //===================================================================================================
+
+  @Override
+  public Set<PlayerPhaseType> getActivePhase() {
+    return null;
   }
   //===================================================================================================
 
