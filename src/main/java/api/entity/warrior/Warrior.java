@@ -1,16 +1,16 @@
 package api.entity.warrior;
 
 import api.core.Context;
-import api.game.Influencer;
+import api.core.Owner;
 import api.core.Result;
-import api.game.ability.Ability;
-import api.game.ability.Modifier;
-import api.entity.base.BaseEntityHeader;
 import api.entity.weapon.Weapon;
 import api.enums.LifeTimeUnit;
-import api.geo.Coords;
+import api.game.Influencer;
+import api.game.ability.Ability;
+import api.game.ability.Modifier;
 import api.game.action.AttackResult;
 import api.game.map.Player;
+import api.geo.Coords;
 
 import java.util.List;
 import java.util.Map;
@@ -18,7 +18,7 @@ import java.util.Map;
 /**
  * Класс воина на карте
  */
-public interface Warrior extends BaseEntityHeader, HasCoordinates {
+public interface Warrior extends Owner, HasCoordinates {
   /**
    * Получить базовый класс
    *
@@ -136,7 +136,7 @@ public interface Warrior extends BaseEntityHeader, HasCoordinates {
    * @param lifeTime
    * @return
    */
-  Result<Influencer> addInfluenceToWarrior(Modifier modifier, Object source, LifeTimeUnit lifeTimeUnit, int lifeTime);
+  Result<Influencer> addInfluenceToWarrior(Modifier modifier, Owner source, LifeTimeUnit lifeTimeUnit, int lifeTime);
 
   /**
    * Получить список оказываемых влияний на юнит

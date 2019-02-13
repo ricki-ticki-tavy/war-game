@@ -1,6 +1,7 @@
 package api.game.ability;
 
 import api.core.Context;
+import api.core.Owner;
 import api.core.Result;
 import api.entity.base.BaseEntityHeader;
 import api.entity.warrior.Warrior;
@@ -16,14 +17,15 @@ import java.util.List;
  * Способность. класс высшего уровня. Представляет собой способность влиять на один или несколько параметров юнита или
  * игрока при различных условиях. Этот класс формирует объекты влияния на конечные цели. Объекты влияния прикрепляются к
  * цели на определенное условиями время и оказывают влияние на его атрибуты.
- *
+ * <p>
  * Например способностью можно назвать : поглощение доп.единиц действия при атаке или урон огнем и так далее.
  * Такие влияния можно в дальнейшем встраивать в облрудование или давать игрокам и юнитам
  */
-public interface Ability extends BaseEntityHeader {
+public interface Ability extends Owner {
 
-   /**
+  /**
    * Отменить действие способности
+   *
    * @param context
    * @return
    */
@@ -32,6 +34,7 @@ public interface Ability extends BaseEntityHeader {
 
   /**
    * Доступна ли способность в данном собитии
+   *
    * @param triggerType
    * @return
    */
@@ -39,6 +42,7 @@ public interface Ability extends BaseEntityHeader {
 
   /**
    * Вернуть все события на которые способность оказывает влияние
+   *
    * @return
    */
   @Deprecated
@@ -46,12 +50,14 @@ public interface Ability extends BaseEntityHeader {
 
   /**
    * Допустимое кол-во применений за ход. 0 - бесконечность
+   *
    * @return
    */
   int getUseCountPerRound();
 
   /**
    * Максимальное кол-во использований за игру. 0 - бесконечность
+   *
    * @return
    */
   int getTotalUseCount();
@@ -63,20 +69,37 @@ public interface Ability extends BaseEntityHeader {
 
   /**
    * Создать объект-влияние на заданного юнита согласно действию влияния. Объект-влияние может быть древовидным
+   *
    * @param target
    * @return
    */
-  Result<List<Influencer>> createModifier(Warrior target);
+  List<Influencer> buildForTarget(Warrior target);
+
+  /**
+   * возвращает активна ли сейчас способность
+   *
+   * @return
+   */
+  boolean isActive();
 
   /**
    * Вернуть объект на который оказывается воздействие данной способностью. "Против" кого она
+   *
    * @return
    */
   TargetTypeEnum getTargetType();
 
   /**
    * Вернуть тип объекта, который может использовать данную способность
+   *
    * @return
    */
   ActorTypeEnum getActorType();
+
+  /**
+   * Восстановиться после хода
+   *
+   * @return
+   */
+  Ability revival();
 }

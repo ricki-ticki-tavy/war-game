@@ -80,6 +80,8 @@ public class BaseModifier implements Modifier {
           calculatedValue = maxValue;
         }
       }
+    } else {
+      calculatedValue = 0;
     }
     return ResultImpl.success(calculatedValue);
   }

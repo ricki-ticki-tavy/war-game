@@ -8,8 +8,11 @@ import api.entity.weapon.Weapon;
 import api.enums.EventType;
 import api.core.Event;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static core.system.error.GameErrors.WARRIOR_BASE_ATTRS_IS_FINAL;
 
@@ -20,6 +23,7 @@ public abstract class AbstractBaseWarriorClass implements WarriorBaseClass {
   protected String description;
   protected WarriorSBaseAttributesImpl warriorSBaseAttributes;
   protected List<Class<? extends Weapon>> supportedWeapons;
+  protected final Map<String, Ability> abilities = new ConcurrentHashMap<>(10);
 
   public AbstractBaseWarriorClass(String title, String description) {
     this.title = title;
@@ -58,8 +62,8 @@ public abstract class AbstractBaseWarriorClass implements WarriorBaseClass {
   }
 
   @Override
-  public List<Ability> getAbilities(EventType triggerType) {
-    return null;
+  public Map<String, Ability> getAbilities() {
+    return new HashMap<>(abilities);
   }
 
   @Override

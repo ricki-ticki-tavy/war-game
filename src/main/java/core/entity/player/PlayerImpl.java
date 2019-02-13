@@ -1,6 +1,7 @@
 package core.entity.player;
 
 import api.core.Context;
+import api.core.Owner;
 import api.core.Result;
 import api.game.ability.Modifier;
 import api.game.Influencer;
@@ -45,6 +46,11 @@ public class PlayerImpl implements Player {
     this.readyToPlay = false;
   }
   //===================================================================================================
+
+  @Override
+  public Context getContext() {
+    return context;
+  }
   //===================================================================================================
 
   @Override
@@ -303,6 +309,7 @@ public class PlayerImpl implements Player {
   }
   //===================================================================================================
 
+  // TODO сделать УМИРАНИЕ юнита
   @Override
   public Result<AttackResult> defenceWarrior(AttackResult attackResult) {
     // возможность воину отбить удары и / или ослабить воздействие вредных влияний
@@ -312,7 +319,6 @@ public class PlayerImpl implements Player {
               // собственно применим полученные поражения
               fineAttackResult.getInfluencers().stream()
                       // считаем, что уже все значения в модифиерах расчитаны жестко и не изменяются от запроса к запросу
-//                      .filter(influencer -> influencer.getModifier().getLastCalculatedValue() > 0)
                       .forEach(influencer -> influencer.applyToWarrior(attackResult));
               return ResultImpl.success(attackResult);
             });
@@ -338,7 +344,7 @@ public class PlayerImpl implements Player {
   //===================================================================================================
 
   @Override
-  public Result<Influencer> addInfluenceToWarrior(String warriorId, Modifier modifier, Object source, LifeTimeUnit lifeTimeUnit, int lifeTime) {
+  public Result<Influencer> addInfluenceToWarrior(String warriorId, Modifier modifier, Owner source, LifeTimeUnit lifeTimeUnit, int lifeTime) {
     return findWarriorById(warriorId)
             .map(warrior -> warrior.addInfluenceToWarrior(modifier, source, lifeTimeUnit, lifeTime))
             // добавить слушатель события

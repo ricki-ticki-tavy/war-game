@@ -1,5 +1,6 @@
 package api.entity.weapon;
 
+import api.core.Owner;
 import api.core.Result;
 import api.game.ability.Ability;
 import api.game.ability.Modifier;
@@ -12,7 +13,7 @@ import java.util.List;
 /**
  * базовое боевое снаряжение
  */
-public interface Weapon extends BaseEntityHeader{
+public interface Weapon extends Owner{
   /**
    * минимальный урон рукопашной атаки
    */
@@ -133,5 +134,12 @@ public interface Weapon extends BaseEntityHeader{
    * @return
    */
   String getSecondWeaponName();
+
+  /**
+   * Восстановиться спосоностям и прочим параметрам оружия ДО и ПОСЛЕ хода
+   * @return
+   */
+  Weapon revival();
+
 
 }
