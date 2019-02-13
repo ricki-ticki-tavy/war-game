@@ -29,7 +29,6 @@ public class TestBow extends AbstractWeaponImpl {
     this.rangedMaxDamage = 8;
     this.meleeAttackCost = 40;
     this.rangedAttackCost = 120;
-    this.additionalModifiers = null;
     this.unrejectable = false;
     this.useCountPerRound = -1;
     this.totalRangedUseCount = -1;

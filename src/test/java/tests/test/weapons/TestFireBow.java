@@ -29,7 +29,6 @@ public class TestFireBow extends AbstractWeaponImpl {
     this.rangedMaxDamage = 7;
     this.meleeAttackCost = 40;
     this.rangedAttackCost = 120;
-    this.additionalModifiers = null;
     this.unrejectable = false;
     this.useCountPerRound = -1;
     this.totalRangedUseCount = -1;
@@ -42,7 +41,7 @@ public class TestFireBow extends AbstractWeaponImpl {
     this.neededHandsCountToTakeWeapon = 2;
     this.secondWeaponName = SECOND_WEAPON_NAME;
 
-//    this.additionalModifiers.put("Огненная стрела", )
+//    this.abilities.put("Огненная стрела", )
   }
 
 }

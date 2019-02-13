@@ -3,6 +3,7 @@ package api.entity.warrior;
 import api.core.Context;
 import api.game.Influencer;
 import api.core.Result;
+import api.game.ability.Ability;
 import api.game.ability.Modifier;
 import api.entity.base.BaseEntityHeader;
 import api.entity.weapon.Weapon;
@@ -12,6 +13,7 @@ import api.game.action.AttackResult;
 import api.game.map.Player;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Класс воина на карте
@@ -260,6 +262,12 @@ public interface Warrior extends BaseEntityHeader, HasCoordinates {
    * @return
    */
   Warrior setTitle(String title);
+
+  /**
+   * Получить список не применимых к данному классу юнитов способностей
+   * @return
+   */
+  Map<String, Class<? extends Ability>> getUnavailableAbilities();
 
   void setTreatedActionPointsForMove(int treatedActionPointsForMove);
 

@@ -2,6 +2,7 @@ package core.entity.weapon;
 
 import api.core.EventDataContainer;
 import api.core.Result;
+import api.game.ability.Ability;
 import api.game.ability.Modifier;
 import api.entity.warrior.Warrior;
 import api.entity.weapon.Weapon;
@@ -15,6 +16,7 @@ import core.system.ResultImpl;
 import core.system.error.GameErrors;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static api.enums.AttributeEnum.HEALTH;
 import static api.enums.EventType.WARRIOR_ATTACK_LUCK;
@@ -37,7 +39,7 @@ public abstract class AbstractWeaponImpl implements Weapon {
   protected int rangedMaxDamage;
   protected int rangedAttackCost;
   protected int meleeAttackCost;
-  protected Map<String, Modifier> additionalModifiers;
+  protected final Map<String, Ability> abilities = new ConcurrentHashMap<>(10);
   protected boolean unrejectable;
   protected int useCountPerRound;
   protected int totalRangedUseCount;
@@ -63,7 +65,7 @@ public abstract class AbstractWeaponImpl implements Weapon {
           , int rangedMaxDamage
           , int rangedAttackCost
           , int meleeAttackCost
-          , Map<String, Modifier> additionalModifiers
+          , Map<String, Ability> abilities
           , boolean unrejectable
           , int useCountPerRound
           , int totalRangedUseCount
@@ -84,7 +86,7 @@ public abstract class AbstractWeaponImpl implements Weapon {
     this.rangedMaxDamage = rangedMaxDamage;
     this.rangedAttackCost = rangedAttackCost;
     this.meleeAttackCost = meleeAttackCost;
-    this.additionalModifiers = additionalModifiers;
+    this.abilities.putAll(abilities);
     this.unrejectable = unrejectable;
     this.useCountPerRound = useCountPerRound;
     this.totalRangedUseCount = totalRangedUseCount;
@@ -155,8 +157,8 @@ public abstract class AbstractWeaponImpl implements Weapon {
   //===================================================================================================
 
   @Override
-  public List<Modifier> getAdditionalModifiers() {
-    return new ArrayList(additionalModifiers.values());
+  public List<Ability> getAbilities() {
+    return new ArrayList(abilities.values());
   }
   //===================================================================================================
 

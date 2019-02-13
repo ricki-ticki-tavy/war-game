@@ -1,6 +1,7 @@
 package api.entity.weapon;
 
 import api.core.Result;
+import api.game.ability.Ability;
 import api.game.ability.Modifier;
 import api.entity.base.BaseEntityHeader;
 import api.entity.warrior.Warrior;
@@ -43,9 +44,9 @@ public interface Weapon extends BaseEntityHeader{
   int getMeleeAttackCost();
 
   /**
-   * Дополнительные влияния
+   * Дополнительные модификаторы атаки
    */
-  List<Modifier> getAdditionalModifiers();
+  List<Ability> getAbilities();
 
   /**
    * Невозможность отразить удар

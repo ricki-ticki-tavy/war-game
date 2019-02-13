@@ -3,6 +3,7 @@ package core.entity.warrior.base;
 import api.core.Context;
 import api.game.Influencer;
 import api.core.Result;
+import api.game.ability.Ability;
 import api.game.ability.Modifier;
 import api.entity.warrior.*;
 import api.entity.weapon.Weapon;
@@ -49,6 +50,8 @@ public class WarriorImpl implements Warrior {
   protected volatile boolean moveLocked;
   protected volatile boolean rollbackAvailable;
   protected volatile int treatedActionPointsForMove;
+
+  protected final Map<String, Class<? extends Ability>> unsupportedAbilities = new ConcurrentHashMap<>(20);
 
 
   @Autowired
@@ -542,6 +545,12 @@ public class WarriorImpl implements Warrior {
   public Warrior setTitle(String title) {
     this.title = title;
     return this;
+  }
+  //===================================================================================================
+
+  @Override
+  public Map<String, Class<? extends Ability>> getUnavailableAbilities() {
+    return new HashMap<>(unsupportedAbilities);
   }
   //===================================================================================================
 
