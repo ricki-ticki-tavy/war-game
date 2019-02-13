@@ -2,6 +2,8 @@ import api.core.Context;
 import api.core.Result;
 import api.entity.warrior.Warrior;
 import api.entity.weapon.Weapon;
+import api.game.Influencer;
+import api.game.ability.Modifier;
 import api.game.action.AttackResult;
 import api.game.wraper.GameWrapper;
 import api.geo.Coords;
@@ -110,10 +112,16 @@ public class WeaponsWithAbilitiesTest extends AbstractMapTest {
               }
             });
 
-    // Пробуем атаковать воином 1 игрока 1 воина 1 игрока 2. Это должно выйти
+    // Пробуем атаковать воином 1 игрока 1 воина 1 игрока 2. Это должно выйти. Заодно проверим, что огнем
+    // урон нанесен тоже
+    int hp = warriorImpl1p2.getAttributes().getHealth();
     Result<AttackResult> attackResult = gameWrapper.attackWarrior(gameContext, player1, warrior1p1, warrior1p2, bowWarrior1p1);
     assertSuccess(attackResult);
     Assert.isTrue(warriorImpl1p1.getAttributes().getActionPoints() == 120, "Не списаны очки за выстрел луком");
+    Influencer influencer = attackResult.getResult().getInfluencers().get(0);
+    Assert.isTrue(warriorImpl1p2.getAttributes().getHealth() ==
+            hp - influencer.getModifier().getLastCalculatedValue()
+                    - influencer.getChildren().get(0).getModifier().getLastCalculatedValue(), "Не правильно нанесен урон огненным луком");
 
     // Пробуем атаковать воином 1 игрока 1 воина 2 игрока 2. Это должно выйти
     attackResult = gameWrapper.attackWarrior(gameContext, player1, warrior1p1, warrior2p2, bowWarrior1p1);
