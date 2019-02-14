@@ -48,19 +48,6 @@ public interface Warrior extends Owner, HasCoordinates {
   Result<Warrior> moveWarriorTo(Coords to);
 
   /**
-   * Получить игрока - владельца юнита
-   *
-   * @return
-   */
-  Player getOwner();
-
-  /**
-   * Получить контекст игры
-   * @return
-   */
-  Context getContext();
-
-  /**
    * Взять в руку оружие
    *
    * @param weaponClass
@@ -137,6 +124,14 @@ public interface Warrior extends Owner, HasCoordinates {
    * @return
    */
   Result<Influencer> addInfluenceToWarrior(Modifier modifier, Owner source, LifeTimeUnit lifeTimeUnit, int lifeTime);
+
+  /**
+   * добавить влияние юниту
+   *
+   * @param influencer
+   * @return
+   */
+  Result<Influencer> addInfluenceToWarrior(Influencer influencer);
 
   /**
    * Получить список оказываемых влияний на юнит
@@ -264,10 +259,17 @@ public interface Warrior extends Owner, HasCoordinates {
   Warrior setTitle(String title);
 
   /**
-   * Получить список не применимых к данному классу юнитов способностей
+   * Получить список способностей, которыми данный класс обладать не может
+   * @return название/класс
+   */
+  Map<String, Class<? extends Ability>> getUnsupportedAbilities();
+
+  /**
+   * Перекрыть метод возврата владельца.
+   * TODO поправить, чтобы работало БЕЗ этого метода
    * @return
    */
-  Map<String, Class<? extends Ability>> getUnavailableAbilities();
+  Player getOwner();
 
   void setTreatedActionPointsForMove(int treatedActionPointsForMove);
 

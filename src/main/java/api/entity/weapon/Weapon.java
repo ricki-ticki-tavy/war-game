@@ -109,12 +109,6 @@ public interface Weapon extends Owner{
   int getNeededHandsCountToTakeWeapon();
 
   /**
-   * Получить воина, владеющего снаряжением
-   * @return
-   */
-  Warrior getOwner();
-
-  /**
    * Атаковать противника
    * @param targetWarrior
    */

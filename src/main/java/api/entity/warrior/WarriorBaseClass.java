@@ -1,5 +1,6 @@
 package api.entity.warrior;
 
+import api.core.Owner;
 import api.core.Result;
 import api.game.action.InfluenceResult;
 import core.entity.warrior.base.WarriorSBaseAttributesImpl;
@@ -15,7 +16,7 @@ import java.util.Map;
 /**
  * Базовый класс воина
  */
-public interface WarriorBaseClass extends BaseEntityHeader {
+public interface WarriorBaseClass extends Owner {
   /**
    * Возвращает значение параметроввоина
    * @return
@@ -98,5 +99,12 @@ public interface WarriorBaseClass extends BaseEntityHeader {
    * @return
    */
   boolean isSummonable();
+
+  /**
+   * задать юнита, созданного с этого базового класса
+   * @param owner
+   * @return
+   */
+  WarriorBaseClass attachToWarrior(Warrior owner);
 
 }

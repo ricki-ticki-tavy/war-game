@@ -15,6 +15,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
+import static core.system.error.GameErrors.SYSTEM_OBJECT_ALREADY_INITIALIZED;
+
 public class InfluencerImpl extends AbstractOwnerImpl implements Influencer {
   private LifeTimeUnit lifeTimeUnit;
   private int lifeTime;
@@ -24,6 +26,21 @@ public class InfluencerImpl extends AbstractOwnerImpl implements Influencer {
   private String consumerId = null;
   private final List<Influencer> children;
   //===================================================================================================
+  //===================================================================================================
+
+  @Override
+  public Influencer attachToOwner(Owner owner){
+    if (this.owner != null && owner != this.owner){
+      SYSTEM_OBJECT_ALREADY_INITIALIZED.getError(getTitle() + "  " + getId(), "owner");
+    }
+    this.owner = owner;
+    if (lifeTimeUnit.getEventType().equals(EventType.ROUND_FULL)
+            || lifeTimeUnit.getEventType().equals(EventType.PLAYER_TAKES_TURN)
+            || lifeTimeUnit.getEventType().equals(EventType.PLAYER_LOOSE_TURN)) {
+      consumerId = getContext().subscribeEvent(this::onTimeEvent, lifeTimeUnit.getEventType());
+    }
+    return this;
+  }
   //===================================================================================================
 
   /**
@@ -40,9 +57,7 @@ public class InfluencerImpl extends AbstractOwnerImpl implements Influencer {
     this.lifeTime = lifeTime;
     this.targetWarrior = targetWarrior;
     this.children = new ArrayList<>(10);
-    if (!lifeTimeUnit.getEventType().equals(EventType.ALWAYS)) {
-      consumerId = getContext().subscribeEvent(this::onTimeEvent, lifeTimeUnit.getEventType());
-    }
+    attachToOwner(owner);
   }
   //===================================================================================================
 
@@ -139,7 +154,7 @@ public class InfluencerImpl extends AbstractOwnerImpl implements Influencer {
     // Уже всерассчитано. Применяем значение, рассчитанное заранее (getLastCalculatedValue())
     Result<Warrior> result;
     if (modifier.isLuckyRollOfDice() || modifier.isHitSuccess()) {
-      result = modifier.applyAttack(influenceResult)
+      result = modifier.applyModifier(influenceResult)
               .map(fineModifier -> {
                 children.stream()
                         .forEach(child -> child.applyToWarrior(influenceResult));

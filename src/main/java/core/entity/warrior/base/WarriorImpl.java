@@ -71,6 +71,13 @@ public class WarriorImpl extends AbstractOwnerImpl<Player> implements Warrior {
     while (handsCount-- > 0) {
       hands.put(hands.size(), new WarriorSHandImpl());
     }
+    this.warriorBaseClass.attachToWarrior(this);
+  }
+  //===================================================================================================
+
+  @Override
+  public Player getOwner(){
+    return super.getOwner();
   }
   //===================================================================================================
 
@@ -392,6 +399,16 @@ public class WarriorImpl extends AbstractOwnerImpl<Player> implements Warrior {
   //===================================================================================================
 
   @Override
+  public Result<Influencer> addInfluenceToWarrior(Influencer influencer) {
+    influencer.attachToOwner(this);
+    influencers.put(influencer.getId(), influencer);
+    getContext().fireGameEvent(null, WARRIOR_INFLUENCER_ADDED
+            , new EventDataContainer(influencer, this), null);
+    return ResultImpl.success(influencer);
+  }
+  //===================================================================================================
+
+  @Override
   public Result<List<Influencer>> getWarriorSInfluencers() {
     return ResultImpl.success(new ArrayList<>(influencers.values()));
   }
@@ -533,7 +550,7 @@ public class WarriorImpl extends AbstractOwnerImpl<Player> implements Warrior {
   //===================================================================================================
 
   @Override
-  public Map<String, Class<? extends Ability>> getUnavailableAbilities() {
+  public Map<String, Class<? extends Ability>> getUnsupportedAbilities() {
     return new HashMap<>(unsupportedAbilities);
   }
   //===================================================================================================

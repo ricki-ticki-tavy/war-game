@@ -135,7 +135,7 @@ public interface Modifier {
    * @param influenceResult
    * @return
    */
-  Result<Modifier> applyAttack(InfluenceResult influenceResult);
+  Result<Modifier> applyModifier(InfluenceResult influenceResult);
 
   /**
    * Возвращает тип влияния: положительный или отрицательный

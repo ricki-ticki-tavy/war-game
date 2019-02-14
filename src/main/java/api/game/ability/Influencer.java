@@ -25,10 +25,18 @@ public interface Influencer extends Owner {
   Result<Influencer> removeFromWarrior(boolean silent);
 
   /**
-   * Добавить зависимое влияние
-   * @param influencer
+   * прикрепить влияние к владельцу.
+   * @param owner
    * @return
    */
+  Influencer attachToOwner(Owner owner);
+
+
+    /**
+     * Добавить зависимое влияние
+     * @param influencer
+     * @return
+     */
   Influencer addChild(Influencer influencer);
   
   /**

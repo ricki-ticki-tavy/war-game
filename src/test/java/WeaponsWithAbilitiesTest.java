@@ -89,6 +89,11 @@ public class WeaponsWithAbilitiesTest extends AbstractMapTest {
     // Игрок 2 готов
     assertSuccess(gameWrapper.playerReady(player2, true));
 
+    // проверим значение удачи в стрельбу у воина 1 игрока 1. Базовое значение 6. Благодаря способности удачи
+    // оно должно вырасти до 16
+    Assert.isTrue(warriorImpl1p1.getAttributes().getLuckRangeAtack() == 16, "Способность удачливого стрелка 10-го уровня не сработала");
+
+
     // если первым ходитигрок 2, то передаем ход игроку 1
     gameWrapper.getGetPlayerOwnsTheRound(gameContext)
             .peak(player -> {
@@ -117,6 +122,10 @@ public class WeaponsWithAbilitiesTest extends AbstractMapTest {
     assertSuccess(gameWrapper.nextTurn(gameContext, player1));
     assertSuccess(gameWrapper.nextTurn(gameContext, player2));
 
+    // проверим значение удачи в стрельбу у воина 1 игрока 1. Базовое значение 6. Благодаря способности удачи
+    // оно должно вырасти до 16  НО не более
+    Assert.isTrue(warriorImpl1p1.getAttributes().getLuckRangeAtack() == 16, "Способность удачливого стрелка 10-го уровня не сработала");
+
     Assert.isTrue(warriorImpl1p1.getAttributes().getActionPoints() == 240, "Не восстановились очки действия");
 
     // поднимем удачу до 100% воину 1 игрока 1
@@ -127,6 +136,9 @@ public class WeaponsWithAbilitiesTest extends AbstractMapTest {
     attackResult = gameWrapper.attackWarrior(gameContext, player1, warrior1p1, warrior2p2, bowWarrior1p1);
     assertSuccess(attackResult);
     Assert.isTrue(attackResult.getResult().getInfluencers().get(0).getModifier().isLuckyRollOfDice(), "Удача не сработала");
+
+    // подлечим воина 2 игрока 2. Он нам еще нужен живым
+    warriorImpl2p2.getAttributes().setHealth(20);
 
     assertSuccess(gameWrapper.getCore().removeGameContext(gameContext));
   }

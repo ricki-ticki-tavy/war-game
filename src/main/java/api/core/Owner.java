@@ -6,7 +6,7 @@ import api.enums.OwnerTypeEnum;
 /**
  * Именуемый (имеющий код,название, описание ) объект, умеющий давать ссылку на контекст
  */
-public interface Owner extends BaseEntityHeader{
+public interface Owner<O extends Owner> extends BaseEntityHeader{
   /**
    * Вернуть контекст
    * @return
@@ -23,5 +23,5 @@ public interface Owner extends BaseEntityHeader{
    * Вернуть своего владельца
    * @return
    */
-  Owner getOwner();
+  O getOwner();
 }

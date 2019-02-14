@@ -194,7 +194,7 @@ public class BaseModifier implements Modifier {
   //===================================================================================================
 
   @Override
-  public Result<Modifier> applyAttack(InfluenceResult influenceResult) {
+  public Result<Modifier> applyModifier(InfluenceResult influenceResult) {
     // Уже всерассчитано. Применяем значение, рассчитанное заранее (getLastCalculatedValue())
 
     innerApplyToWarrior(influenceResult.getTarget());
