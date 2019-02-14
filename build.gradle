@@ -1,4 +1,5 @@
 apply plugin: 'java'
+apply plugin: "jacoco"
 
 project.ext {
 
@@ -54,5 +55,14 @@ jar {
         attributes(
                 'Main-Class': "Main"
         )
+    }
+}
+
+jacocoTestReport {
+    group = "Reporting"
+    reports {
+        xml.enabled true
+        csv.enabled false
+        html.destination "${buildDir}/reports/coverage"
     }
 }
