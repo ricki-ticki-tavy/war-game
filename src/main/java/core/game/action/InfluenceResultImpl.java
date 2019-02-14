@@ -86,4 +86,10 @@ public class InfluenceResultImpl implements InfluenceResult {
     return consumedActionPoints;
   }
   //===================================================================================================
+
+  public static InfluenceResult forPositive(Warrior target){
+    return new InfluenceResultImpl(target.getOwner(), target, null, target.getOwner(), target, 0);
+  }
+  //===================================================================================================
+  //===================================================================================================
 }

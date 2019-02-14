@@ -3,6 +3,7 @@ package core.entity.player;
 import api.core.Context;
 import api.core.Owner;
 import api.core.Result;
+import api.entity.stuff.Artifact;
 import api.enums.OwnerTypeEnum;
 import api.game.ability.Modifier;
 import api.game.ability.Influencer;
@@ -244,6 +245,13 @@ public class PlayerImpl extends AbstractOwnerImpl implements Player {
   public Result<Weapon> giveWeaponToWarrior(String warriorId, Class<? extends Weapon> weaponClass) {
     return findWarriorById(warriorId)
             .map(foundWarrior -> foundWarrior.takeWeapon(weaponClass));
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Artifact<Warrior>> giveArtifactToWarrior(String warriorId, Class<? extends Artifact<Warrior>> artifactClass) {
+    return findWarriorById(warriorId)
+            .map(foundWarrior -> foundWarrior.giveArtifactToWarrior(artifactClass));
   }
   //===================================================================================================
 

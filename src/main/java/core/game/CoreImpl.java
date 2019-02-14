@@ -3,6 +3,8 @@ package core.game;
 import api.core.Context;
 import api.core.Core;
 import api.core.Result;
+import api.entity.stuff.Artifact;
+import api.entity.warrior.Warrior;
 import api.entity.warrior.WarriorBaseClass;
 import api.entity.weapon.Weapon;
 import api.enums.EventType;
@@ -10,6 +12,7 @@ import api.core.Event;
 import api.core.EventDataContainer;
 import api.game.map.Player;
 import api.game.map.metadata.GameRules;
+import core.entity.artifact.ArtifactRainbowArrowForWarrior;
 import core.entity.warrior.Skeleton;
 import core.entity.warrior.Viking;
 import core.entity.warrior.Vityaz;
@@ -46,6 +49,7 @@ public class CoreImpl implements Core {
 
   private final Map<String, Class<? extends WarriorBaseClass>> registeredWarriorBaseClasses = new ConcurrentHashMap<>(100);
   private final Map<String, Class<? extends Weapon>> registeredWeaponClasses = new ConcurrentHashMap<>(100);
+  private final Map<String, Class<? extends Artifact>> registeredArtifactForWarriorClasses = new ConcurrentHashMap<>(100);
 
   private Map<String, Context> contextMap = new ConcurrentHashMap<>(10);
   private Map<String, Player> players = new ConcurrentHashMap<>(1000);
@@ -85,6 +89,17 @@ public class CoreImpl implements Core {
    */
   public void registerWeaponClass(String className, Class<? extends Weapon> weaponClass) {
     registeredWeaponClasses.put(className, weaponClass);
+  }
+  //===================================================================================================
+
+  /**
+   * Зарегистрировать базовый класс артефакта для юнита (воина)
+   *
+   * @param className
+   * @param artifactClass
+   */
+  public void registerArtifactForWarriorClass(String className, Class<? extends Artifact> artifactClass) {
+    registeredArtifactForWarriorClasses.put(className, artifactClass);
   }
   //===================================================================================================
 
@@ -150,6 +165,8 @@ public class CoreImpl implements Core {
     registerWeaponClass(Bow.CLASS_NAME, Bow.class);
     registerWeaponClass(ShortSword.CLASS_NAME, ShortSword.class);
     registerWeaponClass(Sword.CLASS_NAME, Sword.class);
+
+    registerArtifactForWarriorClass(ArtifactRainbowArrowForWarrior.CLASS_NAME, ArtifactRainbowArrowForWarrior.class);
   }
   //===================================================================================================
 
@@ -276,10 +293,18 @@ public class CoreImpl implements Core {
   //===================================================================================================
 
   @Override
-  public Result<Class<? extends Weapon>> findWeaponByName(String weaponClassName) {
-    return Optional.ofNullable(registeredWeaponClasses.get(weaponClassName))
+  public Result<Class<? extends Weapon>> findWeaponByName(String weaponName) {
+    return Optional.ofNullable(registeredWeaponClasses.get(weaponName))
             .map(clazz -> ResultImpl.success(clazz))
-            .orElse(ResultImpl.fail(WEAPON_BASE_CLASS_NOT_FOUND_BY_NAME.getError(weaponClassName)));
+            .orElse(ResultImpl.fail(WEAPON_BASE_CLASS_NOT_FOUND_BY_NAME.getError(weaponName)));
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Class<? extends Artifact<Warrior>>> findArtifactForWarrior(String artifactName) {
+    return Optional.ofNullable(registeredArtifactForWarriorClasses.get(artifactName))
+            .map(clazz -> ResultImpl.success(clazz))
+            .orElse(ResultImpl.fail(ARTIFACT_BASE_CLASS_ARTIFACT_OF_WARRIOR_NOT_FOUND_BY_NAME.getError(artifactName)));
   }
   //===================================================================================================
 }

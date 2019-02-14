@@ -61,8 +61,8 @@ public interface Influencer extends Owner {
 
   /**
    * Применить влияние на воина
-   * @param attackResult
+   * @param influenceResult
    * @return
    */
-  Result<Warrior> applyToWarrior(InfluenceResult attackResult);
+  Result<Warrior> applyToWarrior(InfluenceResult influenceResult);
 }

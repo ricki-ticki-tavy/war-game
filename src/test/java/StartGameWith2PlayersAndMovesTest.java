@@ -107,7 +107,7 @@ public class StartGameWith2PlayersAndMovesTest extends AbstractMapTest {
             .map(context -> context.ifGameRan(true)));
 
     // если первым ходитигрок 2, то передаем ход игроку 1
-    gameWrapper.getGetPlayerOwnsTheRound(gameContext)
+    gameWrapper.getPlayerOwnsTheRound(gameContext)
             .peak(player -> {
               if (player.getId().equals(player2)) {
                 assertSuccess(gameWrapper.nextTurn(gameContext, player2));

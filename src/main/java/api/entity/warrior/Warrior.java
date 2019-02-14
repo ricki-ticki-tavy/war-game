@@ -3,6 +3,7 @@ package api.entity.warrior;
 import api.core.Context;
 import api.core.Owner;
 import api.core.Result;
+import api.entity.stuff.Artifact;
 import api.entity.weapon.Weapon;
 import api.enums.LifeTimeUnit;
 import api.game.ability.Influencer;
@@ -270,6 +271,26 @@ public interface Warrior extends Owner, HasCoordinates {
    * @return
    */
   Player getOwner();
+
+  /**
+   * дать воину артефакт. Если такой артефакт такого типа уже есть, то будет отказ
+   * @param artifactClass класс даваемого артефакта
+   * @return
+   */
+  Result<Artifact<Warrior>> giveArtifactToWarrior(Class<? extends Artifact<Warrior>> artifactClass);
+
+  /**
+   * добавить уже существующий артифакт. Если такой артифакт уже есть, то добавить второй нельзя
+   * @param artifact
+   * @return
+   */
+  Result<Artifact<Warrior>> attachArtifact(Artifact<Warrior> artifact);
+
+  /**
+   * Возвращает список артефактов воина
+   * @return
+   */
+  Result<List<Artifact<Warrior>>> getArtifacts();
 
   void setTreatedActionPointsForMove(int treatedActionPointsForMove);
 

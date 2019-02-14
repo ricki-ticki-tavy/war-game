@@ -95,7 +95,7 @@ public class WeaponsWithAbilitiesTest extends AbstractMapTest {
 
 
     // если первым ходитигрок 2, то передаем ход игроку 1
-    gameWrapper.getGetPlayerOwnsTheRound(gameContext)
+    gameWrapper.getPlayerOwnsTheRound(gameContext)
             .peak(player -> {
               if (player.getId().equals(player2)) {
                 assertSuccess(gameWrapper.nextTurn(gameContext, player2));

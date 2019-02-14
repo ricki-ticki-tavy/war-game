@@ -1,16 +1,14 @@
 package tests.test.warrior;
 
-import api.core.Owner;
 import api.core.Result;
 import api.enums.ArmorClassEnum;
 import api.game.ability.Ability;
 import api.game.action.InfluenceResult;
-import api.game.map.Player;
 import core.entity.warrior.base.AbstractBaseWarriorClass;
 import core.entity.warrior.base.WarriorSBaseAttributesImpl;
 import core.entity.weapon.ShortSword;
 import core.entity.weapon.Sword;
-import core.game.ability.LuckForRangedAttack;
+import core.entity.ability.AbilityLuckForRangedAttackForWarrior;
 import core.system.ResultImpl;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +31,7 @@ public class TestVityaz extends AbstractBaseWarriorClass {
 
   @PostConstruct
   private void registerAbilities(){
-    Ability luck = beanFactory.getBean(LuckForRangedAttack.class, this, 10, -1, -1);
+    Ability luck = beanFactory.getBean(AbilityLuckForRangedAttackForWarrior.class, this, 10, -1, -1);
     abilities.put(luck.getTitle(), luck);
   }
 

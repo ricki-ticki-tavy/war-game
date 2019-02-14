@@ -1,5 +1,6 @@
 package api.core;
 
+import api.entity.stuff.Artifact;
 import api.entity.warrior.Warrior;
 import api.entity.weapon.Weapon;
 import api.enums.EventType;
@@ -235,6 +236,15 @@ public interface Context {
    * @return
    */
   Result<Weapon> giveWeaponToWarrior(String userName, String warriorId, Class<? extends Weapon> weaponClass);
+
+  /**
+   * дать воину артефакт. Если такой артефакт такого типа уже есть, то будет отказ
+   * @param userName      код игрока, которому принадлежит воин
+   * @param warriorId     код воина, которому дается артефакт
+   * @param artifactClass класс даваемого артефакта
+   * @return
+   */
+  Result<Artifact<Warrior>> giveArtifactToWarrior(String userName, String warriorId, Class<? extends Artifact<Warrior>> artifactClass);
 
   /**
    * Найти оружие по его id

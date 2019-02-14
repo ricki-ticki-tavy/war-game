@@ -3,6 +3,7 @@ package core.game.wraper;
 import api.core.Context;
 import api.core.Core;
 import api.core.Result;
+import api.entity.stuff.Artifact;
 import api.game.ability.Influencer;
 import api.entity.warrior.Warrior;
 import api.entity.weapon.Weapon;
@@ -136,6 +137,15 @@ public class GameWrapperImpl implements GameWrapper {
 //===================================================================================================
 
   @Override
+  public Result<Artifact<Warrior>> giveArtifactToWarrior(String contextId, String userName, String warriorId, String artifactName) {
+    return core.findGameContextByUID(contextId)
+            .mapSafe(fineContext -> core.findArtifactForWarrior(artifactName)
+                    .map(artifactClass -> fineContext.giveArtifactToWarrior(userName, warriorId, artifactClass)))
+            .logIfError(logger);
+  }
+//===================================================================================================
+
+  @Override
   public Result<Weapon> takeWeaponFromWarrior(String userName, String warriorId, String weaponId) {
     return core.findUserByName(userName)
             .mapSafe(foundPlayer -> foundPlayer.findContext()
@@ -181,7 +191,7 @@ public class GameWrapperImpl implements GameWrapper {
   //===================================================================================================
 
   @Override
-  public Result<Player> getGetPlayerOwnsTheRound(String contextId) {
+  public Result<Player> getPlayerOwnsTheRound(String contextId) {
     return core.findGameContextByUID(contextId)
             .mapSafe(fineContext -> fineContext.getPlayerOwnsThisTurn())
             .logIfError(logger);

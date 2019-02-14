@@ -1,4 +1,4 @@
-package core.game.ability;
+package core.entity.ability;
 
 import api.core.Owner;
 import api.entity.warrior.Warrior;
@@ -6,6 +6,7 @@ import api.enums.*;
 import api.game.ability.Influencer;
 import core.entity.ability.base.BaseModifier;
 import core.entity.warrior.base.InfluencerImpl;
+import core.entity.ability.base.AbstractAbilityImpl;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -18,7 +19,7 @@ import java.util.List;
  */
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class LuckForRangedAttack extends AbstractAbilityImpl {
+public class AbilityLuckForRangedAttackForWarrior extends AbstractAbilityImpl {
 
   private int level;
   //===================================================================================================
@@ -31,7 +32,7 @@ public class LuckForRangedAttack extends AbstractAbilityImpl {
    * @param useCountPerRound кол-во использований заход. -1 без ограничений
    *
    */
-  public LuckForRangedAttack(Owner owner, int level, int useCount, int useCountPerRound) {
+  public AbilityLuckForRangedAttackForWarrior(Owner owner, int level, int useCount, int useCountPerRound) {
     super(owner, useCountPerRound, "AblLuckR_", "Удачливый стрелок", "Удача в стрельбе"); // бесконечно
 
     this.level = level;

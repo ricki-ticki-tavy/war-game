@@ -2,7 +2,9 @@ package core.entity.warrior.base;
 
 import api.core.Context;
 import api.core.Owner;
+import api.entity.stuff.Artifact;
 import api.enums.OwnerTypeEnum;
+import api.enums.TargetTypeEnum;
 import api.game.ability.Influencer;
 import api.core.Result;
 import api.game.ability.Ability;
@@ -33,6 +35,7 @@ import static api.enums.EventType.*;
 import static core.system.error.GameErrors.*;
 
 // TODO добавить поддержку ограничения оружия по допустимому списку
+// TODO способности воина долждны действовать даже на этапе расстановки войск
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class WarriorImpl extends AbstractOwnerImpl<Player> implements Warrior {
@@ -42,7 +45,7 @@ public class WarriorImpl extends AbstractOwnerImpl<Player> implements Warrior {
   protected volatile Coords coords;
   protected boolean summoned;
   protected WarriorSBaseAttributes attributes;
-  protected Map<String, Influencer> influencers = new ConcurrentHashMap<>(50);
+  protected final Map<String, Influencer> influencers = new ConcurrentHashMap<>(50);
 
   protected volatile boolean touchedAtThisTurn = false;
 
@@ -50,6 +53,7 @@ public class WarriorImpl extends AbstractOwnerImpl<Player> implements Warrior {
   protected volatile boolean moveLocked;
   protected volatile boolean rollbackAvailable;
   protected volatile int treatedActionPointsForMove;
+  protected final Map<String, Artifact<Warrior>> artifacts = new ConcurrentHashMap<>(10);
 
   protected final Map<String, Class<? extends Ability>> unsupportedAbilities = new ConcurrentHashMap<>(20);
 
@@ -61,7 +65,7 @@ public class WarriorImpl extends AbstractOwnerImpl<Player> implements Warrior {
   //===================================================================================================
 
   public WarriorImpl(Player owner, WarriorBaseClass warriorBaseClass, String title, Coords coords, boolean summoned) {
-    super(owner, OwnerTypeEnum.WARRIOR, "wrr",title, title);
+    super(owner, OwnerTypeEnum.WARRIOR, "wrr", title, title);
     this.warriorBaseClass = warriorBaseClass;
     this.attributes = warriorBaseClass.getBaseAttributes().clone();
     this.summoned = summoned;
@@ -76,8 +80,49 @@ public class WarriorImpl extends AbstractOwnerImpl<Player> implements Warrior {
   //===================================================================================================
 
   @Override
-  public Player getOwner(){
+  public Player getOwner() {
     return super.getOwner();
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Artifact<Warrior>> giveArtifactToWarrior(Class<? extends Artifact<Warrior>> artifactClass) {
+    Result<Artifact<Warrior>> result = ResultImpl.success(null);
+    return result.mapSafe(nullArt -> {
+      Artifact<Warrior> artifact = beanFactory.getBean(artifactClass
+              , this);
+      return attachArtifact(artifact);
+    });
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Artifact<Warrior>> attachArtifact(Artifact<Warrior> artifact) {
+    Result<Artifact<Warrior>> result;
+    if (artifacts.get(artifact.getTitle()) != null) {
+      // уже есть такой артефакт. даем ошибку
+      // "В игре %s. воин '%s %s' игрока '%s' уже владеет артефактом '%s'."
+      result = ResultImpl.fail(ARTIFACT_ALREADY_EXISTS.getError(
+              getContext().getGameName()
+              , warriorBaseClass.getTitle()
+              , title
+              , owner.getId()
+              , artifact.getTitle()));
+    } else {
+      artifact.attachToOwner(this);
+      artifacts.put(artifact.getTitle(), artifact);
+      // применить сразу действие артефакта
+      artifact.applyToOwner();
+
+      result = ResultImpl.success(artifact);
+    }
+    return result;
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<List<Artifact<Warrior>>> getArtifacts() {
+    return ResultImpl.success(new ArrayList<Artifact<Warrior>>(artifacts.values()));
   }
   //===================================================================================================
 
@@ -357,7 +402,9 @@ public class WarriorImpl extends AbstractOwnerImpl<Player> implements Warrior {
             .forEach(ability -> ability.buildForTarget(this).stream()
                     .forEach(influencer -> influencer.applyToWarrior(influenceResult)));
 
-    // TODO применить влияния артефактов
+    // применить влияния артефактов
+    artifacts.values().stream()
+            .forEach(artifact -> artifact.applyToOwner());
   }
   //===================================================================================================
 

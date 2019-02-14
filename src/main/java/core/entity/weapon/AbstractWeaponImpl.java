@@ -1,6 +1,5 @@
 package core.entity.weapon;
 
-import api.core.Context;
 import api.core.EventDataContainer;
 import api.core.Result;
 import api.enums.ManifestationOfInfluenceEnum;

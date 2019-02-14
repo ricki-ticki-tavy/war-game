@@ -3,6 +3,7 @@ package core.entity.map;
 import api.core.Context;
 import api.core.Owner;
 import api.core.Result;
+import api.entity.stuff.Artifact;
 import api.game.ability.Modifier;
 import api.game.ability.Influencer;
 import api.entity.warrior.Warrior;
@@ -292,6 +293,14 @@ public class LevelMapImpl implements LevelMap {
             // ход именно этого игрока
             .map(fineContext -> fineContext.ifPlayerOwnsTheTurnEqualsTo(player, String.format(" атаковать воином %s воина %s", attackerWarriorId, targetWarriorId))
                     .map(finePlayer -> finePlayer.attackWarrior(attackerWarriorId, targetWarriorId, weaponId)));
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Artifact<Warrior>> giveArtifactToWarrior(Player player, String warriorId, Class<? extends Artifact<Warrior>> artifactClass) {
+    // активен режим расстановки
+    return context.ifGameRan(false)
+            .map(fineContext -> player.giveArtifactToWarrior(warriorId, artifactClass));
   }
   //===================================================================================================
 

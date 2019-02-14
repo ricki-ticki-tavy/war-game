@@ -2,7 +2,7 @@ package tests.test.weapons;
 
 import api.game.ability.Ability;
 import core.entity.weapon.AbstractWeaponImpl;
-import core.game.ability.FireArrow;
+import core.entity.ability.AbilityFireArrowForWeapon;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 import java.util.UUID;
 
 /**
@@ -29,9 +28,8 @@ public class TestFireBow extends AbstractWeaponImpl {
 
   @PostConstruct
   private void initAbilities(){
-    Ability fireArrowAbility = beanFactory.getBean(FireArrow.class, this, 1, -1, -1);
+    Ability fireArrowAbility = beanFactory.getBean(AbilityFireArrowForWeapon.class, this, 1, -1, -1);
     this.abilities.put("Огненная стрела", fireArrowAbility);
-
   }
 
   public TestFireBow() {

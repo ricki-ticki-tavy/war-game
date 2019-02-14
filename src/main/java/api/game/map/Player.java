@@ -3,6 +3,7 @@ package api.game.map;
 import api.core.Context;
 import api.core.Owner;
 import api.core.Result;
+import api.entity.stuff.Artifact;
 import api.game.ability.Modifier;
 import api.game.ability.Influencer;
 import api.entity.warrior.Warrior;
@@ -158,6 +159,14 @@ public interface Player extends Owner {
    * @return
    */
   Result<Weapon> giveWeaponToWarrior(String warriorId, Class<? extends Weapon> weaponClass);
+
+  /**
+   * дать воину артефакт. Если такой артефакт такого типа уже есть, то будет отказ
+   * @param warriorId     код воина, которому дается артефакт
+   * @param artifactClass класс даваемого артефакта
+   * @return
+   */
+  Result<Artifact<Warrior>> giveArtifactToWarrior(String warriorId, Class<? extends Artifact<Warrior>> artifactClass);
 
   /**
    * Подготовка воина перед ходом игрока. Восстановление различных параметров до нормальных значений

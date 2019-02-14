@@ -3,6 +3,7 @@ package core.game;
 import api.core.Context;
 import api.core.Core;
 import api.core.Result;
+import api.entity.stuff.Artifact;
 import api.game.ability.Influencer;
 import api.entity.warrior.Warrior;
 import api.entity.weapon.Weapon;
@@ -385,6 +386,15 @@ public class ContextImpl implements Context {
             .map(fineContext -> findUserByName(userName))
             .map(player -> ifGameRan(false)
                     .map(context -> context.getLevelMap().giveWeaponToWarrior(player, warriorId, weaponClass)));
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Artifact<Warrior>> giveArtifactToWarrior(String userName, String warriorId, Class<? extends Artifact<Warrior>> artifactClass) {
+    return ifGameDeleting(false)
+            .map(fineContext -> findUserByName(userName))
+            .map(player -> ifGameRan(false)
+                    .map(context -> context.getLevelMap().giveArtifactToWarrior(player, warriorId, artifactClass)));
   }
   //===================================================================================================
 

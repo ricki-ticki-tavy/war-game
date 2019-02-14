@@ -1,4 +1,4 @@
-package core.game.ability;
+package core.entity.ability.base;
 
 import api.core.Context;
 import api.core.Owner;

@@ -3,6 +3,7 @@ package api.game.wraper;
 import api.core.Context;
 import api.core.Core;
 import api.core.Result;
+import api.entity.stuff.Artifact;
 import api.game.ability.Influencer;
 import api.entity.warrior.Warrior;
 import api.entity.weapon.Weapon;
@@ -106,6 +107,16 @@ public interface GameWrapper {
    */
   Result<Weapon> giveWeaponToWarrior(String contextId, String userName, String warriorId, String weaponName);
 
+  /**
+   * дать воину артефакт. Если такой артефакт такого типа уже есть, то будет отказ. Доступно только на этапе
+   * расстановки войска
+   * @param userName      код игрока, которому принадлежит воин
+   * @param warriorId     код воина, которому дается артефакт
+   * @param artifactName  название выдаваемого артефакта
+   * @return
+   */
+  Result<Artifact<Warrior>> giveArtifactToWarrior(String contextId, String userName, String warriorId, String artifactName);
+
   // TODO переделать с кодом контекста в параметр
   /**
    * Забрать предмет у воина
@@ -163,7 +174,7 @@ public interface GameWrapper {
    * Возвращает игрока, которому сейчас принадлежит ход
    * @return
    */
-  Result<Player> getGetPlayerOwnsTheRound(String contextId);
+  Result<Player> getPlayerOwnsTheRound(String contextId);
 
   /**
    * Возвращает имена базовых классов воинов
