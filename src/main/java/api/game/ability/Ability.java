@@ -93,7 +93,7 @@ public interface Ability extends Owner {
    *
    * @return
    */
-  OwnerTypeEnum getOwnerType();
+  OwnerTypeEnum getOwnerTypeForAbility();
 
   /**
    * Восстановиться после хода

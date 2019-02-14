@@ -11,6 +11,6 @@ public interface Artifact extends Owner{
    * Возвращает тип владельца, который может владеть данным артифактом
    * @return
    */
- OwnerTypeEnum getOwnerType();
+ OwnerTypeEnum getArtifactOwnerType();
 
 }

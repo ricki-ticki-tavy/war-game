@@ -7,6 +7,7 @@ import api.entity.warrior.Warrior;
 import api.enums.EventType;
 import api.enums.LifeTimeUnit;
 import api.game.action.InfluenceResult;
+import core.entity.abstracts.AbstractOwnerImpl;
 import core.system.ResultImpl;
 
 import java.util.ArrayList;
@@ -14,12 +15,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-public class InfluencerImpl implements Influencer {
+public class InfluencerImpl extends AbstractOwnerImpl implements Influencer {
   private LifeTimeUnit lifeTimeUnit;
   private int lifeTime;
   private Warrior targetWarrior;
   private final Modifier modifier;
-  private Owner owner;
   private String id = UUID.randomUUID().toString();
   private String consumerId = null;
   private final List<Influencer> children;
@@ -34,11 +34,11 @@ public class InfluencerImpl implements Influencer {
    * @param modifier      модификатор влияния
    */
   public InfluencerImpl(Warrior targetWarrior, Owner owner, LifeTimeUnit lifeTimeUnit, int lifeTime, Modifier modifier) {
+    super(owner, null, null, "", "");
     this.modifier = modifier;
     this.lifeTimeUnit = lifeTimeUnit;
     this.lifeTime = lifeTime;
     this.targetWarrior = targetWarrior;
-    this.owner = owner;
     this.children = new ArrayList<>(10);
     if (!lifeTimeUnit.getEventType().equals(EventType.ALWAYS)) {
       consumerId = getContext().subscribeEvent(this::onTimeEvent, lifeTimeUnit.getEventType());

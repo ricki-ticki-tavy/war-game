@@ -4,7 +4,7 @@ import api.core.Owner;
 import api.entity.warrior.Warrior;
 import api.enums.*;
 import api.game.ability.Influencer;
-import core.entity.base.BaseModifier;
+import core.entity.ability.base.BaseModifier;
 import core.entity.warrior.base.InfluencerImpl;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -36,7 +36,7 @@ public class FireArrow extends AbstractAbilityImpl {
 
     this.level = level;
 
-    ownerType = OwnerTypeEnum.WEAPON;
+    ownerTypeForAbility = OwnerTypeEnum.WEAPON;
     targetType = TargetTypeEnum.ENEMY_WARRIOR;
     this.useCount.set(useCount);
   }

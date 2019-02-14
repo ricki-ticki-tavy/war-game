@@ -10,6 +10,7 @@ import api.enums.PlayerPhaseType;
 import api.enums.TargetTypeEnum;
 import api.game.ability.Influencer;
 import api.game.ability.Ability;
+import core.entity.abstracts.AbstractOwnerImpl;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,17 +21,13 @@ import static core.system.error.GameErrors.SYSTEM_NOT_REALIZED;
 /**
  * Абстрактный класс способности. Общий для всех
  */
-public abstract class AbstractAbilityImpl implements Ability {
-  protected String id;
-  protected String title;
-  protected String description;
-  protected OwnerTypeEnum ownerType;
+public abstract class AbstractAbilityImpl extends AbstractOwnerImpl implements Ability {
+  protected OwnerTypeEnum ownerTypeForAbility;
   protected TargetTypeEnum targetType;
   protected final Map<String, Class<? extends WarriorBaseClass>> unsupportedWarriorBaseClasses = new ConcurrentHashMap<>(10);
   protected AtomicInteger useCount = new AtomicInteger(0);
   protected final int useCountPerRound;
   private AtomicInteger currentUseCountPerPeriod = new AtomicInteger(0);
-  protected Owner owner;
   protected Set<PlayerPhaseType> activePhases = new HashSet<>(2);
 
   /**
@@ -40,10 +37,7 @@ public abstract class AbstractAbilityImpl implements Ability {
    * @param description
    */
   protected AbstractAbilityImpl(Owner owner, int useCountPerRound, String idPrefix, String title, String description) {
-    this.id = idPrefix + UUID.randomUUID().toString();
-    this.title = title;
-    this.description = description;
-    this.owner = owner;
+    super(owner, null, idPrefix, title, description);
 
     this.useCountPerRound = useCountPerRound;
     currentUseCountPerPeriod.set(useCountPerRound);
@@ -63,26 +57,8 @@ public abstract class AbstractAbilityImpl implements Ability {
   //===================================================================================================
 
   @Override
-  public String getId() {
-    return id;
-  }
-  //===================================================================================================
-
-  @Override
-  public String getTitle() {
-    return title;
-  }
-  //===================================================================================================
-
-  @Override
-  public String getDescription() {
-    return description;
-  }
-  //===================================================================================================
-
-  @Override
-  public OwnerTypeEnum getOwnerType() {
-    return ownerType;
+  public OwnerTypeEnum getOwnerTypeForAbility() {
+    return ownerTypeForAbility;
   }
   //===================================================================================================
 
@@ -149,12 +125,6 @@ public abstract class AbstractAbilityImpl implements Ability {
             &&
             // проверим нет ли общих ограничений по количеству
             useCount.get() == -1 || useCount.get() > 0;
-  }
-  //===================================================================================================
-
-  @Override
-  public Context getContext() {
-    return owner.getContext();
   }
   //===================================================================================================
 

@@ -7,6 +7,8 @@ public enum OwnerTypeEnum {
   PLAYER("Игрок")
   , WARRIOR("Воин")
   , WEAPON("Оружие")
+  , ARTIFACT("Артифакт")
+  , SYSTEM("внутреннее")
   ;
   private String title;
 
@@ -14,7 +16,7 @@ public enum OwnerTypeEnum {
     return title;
   }
 
-  private OwnerTypeEnum(String title){
+  OwnerTypeEnum(String title){
     this.title = title;
   }
 }

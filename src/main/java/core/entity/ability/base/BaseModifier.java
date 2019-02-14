@@ -1,4 +1,4 @@
-package core.entity.base;
+package core.entity.ability.base;
 
 import api.core.Context;
 import api.core.EventDataContainer;

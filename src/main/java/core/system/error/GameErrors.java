@@ -32,6 +32,8 @@ public enum GameErrors {
 
   , WEAPON_BASE_CLASS_NOT_FOUND_BY_NAME("WP-1", "Класс оружия с именем %s не существует")
 
+  , ARTIFACT_WRONG_ABILITY("AR-1", "Игра %s. артефакт '%s' не может использовать способность '%s'. Эту способность может использовать только %s")
+
   , MAP_LOAD_ERROR("M-1", "Ошибка загрузки карты: %s")
   , MAP_IS_NOT_LOADED("M-2", "Карта не загружена")
 
