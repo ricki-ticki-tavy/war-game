@@ -16,6 +16,7 @@ import api.geo.Rectangle;
 import api.game.action.InfluenceResult;
 import api.game.map.Player;
 import core.entity.abstracts.AbstractOwnerImpl;
+import core.entity.warrior.base.WarriorImpl;
 import core.system.ResultImpl;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +63,7 @@ public class PlayerImpl extends AbstractOwnerImpl implements Player {
                               , beanFactory.getBean(aClass), "", coords, false);
                       // поместим в массив
                       warriors.put(warrior.getId(), warrior);
+                      ((WarriorImpl)warrior).restoreAttributesAvailableForRestoration(null);
                       Result result = ResultImpl.success(warrior);
                       getContext().fireGameEvent(null, WARRIOR_ADDED, new EventDataContainer(warrior, result), Collections.EMPTY_MAP);
                       return result;

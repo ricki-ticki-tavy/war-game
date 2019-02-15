@@ -34,7 +34,6 @@ import static api.enums.EventType.*;
 import static core.system.error.GameErrors.*;
 
 // TODO добавить поддержку ограничения оружия по допустимому списку
-// TODO способности воина долждны действовать даже на этапе расстановки войск
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class WarriorImpl extends AbstractOwnerImpl<Player> implements Warrior {
@@ -292,8 +291,8 @@ public class WarriorImpl extends AbstractOwnerImpl<Player> implements Warrior {
   public Result<Artifact<Warrior>> dropArtifact(String artifactInstanceId) {
     return findArtifactById(artifactInstanceId)
             .map(artifact -> {
-              // долой из списка
-              artifacts.remove(artifact.getId());
+              // долой из списка. Так как не может быть более одного одинакового артефакта, то тут они хранятся по именам
+              artifacts.remove(artifact.getTitle());
               // сразу отменить действие.
               restoreAttributesAvailableForRestoration(null);
               // отправить сообщение
@@ -409,7 +408,7 @@ public class WarriorImpl extends AbstractOwnerImpl<Player> implements Warrior {
    * Восстанавливает значения атрибутов, которые могут быть восстановлены на заданный режим.
    * Например кол-во очков действия для режима хода или защиты, максимальный запас здоровья и прочее
    */
-  private void restoreAttributesAvailableForRestoration(PlayerPhaseType playerPhaseType) {
+  public void restoreAttributesAvailableForRestoration(PlayerPhaseType playerPhaseType) {
     attributes.setAbilityActionPoints(attributes.getMaxAbilityActionPoints());
     attributes.setActionPoints(playerPhaseType == PlayerPhaseType.ATACK_PHASE ? attributes.getMaxActionPoints() : attributes.getMaxDefenseActionPoints());
     attributes.setLuckMeleeAtack(getWarriorBaseClass().getBaseAttributes().getLuckMeleeAtack());

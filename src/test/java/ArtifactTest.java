@@ -42,13 +42,26 @@ public class ArtifactTest extends AbstractMapTest {
     Warrior warriorImpl1p1 = gameWrapper.getCore().findGameContextByUID(gameContext).getResult()
             .findUserByName(player1).getResult()
             .findWarriorById(warrior1p1).getResult();
-    int curLuck = warriorImpl1p1.getAttributes().getLuckRangeAtack();
+
+    Assert.isTrue(warriorImpl1p1.getAttributes().getLuckRangeAtack() == 16, "способность воина удачи не подействовала");
 
     // выдать артефакт удачи при стрельбе +20%. Должно все получиться
     Result<Artifact<Warrior>> artifactResult = gameWrapper.giveArtifactToWarrior(gameContext, player1, warrior1p1, ArtifactRainbowArrowForWarrior.CLASS_NAME);
     assertSuccess(artifactResult);
     Assert.isTrue(warriorImpl1p1.getArtifacts().getResult().size() == 1, "У воина нет добавленного артефакта");
-    Assert.isTrue(warriorImpl1p1.getAttributes().getLuckRangeAtack() == 26, "Добавленный артефакт не подействовал");
+    Assert.isTrue(warriorImpl1p1.getAttributes().getLuckRangeAtack() == 36, "Добавленный артефакт не подействовал");
+    String artifact1w1p1 = artifactResult.getResult().getId();
+
+    // выбросим артефакт и посмотрим что будет
+    assertSuccess(artifactResult = gameWrapper.dropArtifactByWarrior(gameContext, player1, warrior1p1, artifact1w1p1));
+    Assert.isTrue(warriorImpl1p1.getArtifacts().getResult().size() == 0, "У воина не удалился артефакт");
+    Assert.isTrue(warriorImpl1p1.getAttributes().getLuckRangeAtack() == 16, "Удаленный артефакт не откатил свое влияние");
+
+    // Заново выдать артефакт удачи при стрельбе +20%. Должно все получиться
+    artifactResult = gameWrapper.giveArtifactToWarrior(gameContext, player1, warrior1p1, ArtifactRainbowArrowForWarrior.CLASS_NAME);
+    assertSuccess(artifactResult);
+    Assert.isTrue(warriorImpl1p1.getAttributes().getLuckRangeAtack() == 36, "Добавленный артефакт не подействовал");
+    artifact1w1p1 = artifactResult.getResult().getId();
 
     // выдать артефакт удачи при стрельбе +20% ЕЩЕ раз тому жевоину. Так как повтор, то должен быть отказ
     artifactResult = gameWrapper.giveArtifactToWarrior(gameContext, player1, warrior1p1, ArtifactRainbowArrowForWarrior.CLASS_NAME);
