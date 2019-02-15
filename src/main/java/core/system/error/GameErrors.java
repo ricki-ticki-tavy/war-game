@@ -35,6 +35,7 @@ public enum GameErrors {
   , ARTIFACT_WRONG_ABILITY("AR-1", "Игра %s. артефакт '%s' не может использовать способность '%s'. Эту способность может использовать только %s")
   , ARTIFACT_ALREADY_EXISTS("AR-2", "В игре %s. воин '%s %s' игрока '%s' уже владеет артефактом '%s'.")
   , ARTIFACT_BASE_CLASS_ARTIFACT_OF_WARRIOR_NOT_FOUND_BY_NAME("AR-3", "Класс воинского артефакта  с именем %s не существует")
+  , ARTIFACT_NOT_FOUND_BY_WARRIOR("AR-4", "В игре %s (id %s) у игрока %s воин '%s %s' (id %s) не имеет артефакта с id '%s'")
 
   , MAP_LOAD_ERROR("M-1", "Ошибка загрузки карты: %s")
   , MAP_IS_NOT_LOADED("M-2", "Карта не загружена")

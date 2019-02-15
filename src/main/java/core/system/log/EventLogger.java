@@ -2,6 +2,7 @@ package core.system.log;
 
 import api.core.Context;
 import api.core.Result;
+import api.entity.stuff.Artifact;
 import api.game.ability.Modifier;
 import api.game.ability.Influencer;
 import api.entity.warrior.Warrior;
@@ -71,22 +72,14 @@ public class EventLogger {
                 , event.getSource(Player.class).isReadyToPlay() ? "готовности" : "продолжении подготовки"));
         break;
       }
-      case PLAYER_LOOSE_TURN: {
+      case PLAYER_LOOSE_TURN:
+      case PLAYER_TAKES_TURN:
         //"Игрок '%s' в игре %s (контекст '%s') завершил ход."
         logger.info(event.getEventType().getFormattedMessage(
                 event.getSource(Player.class).getTitle()
                 , event.getSourceContext().getGameName()
                 , event.getSourceContext().getContextId()));
         break;
-      }
-      case PLAYER_TAKES_TURN: {
-        //"Игрок '%s' в игре %s (контекст '%s') получил ход"
-        logger.info(event.getEventType().getFormattedMessage(
-                event.getSource(Player.class).getTitle()
-                , event.getSourceContext().getGameName()
-                , event.getSourceContext().getContextId()));
-        break;
-      }
       case WARRIOR_ADDED: {
         // "В игре '%s' (контекст '%s') игроком '%s' добавлен воин '%s'"
         logger.info(event.getEventType().getFormattedMessage(
@@ -152,18 +145,9 @@ public class EventLogger {
                 , event.getSource(Influencer.class).getId()));
         break;
       }
-      case WARRIOR_PREPARED_TO_DEFENCE: {
+      case WARRIOR_PREPARED_TO_DEFENCE:
+      case WARRIOR_PREPARED_TO_ATTACK:
         //   "В игре '%s' (контекст '%s') у игрока '%s' воин '%s (%s)' (id %s) подготовился к защите"
-        logger.info(event.getEventType().getFormattedMessage(
-                event.getSourceContext().getGameName()
-                , event.getSourceContext().getContextId()
-                , event.getSource(Warrior.class).getOwner().getId()
-                , event.getSource(Warrior.class).getTitle()
-                , event.getSource(Warrior.class).getWarriorBaseClass().getTitle()
-                , event.getSource(Warrior.class).getId()));
-        break;
-      }
-      case WARRIOR_PREPARED_TO_ATTACK: {
         //   "В игре '%s' (контекст '%s') у игрока '%s' воин '%s (%s)' (id %s) подготовился к действиям и атаке"
         logger.info(event.getEventType().getFormattedMessage(
                 event.getSourceContext().getGameName()
@@ -173,7 +157,6 @@ public class EventLogger {
                 , event.getSource(Warrior.class).getWarriorBaseClass().getTitle()
                 , event.getSource(Warrior.class).getId()));
         break;
-      }
       case WARRIOR_WAS_ATTACKED_BY_ENEMY: {
         //   "В игре '%s' воин '%s %s' игрока '%s' нанес оружием %s воину '%s %s' игрока %s %s единиц урона"
         logger.info(event.getEventType().getFormattedMessage(
@@ -219,15 +202,25 @@ public class EventLogger {
                 , event.getSource(Result.class).toString()));
         break;
       }
-      case WEAPON_DROPED: {
-        // "В игре '%s' игрок '%s' убрал у юнита '%s' (id '%s') оружие '%s' (id '%s'). %s"
-        logger.info(event.getEventType().getFormattedMessage(event.getSourceContext().getGameName()
-                , event.getSource(Warrior.class).getOwner().getTitle()
+      case WEAPON_DROPPED: {
+        // "В игре '%s' игрок '%s' убрал у юнита '%s %s' оружие '%s'."
+        logger.info(event.getEventType().getFormattedMessage(
+                event.getSourceContext().getGameName()
+                , event.getSource(Warrior.class).getOwner().getId()
                 , event.getSource(Warrior.class).getWarriorBaseClass().getTitle()
-                , event.getSource(Warrior.class).getWarriorBaseClass().getId()
-                , event.getSource(Weapon.class).getTitle()
-                , event.getSource(Weapon.class).getId()
-                , event.getSource(Result.class).toString()));
+                , event.getSource(Warrior.class).getTitle()
+                , event.getSource(Weapon.class).getTitle()));
+        break;
+      }
+      case ARTIFACT_TAKEN_BY_WARRIOR:
+      case ARTIFACT_DROPPED_BY_WARRIOR: {
+        // "В игре '%s' воин '%s %s' игрока '%s' взял/выбросил артефакт %s"
+        logger.info(event.getEventType().getFormattedMessage(
+                event.getSourceContext().getGameName()
+                , event.getSource(Warrior.class).getOwner().getId()
+                , event.getSource(Warrior.class).getWarriorBaseClass().getTitle()
+                , event.getSource(Warrior.class).getTitle()
+                , event.getSource(Artifact.class).getTitle()));
         break;
       }
       case GAME_CONTEXT_CREATED: {

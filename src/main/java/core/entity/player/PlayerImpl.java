@@ -244,7 +244,7 @@ public class PlayerImpl extends AbstractOwnerImpl implements Player {
   @Override
   public Result<Weapon> giveWeaponToWarrior(String warriorId, Class<? extends Weapon> weaponClass) {
     return findWarriorById(warriorId)
-            .map(foundWarrior -> foundWarrior.takeWeapon(weaponClass));
+            .map(foundWarrior -> foundWarrior.giveWeaponToWarrior(weaponClass));
   }
   //===================================================================================================
 
@@ -252,6 +252,20 @@ public class PlayerImpl extends AbstractOwnerImpl implements Player {
   public Result<Artifact<Warrior>> giveArtifactToWarrior(String warriorId, Class<? extends Artifact<Warrior>> artifactClass) {
     return findWarriorById(warriorId)
             .map(foundWarrior -> foundWarrior.giveArtifactToWarrior(artifactClass));
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Weapon> dropWeaponByWarrior(String warriorId, String weaponId) {
+    return findWarriorById(warriorId)
+            .map(warrior -> warrior.dropWeapon(weaponId));
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Artifact<Warrior>> dropArtifactByWarrior(String warriorId, String artifactId) {
+    return findWarriorById(warriorId)
+            .map(foundWarrior -> foundWarrior.dropArtifact(artifactId));
   }
   //===================================================================================================
 

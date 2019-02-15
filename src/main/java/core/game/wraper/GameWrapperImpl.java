@@ -146,11 +146,17 @@ public class GameWrapperImpl implements GameWrapper {
 //===================================================================================================
 
   @Override
-  public Result<Weapon> takeWeaponFromWarrior(String userName, String warriorId, String weaponId) {
-    return core.findUserByName(userName)
-            .mapSafe(foundPlayer -> foundPlayer.findContext()
-                    .map(foundContext -> foundPlayer.findWarriorById(warriorId)
-                            .map(foundWarrior -> foundWarrior.dropWeapon(weaponId))))
+  public Result<Artifact<Warrior>> dropArtifactByWarrior(String contextId, String userName, String warriorId, String artifactInstanceId) {
+    return core.findGameContextByUID(contextId)
+            .mapSafe(fineContext -> fineContext.dropArtifactByWarrior(userName, warriorId, artifactInstanceId))
+            .logIfError(logger);
+  }
+//===================================================================================================
+
+  @Override
+  public Result<Weapon> dropWeaponByWarrior(String contextId, String userName, String warriorId, String weaponId) {
+    return core.findGameContextByUID(contextId)
+            .mapSafe(fineContext -> fineContext.dropWeaponByWarrior(userName, warriorId, weaponId))
             .logIfError(logger);
   }
 //===================================================================================================

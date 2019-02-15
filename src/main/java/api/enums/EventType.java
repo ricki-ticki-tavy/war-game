@@ -9,10 +9,10 @@ public enum EventType {
 
   , ATTACK_MELEE_AFTER("После каждого рукопашного удара при атаке")
   , ATTACK_MELEE_BEFORE("Перед каждым рукопашным ударом при атаке")
-  , ATTACK_DISTANCE_AFTER("После каждого дистанционного удара при атаке")
-  , ATTACK_DISTANCE_BEFORE("Перед каждым дистанционным ударом при атаке")
-  , ATTACK_AFTER_EVERY_BIT("После каждого удара при атаке")
-  , ATTACK_BEFORE_EVERY_BIT("Перед каждым ударом при атаке")
+  , ATTACK_DISTANCE_AFTER("После каждого дистанционного атакующего удара")
+  , ATTACK_DISTANCE_BEFORE("Перед каждым дистанционным атакующим ударом")
+  , ATTACK_AFTER_EVERY_BIT("После каждого атакующего удара")
+  , ATTACK_BEFORE_EVERY_BIT("Перед каждым атакующим ударом")
 
   , DEFENSE_AFTER("Перед защитой")
   , DEFENSE_BEFORE("После защиты")
@@ -44,7 +44,13 @@ public enum EventType {
 
   , WEAPON_TAKEN("В игре '%s' игрок '%s' снарядил юнит '%s' (id '%s') оружием '%s'. %s")
   , WEAPON_TRY_TO_DROP("В игре '%s' игрок '%s' попытался убрать у юнита '%s' (id '%s') оружие id '%s'. %s")
-  , WEAPON_DROPED("В игре '%s' игрок '%s' убрал у юнита '%s' (id '%s') оружие '%s' (id '%s'). %s")
+  , WEAPON_DROPPED("В игре '%s' игрок '%s' убрал у юнита '%s %s' оружие '%s'.")
+
+
+  , ARTIFACT_TAKEN_BY_WARRIOR("В игре '%s' воин '%s %s' игрока '%s' взял артефакт %s")
+  , ARTIFACT_DROPPED_BY_WARRIOR("В игре '%s' воин '%s %s' игрока '%s' выбросил артефакт %s")
+  , ARTIFACT_TAKEN_BY_PLAYER("В игре '%s' игрок '%s' взял артефакт %s")
+  , ARTIFACT_DROPPED_BY_PLAYER("В игре '%s' игрок '%s' выбросил артефакт %s")
 
   , GAME_CONTEXT_CREATE("Создание контекста игры '%s' игроком '%s'. %s")
   , GAME_CONTEXT_CREATED("Создание контекста игры '%s' игроком '%s'. %s")

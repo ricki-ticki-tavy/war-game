@@ -1,6 +1,5 @@
 package core.entity.warrior.base;
 
-import api.core.Context;
 import api.core.Owner;
 import api.entity.stuff.Artifact;
 import api.enums.OwnerTypeEnum;
@@ -115,7 +114,8 @@ public class WarriorImpl extends AbstractOwnerImpl<Player> implements Warrior {
       artifacts.put(artifact.getTitle(), artifact);
       // применить сразу действие артефакта
       artifact.applyToOwner(warriorPhase);
-
+      // отправить сообщение
+      getContext().fireGameEvent(null, ARTIFACT_TAKEN_BY_WARRIOR, new EventDataContainer(this, artifact), null);
       result = ResultImpl.success(artifact);
     }
     return result;
@@ -163,6 +163,16 @@ public class WarriorImpl extends AbstractOwnerImpl<Player> implements Warrior {
             .findFirst().map(warriorSHand -> warriorSHand.getWeaponById(weaponId))
             .map(weapon -> ResultImpl.success(weapon))
             .orElse(ResultImpl.fail(generateWeapoNotFoundError(weaponId)));
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Artifact<Warrior>> findArtifactById(String artifactId) {
+    return artifacts.values().stream()
+            .filter(artifact -> artifact.getId().equals(artifactId))
+            .findFirst()
+            .map(artifact -> ResultImpl.success(artifact))
+            .orElse(ResultImpl.fail(generateArtifactNotFoundError(artifactId)));
   }
   //===================================================================================================
 
@@ -234,7 +244,7 @@ public class WarriorImpl extends AbstractOwnerImpl<Player> implements Warrior {
   //===================================================================================================
 
   @Override
-  public Result takeWeapon(Class<? extends Weapon> weaponClass) {
+  public Result giveWeaponToWarrior(Class<? extends Weapon> weaponClass) {
     Result result = null;
     Weapon weapon = beanFactory.getBean(weaponClass);
     if (weapon.getNeededHandsCountToTakeWeapon() > 0) {
@@ -270,11 +280,26 @@ public class WarriorImpl extends AbstractOwnerImpl<Player> implements Warrior {
             .orElse(ResultImpl.fail(generateWeapoNotFoundError(weaponInstanceId)));
 
     getContext().fireGameEvent(null
-            , result.isSuccess() ? WEAPON_DROPED : WEAPON_TRY_TO_DROP
+            , result.isSuccess() ? WEAPON_DROPPED : WEAPON_TRY_TO_DROP
             , new EventDataContainer(this, result.isSuccess() ? result.getResult() : weaponInstanceId, result)
             , null);
 
     return result;
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Artifact<Warrior>> dropArtifact(String artifactInstanceId) {
+    return findArtifactById(artifactInstanceId)
+            .map(artifact -> {
+              // долой из списка
+              artifacts.remove(artifact.getId());
+              // сразу отменить действие.
+              restoreAttributesAvailableForRestoration(null);
+              // отправить сообщение
+              getContext().fireGameEvent(null, ARTIFACT_DROPPED_BY_WARRIOR, new EventDataContainer(this, artifact), null);
+              return ResultImpl.success(artifact);
+            });
   }
   //===================================================================================================
 
@@ -343,6 +368,20 @@ public class WarriorImpl extends AbstractOwnerImpl<Player> implements Warrior {
             , getTitle()
             , getId()
             , weaponId);
+
+  }
+  //===================================================================================================
+
+  private GameError generateArtifactNotFoundError(String artifactId) {
+    //"В игре %s (id %s) у игрока %s воин '%s %s' (id %s) не имеет оружия с id '%s'"
+    return ARTIFACT_NOT_FOUND_BY_WARRIOR.getError(
+            getContext().getGameName()
+            , getContext().getContextId()
+            , getOwner().getId()
+            , getWarriorBaseClass().getTitle()
+            , getTitle()
+            , getId()
+            , artifactId);
 
   }
   //===================================================================================================

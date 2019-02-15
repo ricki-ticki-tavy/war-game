@@ -399,6 +399,24 @@ public class ContextImpl implements Context {
   //===================================================================================================
 
   @Override
+  public Result<Artifact<Warrior>> dropArtifactByWarrior(String userName, String warriorId, String artifactInstanceId) {
+    return ifGameDeleting(false)
+            .map(fineContext -> findUserByName(userName))
+            .map(player -> ifGameRan(false)
+                    .map(context -> context.getLevelMap().dropArtifactByWarrior(player, warriorId, artifactInstanceId)));
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Weapon> dropWeaponByWarrior(String userName, String warriorId, String weaponId) {
+    return ifGameDeleting(false)
+            .map(fineContext -> findUserByName(userName))
+            .map(player -> ifGameRan(false)
+                    .map(context -> context.getLevelMap().dropWeaponByWarrior(player, warriorId, weaponId)));
+  }
+  //===================================================================================================
+
+  @Override
   public Result<Weapon> findWeaponById(String userName, String warriorId, String weaponId) {
     return ifGameDeleting(false)
             .map(context -> context.findUserByName(userName))

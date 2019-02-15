@@ -169,6 +169,22 @@ public interface Player extends Owner {
   Result<Artifact<Warrior>> giveArtifactToWarrior(String warriorId, Class<? extends Artifact<Warrior>> artifactClass);
 
   /**
+   * Бросить оружие
+   * @param warriorId
+   * @param weaponId
+   * @return
+   */
+  Result<Weapon> dropWeaponByWarrior(String warriorId, String weaponId);
+
+  /** выбросить артефакт воина
+   *
+   * @param artifactInstanceId
+   * @param warriorId
+   * @return
+   */
+  Result<Artifact<Warrior>> dropArtifactByWarrior(String warriorId, String artifactInstanceId);
+
+  /**
    * Подготовка воина перед ходом игрока. Восстановление различных параметров до нормальных значений
    *
    * @return

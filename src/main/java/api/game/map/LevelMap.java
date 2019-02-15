@@ -138,6 +138,24 @@ public interface LevelMap {
    */
   Result<Artifact<Warrior>> giveArtifactToWarrior(Player player, String warriorId, Class<? extends Artifact<Warrior>> artifactClass);
 
+  /** выбросить артефакт воина
+   *
+   * @param player
+   * @param artifactInstanceId
+   * @param warriorId
+   * @return
+   */
+  Result<Artifact<Warrior>> dropArtifactByWarrior(Player player, String warriorId, String artifactInstanceId);
+
+  /**
+   * Бросить оружие
+   * @param player
+   * @param warriorId
+   * @param weaponId
+   * @return
+   */
+  Result<Weapon> dropWeaponByWarrior(Player player, String warriorId, String weaponId);
+
   /**
    * Найти оружие по его id
    * @param player

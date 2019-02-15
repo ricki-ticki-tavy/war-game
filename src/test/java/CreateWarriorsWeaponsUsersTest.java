@@ -139,12 +139,12 @@ public class CreateWarriorsWeaponsUsersTest {
     Assert.isTrue(warrior.getWeapons().size() == 2, "У воина присутствует третье добавленное оружие");
 
     logger.info("step " + step++);
-    Result<Weapon> resultDropWeapon1 = gameWrapper.takeWeaponFromWarrior(player.getId(), warrior.getId(), weapon1.getId());
+    Result<Weapon> resultDropWeapon1 = gameWrapper.dropWeaponByWarrior(context1.getContextId(), player.getId(), warrior.getId(), weapon1.getId());
     Assert.isTrue(resultDropWeapon1.isSuccess(), "Ошибка удаления короткого меча (первого оружия)");
     Assert.isTrue(warrior.getWeapons().size() == 1, "У воина присутствует удаленное первое оружие");
 
     logger.info("step " + step++);
-    resultDropWeapon1 = gameWrapper.takeWeaponFromWarrior(player.getId(), warrior.getId(), weapon1.getId());
+    resultDropWeapon1 = gameWrapper.dropWeaponByWarrior(context1.getContextId(), player.getId(), warrior.getId(), weapon1.getId());
     Assert.isTrue(resultDropWeapon1.isFail(), "Ошибка повторного удаления ранее удаленного оружия (короткого меча (первого оружия))");
     Assert.isTrue(warrior.getWeapons().size() == 1, "У воина неверное кол-во оружияпосле удаления первое оружие");
 
@@ -154,7 +154,7 @@ public class CreateWarriorsWeaponsUsersTest {
     Assert.isTrue(warrior.getWeapons().size() == 1, "У воина присутствует лук. третье добавленное оружие");
 
     logger.info("step " + step++);
-    resultDropWeapon1 = gameWrapper.takeWeaponFromWarrior(player.getId(), warrior.getId(), weapon2.getId());
+    resultDropWeapon1 = gameWrapper.dropWeaponByWarrior(context1.getContextId(), player.getId(), warrior.getId(), weapon2.getId());
     Assert.isTrue(resultDropWeapon1.isSuccess(), "Ошибка удаления меча (второго оружия)");
     Assert.isTrue(warrior.getWeapons().size() == 0, "У воина присутствует удаленное второе оружие");
 

@@ -93,14 +93,8 @@ public abstract class AbstractAbilityImpl extends AbstractOwnerImpl implements A
   //===================================================================================================
 
   @Override
-  public List<EventType> getAllTriggerTypes() {
-    throw SYSTEM_NOT_REALIZED.getError("depricated AbstractAbilityImpl.getAllTriggerTypes");
-  }
-  //===================================================================================================
-
-  @Override
-  public boolean isValidForEvent(EventType triggerType) {
-    throw SYSTEM_NOT_REALIZED.getError("AbstractAbilityImpl.isValidForEvent");
+  public List<EventType> getEventsWhenActive() {
+    throw SYSTEM_NOT_REALIZED.getError("AbstractAbilityImpl.getEventsWhenActive");
   }
   //===================================================================================================
 

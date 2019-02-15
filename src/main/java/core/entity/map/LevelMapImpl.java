@@ -304,6 +304,20 @@ public class LevelMapImpl implements LevelMap {
   }
   //===================================================================================================
 
+  @Override
+  public Result<Artifact<Warrior>> dropArtifactByWarrior(Player player, String warriorId, String artifactInstanceId) {
+    return context.ifGameRan(false)
+            .map(fineContext -> player.dropArtifactByWarrior(warriorId, artifactInstanceId));
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Weapon> dropWeaponByWarrior(Player player, String warriorId, String weaponId) {
+    return context.ifGameRan(false)
+            .map(fineContext -> player.dropWeaponByWarrior(warriorId, weaponId));
+  }
+  //===================================================================================================
+
   protected Result<Warrior> innerMoveWarriorTo(Player player, String warriorId, Coords newCoords) {
     return player.findWarriorById(warriorId)
             .map(warrior -> player.ifWarriorCanMoveAtThisTurn(warrior))
