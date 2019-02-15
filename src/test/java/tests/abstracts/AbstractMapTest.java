@@ -14,7 +14,7 @@ import tests.test.warrior.TestSkeleton;
 import tests.test.warrior.TestViking;
 import tests.test.warrior.TestVityaz;
 import tests.test.weapons.TestBow;
-import tests.test.weapons.TestFireBow;
+import tests.test.weapons.TestFireBowOfRejuvenation;
 import tests.test.weapons.TestShortSword;
 import tests.test.weapons.TestSword;
 
@@ -48,7 +48,7 @@ public abstract class AbstractMapTest {
 
     ((CoreImpl)gameWrapper.getCore()).registerWeaponClass(TestBow.CLASS_NAME, TestBow.class);
     ((CoreImpl)gameWrapper.getCore()).registerWeaponClass(TestShortSword.CLASS_NAME, TestShortSword.class);
-    ((CoreImpl)gameWrapper.getCore()).registerWeaponClass(TestFireBow.CLASS_NAME, TestFireBow.class);
+    ((CoreImpl)gameWrapper.getCore()).registerWeaponClass(TestFireBowOfRejuvenation.CLASS_NAME, TestFireBowOfRejuvenation.class);
     ((CoreImpl)gameWrapper.getCore()).registerWeaponClass(TestSword.CLASS_NAME, TestSword.class);
 
     Result<Player> playerResult = gameWrapper.login(player1Name);

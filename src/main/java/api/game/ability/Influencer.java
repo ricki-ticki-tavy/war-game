@@ -1,11 +1,9 @@
-package api.game;
+package api.game.ability;
 
 import api.core.Owner;
 import api.core.Result;
-import api.game.ability.Modifier;
-import api.entity.base.BaseEntityHeader;
 import api.entity.warrior.Warrior;
-import api.game.action.AttackResult;
+import api.game.action.InfluenceResult;
 
 import java.util.Collection;
 import java.util.List;
@@ -27,10 +25,18 @@ public interface Influencer extends Owner {
   Result<Influencer> removeFromWarrior(boolean silent);
 
   /**
-   * Добавить зависимое влияние
-   * @param influencer
+   * прикрепить влияние к владельцу.
+   * @param owner
    * @return
    */
+  Influencer attachToOwner(Owner owner);
+
+
+    /**
+     * Добавить зависимое влияние
+     * @param influencer
+     * @return
+     */
   Influencer addChild(Influencer influencer);
   
   /**
@@ -55,8 +61,8 @@ public interface Influencer extends Owner {
 
   /**
    * Применить влияние на воина
-   * @param attackResult
+   * @param influenceResult
    * @return
    */
-  Result<Warrior> applyToWarrior(AttackResult attackResult);
+  Result<Warrior> applyToWarrior(InfluenceResult influenceResult);
 }

@@ -1,22 +1,20 @@
-package core.entity.base;
+package core.entity.ability.base;
 
 import api.core.Context;
 import api.core.EventDataContainer;
 import api.core.Result;
+import api.entity.warrior.Warrior;
 import api.entity.warrior.WarriorSBaseAttributes;
-import api.enums.EventType;
+import api.enums.*;
 import api.game.ability.Modifier;
-import api.enums.AttributeEnum;
-import api.enums.ModifierClass;
-import api.enums.TargetTypeEnum;
-import api.game.action.AttackResult;
+import api.game.action.InfluenceResult;
 import core.system.ResultImpl;
 
-import static api.enums.AttributeEnum.HEALTH;
+import static api.enums.ManifestationOfInfluenceEnum.POSITIVE;
 
 public class BaseModifier implements Modifier {
 
-  protected TargetTypeEnum target;
+  protected TargetTypeEnum targetType;
   protected String title;
   protected String description;
   protected AttributeEnum attribute;
@@ -28,6 +26,7 @@ public class BaseModifier implements Modifier {
   protected int luck;
   protected boolean luckyRollOfDice = false;
   protected boolean hitSuccess = false;
+  protected ManifestationOfInfluenceEnum manifestationOfInfluence;
 
 
   public BaseModifier() {
@@ -35,8 +34,8 @@ public class BaseModifier implements Modifier {
   //===================================================================================================
 
   @Override
-  public TargetTypeEnum getTarget() {
-    return target;
+  public TargetTypeEnum getTargetType() {
+    return targetType;
   }
   //===================================================================================================
 
@@ -100,11 +99,11 @@ public class BaseModifier implements Modifier {
   //===================================================================================================
 
   public BaseModifier(Context context
-          , String title, String description, TargetTypeEnum target
+          , String title, String description, TargetTypeEnum targetType, ManifestationOfInfluenceEnum manifestationOfInfluence
           , ModifierClass modifierClass
           , AttributeEnum attribute, int minValue, int maxValue
           , int probability, int luck) {
-    this.target = target;
+    this.targetType = targetType;
     this.title = title;
     this.description = description;
     this.attribute = attribute;
@@ -114,6 +113,7 @@ public class BaseModifier implements Modifier {
     this.context = context;
     this.modifierClass = modifierClass;
     this.luck = luck;
+    this.manifestationOfInfluence = manifestationOfInfluence;
     getValue();
   }
   //===================================================================================================
@@ -169,25 +169,51 @@ public class BaseModifier implements Modifier {
   }
   //===================================================================================================
 
+  private void innerApplyToWarrior(Warrior target) {
+    WarriorSBaseAttributes attributes = target.getAttributes();
+    switch (getAttribute()) {
+      case HEALTH:
+        attributes.addHealth(manifestationOfInfluence.equals(POSITIVE) ? calculatedValue : - calculatedValue);
+        break;
+      case RANGED_ATTACK_LUCK:
+        attributes.setLuckRangeAtack(attributes.getLuckRangeAtack()
+                + (manifestationOfInfluence.equals(POSITIVE) ? calculatedValue : - calculatedValue));
+        break;
+      case MELEE_ATTACK_LUCK:
+        attributes.setLuckMeleeAtack(attributes.getLuckMeleeAtack()
+                + (manifestationOfInfluence.equals(POSITIVE) ? calculatedValue : - calculatedValue));
+        break;
+      case ATTACK_LUCK:
+        attributes.setLuckMeleeAtack(attributes.getLuckMeleeAtack()
+                + (manifestationOfInfluence.equals(POSITIVE) ? calculatedValue : - calculatedValue));
+        attributes.setLuckRangeAtack(attributes.getLuckRangeAtack()
+                + (manifestationOfInfluence.equals(POSITIVE) ? calculatedValue : - calculatedValue));
+        break;
+    }
+  }
+  //===================================================================================================
+
   @Override
-  public Result<Modifier> apply(AttackResult attackResult) {
-    WarriorSBaseAttributes attributes = attackResult.getTarget().getAttributes();
+  public Result<Modifier> applyModifier(InfluenceResult influenceResult) {
     // Уже всерассчитано. Применяем значение, рассчитанное заранее (getLastCalculatedValue())
-    if (getTarget() == TargetTypeEnum.ENEMY_WARRIOR) {
-      switch (getAttribute()) {
-        case HEALTH:
-          attributes.addHealth(- calculatedValue);
-          // Отправим сообщение
-          attackResult.getTarget().getContext()
-                  .fireGameEvent(null
-                          , EventType.WARRIOR_WAS_ATTACKED_BY_ENEMY
-                          , new EventDataContainer(attackResult, this)
-                          , null);
-          break;
-      }
+
+    innerApplyToWarrior(influenceResult.getTarget());
+    if (getTargetType() == TargetTypeEnum.ENEMY_WARRIOR) {
+      // Отправим сообщение об атаке
+      influenceResult.getTarget().getContext()
+              .fireGameEvent(null
+                      , EventType.WARRIOR_WAS_ATTACKED_BY_ENEMY
+                      , new EventDataContainer(influenceResult, this)
+                      , null);
     }
     return ResultImpl.success(this);
   }
-  //===================================================================================================
+//===================================================================================================
+
+  @Override
+  public ManifestationOfInfluenceEnum getManifestationOfInfluence() {
+    return manifestationOfInfluence;
+  }
+//===================================================================================================
 
 }

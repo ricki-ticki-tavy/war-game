@@ -1,6 +1,6 @@
 package api.game.action;
 
-import api.game.Influencer;
+import api.game.ability.Influencer;
 import api.entity.warrior.Warrior;
 import api.entity.weapon.Weapon;
 import api.core.Event;
@@ -9,15 +9,15 @@ import api.game.map.Player;
 import java.util.List;
 
 /**
- * Результат атаки
+ * Результат воздействия, атаки
  */
-public interface AttackResult {
+public interface InfluenceResult {
 
   /**
-   * Получить атаковавшего юнита. Может быть NULL если атаковал сам игрок с помощью магии
+   * Получить воздействовавшего, атаковавшего юнита. Может быть NULL если атаковал сам игрок с помощью магии
    * @return
    */
-  Warrior getAttacker();
+  Warrior getActor();
 
   /**
    * Получить оружие с помощью которого была выполнена атака. Может быть NULL в случае атаки магией
@@ -29,7 +29,7 @@ public interface AttackResult {
    * Получить атаковавшего игрока
    * @return
    */
-  Player getAttackerPlayer();
+  Player getActorPlayer();
 
   /**
    * Получить атакованного игрока
@@ -60,7 +60,7 @@ public interface AttackResult {
    * @param influencer
    * @return
    */
-  AttackResult addInfluencer(Influencer influencer);
+  InfluenceResult addInfluencer(Influencer influencer);
 
   /**
    * Получить кол-во очков, затраченных на атаку

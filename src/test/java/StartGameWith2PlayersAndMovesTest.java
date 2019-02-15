@@ -107,7 +107,7 @@ public class StartGameWith2PlayersAndMovesTest extends AbstractMapTest {
             .map(context -> context.ifGameRan(true)));
 
     // если первым ходитигрок 2, то передаем ход игроку 1
-    gameWrapper.getGetPlayerOwnsTheRound(gameContext)
+    gameWrapper.getPlayerOwnsTheRound(gameContext)
             .peak(player -> {
               if (player.getId().equals(player2)) {
                 assertSuccess(gameWrapper.nextTurn(gameContext, player2));
@@ -192,7 +192,7 @@ public class StartGameWith2PlayersAndMovesTest extends AbstractMapTest {
     warriorResult = gameWrapper.rollbackMove(gameContext, player2, warrior2p2);
     Assert.isTrue(warriorResult.isFail(WARRIOR_CAN_T_ROLLBACK_MOVE), "Откат вышел не смотря на блокировку");
 
-    // Еще раз передадим ход. Должно быть событие
+    // Еще раз передадим ход.
     playerResult = gameWrapper.nextTurn(gameContext, player2);
     assertSuccess(playerResult);
 

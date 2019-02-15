@@ -2,11 +2,10 @@ package api.entity.weapon;
 
 import api.core.Owner;
 import api.core.Result;
+import api.entity.stuff.Artifact;
 import api.game.ability.Ability;
-import api.game.ability.Modifier;
-import api.entity.base.BaseEntityHeader;
 import api.entity.warrior.Warrior;
-import api.game.action.AttackResult;
+import api.game.action.InfluenceResult;
 
 import java.util.List;
 
@@ -111,16 +110,10 @@ public interface Weapon extends Owner{
   int getNeededHandsCountToTakeWeapon();
 
   /**
-   * Получить воина, владеющего снаряжением
-   * @return
-   */
-  Warrior getOwner();
-
-  /**
    * Атаковать противника
    * @param targetWarrior
    */
-  Result<AttackResult> attack(Warrior targetWarrior);
+  Result<InfluenceResult> attack(Warrior targetWarrior);
 
   /**
    * задать  владельца снаряжения
@@ -140,6 +133,27 @@ public interface Weapon extends Owner{
    * @return
    */
   Weapon revival();
+
+  /**
+   * добавить уже существующий артифакт. Если такой артифакт уже есть, то добавить второй нельзя
+   * @param artifact
+   * @return
+   */
+//  Result<Artifact<Weapon>> attachArtifact(Artifact<Weapon> artifact);
+
+  /**
+   * Возвращает список артефактов воина
+   * @return
+   */
+//  Result<List<Artifact<Weapon>>> getArtifacts();
+
+  /**
+   * дать воину артефакт. Если такой артефакт такого типа уже есть, то будет отказ
+   * @param artifactClass класс даваемого артефакта
+   * @return
+   */
+//  Result<Artifact<Weapon>> giveArtifactToWarrior(Class<? extends Artifact<Weapon>> artifactClass);
+
 
 
 }

@@ -1,30 +1,30 @@
 package core.game.action;
 
-import api.game.Influencer;
+import api.game.ability.Influencer;
 import api.entity.warrior.Warrior;
 import api.entity.weapon.Weapon;
 import api.core.Event;
-import api.game.action.AttackResult;
+import api.game.action.InfluenceResult;
 import api.game.map.Player;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class AttackResultImpl implements api.game.action.AttackResult {
+public class InfluenceResultImpl implements InfluenceResult {
 
-  private Player attackerPlayer;
+  private Player actorPlayer;
   private Player targetPlayer;
-  private Warrior attacker;
+  private Warrior actor;
   private Warrior target;
   private Weapon weapon;
   private Event event;
   private int consumedActionPoints;
   private final List<Influencer> influencers = new ArrayList<>(20);
 
-  public AttackResultImpl(Player attackerPlayer, Warrior attacker, Weapon weapon
+  public InfluenceResultImpl(Player actorPlayer, Warrior actor, Weapon weapon
           , Player targetPlayer, Warrior target, int consumedActionPoints){
-    this.attackerPlayer = attackerPlayer;
-    this.attacker = attacker;
+    this.actorPlayer = actorPlayer;
+    this.actor = actor;
     this.weapon = weapon;
     this.targetPlayer = targetPlayer;
     this.target = target;
@@ -33,8 +33,8 @@ public class AttackResultImpl implements api.game.action.AttackResult {
   //===================================================================================================
 
   @Override
-  public Warrior getAttacker() {
-    return attacker;
+  public Warrior getActor() {
+    return actor;
   }
   //===================================================================================================
 
@@ -45,8 +45,8 @@ public class AttackResultImpl implements api.game.action.AttackResult {
   //===================================================================================================
 
   @Override
-  public Player getAttackerPlayer() {
-    return attackerPlayer;
+  public Player getActorPlayer() {
+    return actorPlayer;
   }
   //===================================================================================================
 
@@ -75,7 +75,7 @@ public class AttackResultImpl implements api.game.action.AttackResult {
   //===================================================================================================
 
   @Override
-  public AttackResult addInfluencer(Influencer influencer) {
+  public InfluenceResult addInfluencer(Influencer influencer) {
     influencers.add(influencer);
     return this;
   }
@@ -85,5 +85,11 @@ public class AttackResultImpl implements api.game.action.AttackResult {
   public int getConsumedActionPoints() {
     return consumedActionPoints;
   }
+  //===================================================================================================
+
+  public static InfluenceResult forPositive(Warrior target){
+    return new InfluenceResultImpl(target.getOwner(), target, null, target.getOwner(), target, 0);
+  }
+  //===================================================================================================
   //===================================================================================================
 }

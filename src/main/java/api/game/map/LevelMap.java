@@ -3,15 +3,16 @@ package api.game.map;
 import api.core.Context;
 import api.core.Owner;
 import api.core.Result;
+import api.entity.stuff.Artifact;
 import api.game.ability.Modifier;
-import api.game.Influencer;
+import api.game.ability.Influencer;
 import api.entity.warrior.Warrior;
 import api.entity.weapon.Weapon;
 import api.enums.LifeTimeUnit;
 import api.enums.TargetTypeEnum;
 import api.geo.Coords;
 import api.geo.Rectangle;
-import api.game.action.AttackResult;
+import api.game.action.InfluenceResult;
 import api.game.map.metadata.LevelMapMetaDataXml;
 import core.game.GameProcessData;
 
@@ -129,6 +130,15 @@ public interface LevelMap {
   Result<Weapon> giveWeaponToWarrior(Player player, String warriorId, Class<? extends Weapon> weaponClass);
 
   /**
+   * дать воину артефакт. Если такой артефакт такого типа уже есть, то будет отказ
+   * @param player        игрок, которому принадлежит воин
+   * @param warriorId     код воина, которому дается артефакт
+   * @param artifactClass класс даваемого артефакта
+   * @return
+   */
+  Result<Artifact<Warrior>> giveArtifactToWarrior(Player player, String warriorId, Class<? extends Artifact<Warrior>> artifactClass);
+
+  /**
    * Найти оружие по его id
    * @param player
    * @param warriorId
@@ -151,7 +161,7 @@ public interface LevelMap {
    * @param weaponId
    * @return
    */
-  Result<AttackResult> attackWarrior(Player player, String attackerWarriorId, String targetWarriorId, String weaponId);
+  Result<InfluenceResult> attackWarrior(Player player, String attackerWarriorId, String targetWarriorId, String weaponId);
 
   /**
    * Добавить игрока в игру

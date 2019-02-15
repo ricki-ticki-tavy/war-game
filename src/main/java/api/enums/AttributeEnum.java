@@ -19,7 +19,9 @@ public enum AttributeEnum{
   MAGIC_POINT("Кол-во очков магии", Integer.class),
   X_COORD("координата X", Integer.class),
   Y_COORD("координата Y", Integer.class),
-  LUCK("Удача", String.class),
+  RANGED_ATTACK_LUCK("Удача в стрельбе", String.class),
+  MELEE_ATTACK_LUCK("Удача в рукопашной атаке", String.class),
+  ATTACK_LUCK("Удача в атаке", String.class),
   CAPTION("Название", String.class)
 //  ,
 //  ("", Integer.class),

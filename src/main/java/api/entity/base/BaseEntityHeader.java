@@ -21,6 +21,4 @@ public interface BaseEntityHeader {
    * @return
    */
   String getDescription();
-
-
 }

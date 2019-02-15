@@ -3,11 +3,12 @@ package api.game.wraper;
 import api.core.Context;
 import api.core.Core;
 import api.core.Result;
-import api.game.Influencer;
+import api.entity.stuff.Artifact;
+import api.game.ability.Influencer;
 import api.entity.warrior.Warrior;
 import api.entity.weapon.Weapon;
 import api.geo.Coords;
-import api.game.action.AttackResult;
+import api.game.action.InfluenceResult;
 import api.game.map.Player;
 import api.game.map.metadata.GameRules;
 
@@ -70,7 +71,7 @@ public interface GameWrapper {
    * @param weaponId
    * @return
    */
-  Result<AttackResult> attackWarrior(String contextId, String userName, String attackerWarriorId, String targetWarriorId, String weaponId);
+  Result<InfluenceResult> attackWarrior(String contextId, String userName, String attackerWarriorId, String targetWarriorId, String weaponId);
 
   /**
    * Переместить юнит на заданные координаты
@@ -105,6 +106,16 @@ public interface GameWrapper {
    * @return
    */
   Result<Weapon> giveWeaponToWarrior(String contextId, String userName, String warriorId, String weaponName);
+
+  /**
+   * дать воину артефакт. Если такой артефакт такого типа уже есть, то будет отказ. Доступно только на этапе
+   * расстановки войска
+   * @param userName      код игрока, которому принадлежит воин
+   * @param warriorId     код воина, которому дается артефакт
+   * @param artifactName  название выдаваемого артефакта
+   * @return
+   */
+  Result<Artifact<Warrior>> giveArtifactToWarrior(String contextId, String userName, String warriorId, String artifactName);
 
   // TODO переделать с кодом контекста в параметр
   /**
@@ -163,7 +174,7 @@ public interface GameWrapper {
    * Возвращает игрока, которому сейчас принадлежит ход
    * @return
    */
-  Result<Player> getGetPlayerOwnsTheRound(String contextId);
+  Result<Player> getPlayerOwnsTheRound(String contextId);
 
   /**
    * Возвращает имена базовых классов воинов

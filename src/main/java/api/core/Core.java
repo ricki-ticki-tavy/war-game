@@ -1,5 +1,7 @@
 package api.core;
 
+import api.entity.stuff.Artifact;
+import api.entity.warrior.Warrior;
 import api.entity.warrior.WarriorBaseClass;
 import api.entity.weapon.Weapon;
 import api.enums.EventType;
@@ -110,8 +112,22 @@ public interface Core {
 
   /**
    * Ищет базовый класс воина по его названию
-   * @param weaponClassName
+   * @param weaponName
    * @return
    */
-  Result<Class<? extends Weapon>> findWeaponByName(String weaponClassName);
+  Result<Class<? extends Weapon>> findWeaponByName(String weaponName);
+
+  /**
+   * Ищет базовый класс артефакта для воина по его названию
+   * @param artifactName
+   * @return
+   */
+  Result<Class<? extends Artifact<Warrior>>> findArtifactForWarrior(String artifactName);
+
+  /**
+   * Ищет базовый класс артефакта для воина по его названию
+   * @param artifactName
+   * @return
+   */
+//  Result<Class<? extends Artifact<Weapon>>> findArtifactForWarrior(String artifactName);
 }

@@ -1,11 +1,12 @@
 package api.core;
 
+import api.entity.stuff.Artifact;
 import api.entity.warrior.Warrior;
 import api.entity.weapon.Weapon;
 import api.enums.EventType;
 import api.geo.Coords;
-import api.game.Influencer;
-import api.game.action.AttackResult;
+import api.game.ability.Influencer;
+import api.game.action.InfluenceResult;
 import api.game.map.LevelMap;
 import api.game.map.Player;
 import api.game.map.metadata.GameRules;
@@ -193,7 +194,7 @@ public interface Context {
    * @param weaponId
    * @return
    */
-  Result<AttackResult> attackWarrior(String userName, String attackerWarriorId, String targetWarriorId, String weaponId);
+  Result<InfluenceResult> attackWarrior(String userName, String attackerWarriorId, String targetWarriorId, String weaponId);
 
   /**
    * Переместить юнит на новые координаты
@@ -235,6 +236,15 @@ public interface Context {
    * @return
    */
   Result<Weapon> giveWeaponToWarrior(String userName, String warriorId, Class<? extends Weapon> weaponClass);
+
+  /**
+   * дать воину артефакт. Если такой артефакт такого типа уже есть, то будет отказ
+   * @param userName      код игрока, которому принадлежит воин
+   * @param warriorId     код воина, которому дается артефакт
+   * @param artifactClass класс даваемого артефакта
+   * @return
+   */
+  Result<Artifact<Warrior>> giveArtifactToWarrior(String userName, String warriorId, Class<? extends Artifact<Warrior>> artifactClass);
 
   /**
    * Найти оружие по его id

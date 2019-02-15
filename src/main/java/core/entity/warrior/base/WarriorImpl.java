@@ -2,7 +2,10 @@ package core.entity.warrior.base;
 
 import api.core.Context;
 import api.core.Owner;
-import api.game.Influencer;
+import api.entity.stuff.Artifact;
+import api.enums.OwnerTypeEnum;
+import api.enums.TargetTypeEnum;
+import api.game.ability.Influencer;
 import api.core.Result;
 import api.game.ability.Ability;
 import api.game.ability.Modifier;
@@ -12,8 +15,10 @@ import api.enums.LifeTimeUnit;
 import api.enums.PlayerPhaseType;
 import api.geo.Coords;
 import api.core.EventDataContainer;
-import api.game.action.AttackResult;
+import api.game.action.InfluenceResult;
 import api.game.map.Player;
+import core.entity.abstracts.AbstractOwnerImpl;
+import core.game.action.InfluenceResultImpl;
 import core.system.ResultImpl;
 import core.system.error.GameError;
 import org.springframework.beans.factory.BeanFactory;
@@ -30,20 +35,17 @@ import static api.enums.EventType.*;
 import static core.system.error.GameErrors.*;
 
 // TODO добавить поддержку ограничения оружия по допустимому списку
+// TODO способности воина долждны действовать даже на этапе расстановки войск
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class WarriorImpl implements Warrior {
+public class WarriorImpl extends AbstractOwnerImpl<Player> implements Warrior {
 
   protected Map<Integer, WarriorSHand> hands;
   protected WarriorBaseClass warriorBaseClass;
   protected volatile Coords coords;
-  protected final String id = UUID.randomUUID().toString();
-  protected String title;
   protected boolean summoned;
-  protected Context gameContext;
-  protected Player owner;
   protected WarriorSBaseAttributes attributes;
-  protected Map<String, Influencer> influencers = new ConcurrentHashMap<>(50);
+  protected final Map<String, Influencer> influencers = new ConcurrentHashMap<>(50);
 
   protected volatile boolean touchedAtThisTurn = false;
 
@@ -51,6 +53,9 @@ public class WarriorImpl implements Warrior {
   protected volatile boolean moveLocked;
   protected volatile boolean rollbackAvailable;
   protected volatile int treatedActionPointsForMove;
+  protected final Map<String, Artifact<Warrior>> artifacts = new ConcurrentHashMap<>(10);
+
+  protected PlayerPhaseType warriorPhase = null;
 
   protected final Map<String, Class<? extends Ability>> unsupportedAbilities = new ConcurrentHashMap<>(20);
 
@@ -61,20 +66,65 @@ public class WarriorImpl implements Warrior {
   //===================================================================================================
   //===================================================================================================
 
-  // TODO убрать gameContext так как Owner умеет его добыть
-  public WarriorImpl(Context gameContext, Player owner, WarriorBaseClass warriorBaseClass, String title, Coords coords, boolean summoned) {
+  public WarriorImpl(Player owner, WarriorBaseClass warriorBaseClass, String title, Coords coords, boolean summoned) {
+    super(owner, OwnerTypeEnum.WARRIOR, "wrr", title, title);
     this.warriorBaseClass = warriorBaseClass;
     this.attributes = warriorBaseClass.getBaseAttributes().clone();
-    this.title = title;
     this.summoned = summoned;
-    this.gameContext = gameContext;
-    this.owner = owner;
     this.coords = new Coords(coords);
     int handsCount = warriorBaseClass.getHandsCount();
     hands = new ConcurrentHashMap(2);
     while (handsCount-- > 0) {
       hands.put(hands.size(), new WarriorSHandImpl());
     }
+    this.warriorBaseClass.attachToWarrior(this);
+  }
+  //===================================================================================================
+
+  @Override
+  public Player getOwner() {
+    return super.getOwner();
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Artifact<Warrior>> giveArtifactToWarrior(Class<? extends Artifact<Warrior>> artifactClass) {
+    Result<Artifact<Warrior>> result = ResultImpl.success(null);
+    return result.mapSafe(nullArt -> {
+      Artifact<Warrior> artifact = beanFactory.getBean(artifactClass
+              , this);
+      return attachArtifact(artifact);
+    });
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Artifact<Warrior>> attachArtifact(Artifact<Warrior> artifact) {
+    Result<Artifact<Warrior>> result;
+    if (artifacts.get(artifact.getTitle()) != null) {
+      // уже есть такой артефакт. даем ошибку
+      // "В игре %s. воин '%s %s' игрока '%s' уже владеет артефактом '%s'."
+      result = ResultImpl.fail(ARTIFACT_ALREADY_EXISTS.getError(
+              getContext().getGameName()
+              , warriorBaseClass.getTitle()
+              , title
+              , owner.getId()
+              , artifact.getTitle()));
+    } else {
+      artifact.attachToOwner(this);
+      artifacts.put(artifact.getTitle(), artifact);
+      // применить сразу действие артефакта
+      artifact.applyToOwner(warriorPhase);
+
+      result = ResultImpl.success(artifact);
+    }
+    return result;
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<List<Artifact<Warrior>>> getArtifacts() {
+    return ResultImpl.success(new ArrayList<Artifact<Warrior>>(artifacts.values()));
   }
   //===================================================================================================
 
@@ -116,28 +166,10 @@ public class WarriorImpl implements Warrior {
   }
   //===================================================================================================
 
-  @Override
-  public String getId() {
-    return id;
-  }
-  //===================================================================================================
-
-  @Override
-  public String getTitle() {
-    return title;
-  }
-  //===================================================================================================
-
-  @Override
-  public String getDescription() {
-    return "";
-  }
-  //===================================================================================================
-
   private Coords innerGetTranslatedToGameCoords() {
     // если игра уже в стадии игры, а не расстановки, юнит не трогали или если не заблокирована возможность отката, то
     // берем OriginalCoords в противном случае берем Coords
-    return gameContext.isGameRan()
+    return getContext().isGameRan()
             // игра идет
             && isRollbackAvailable() && !isMoveLocked()
             ? originalCoords
@@ -156,19 +188,19 @@ public class WarriorImpl implements Warrior {
     Coords from = innerGetTranslatedToGameCoords();
 
     return (int) Math.round((double) getWarriorSMoveCost() * Math.sqrt((double) ((from.getX() - to.getX()) * (from.getX() - to.getX())
-            + (from.getY() - to.getY()) * (from.getY() - to.getY()))) / (double) gameContext.getLevelMap().getSimpleUnitSize());
+            + (from.getY() - to.getY()) * (from.getY() - to.getY()))) / (double) getContext().getLevelMap().getSimpleUnitSize());
   }
   //===================================================================================================
 
   @Override
   public int calcDistanceTo(Coords to) {
-    return gameContext.calcDistanceTo(innerGetTranslatedToGameCoords(), to);
+    return getContext().calcDistanceTo(innerGetTranslatedToGameCoords(), to);
   }
   //===================================================================================================
 
   @Override
   public int calcDistanceToTarget(Coords to) {
-    return gameContext.calcDistanceTo(coords, to);
+    return getContext().calcDistanceTo(coords, to);
   }
   //===================================================================================================
 
@@ -188,22 +220,10 @@ public class WarriorImpl implements Warrior {
                       getWarriorBaseClass().getTitle()
                       , getId()
                       , getOwner().getId()
-                      , gameContext.getGameName()
-                      , gameContext.getContextId()));
+                      , getContext().getGameName()
+                      , getContext().getContextId()));
     }
     return result;
-  }
-  //===================================================================================================
-
-  @Override
-  public Player getOwner() {
-    return owner;
-  }
-  //===================================================================================================
-
-  @Override
-  public Context getContext() {
-    return gameContext;
   }
   //===================================================================================================
 
@@ -238,7 +258,7 @@ public class WarriorImpl implements Warrior {
               });
       result = ResultImpl.success(weapon);
     }
-    gameContext.fireGameEvent(null, WEAPON_TAKEN, new EventDataContainer(this, weapon, result), null);
+    getContext().fireGameEvent(null, WEAPON_TAKEN, new EventDataContainer(this, weapon, result), null);
     return result;
   }
   //===================================================================================================
@@ -249,7 +269,7 @@ public class WarriorImpl implements Warrior {
             .map(warriorSHand -> ResultImpl.success(warriorSHand.removeWeapon(weaponInstanceId)))
             .orElse(ResultImpl.fail(generateWeapoNotFoundError(weaponInstanceId)));
 
-    gameContext.fireGameEvent(null
+    getContext().fireGameEvent(null
             , result.isSuccess() ? WEAPON_DROPED : WEAPON_TRY_TO_DROP
             , new EventDataContainer(this, result.isSuccess() ? result.getResult() : weaponInstanceId, result)
             , null);
@@ -268,8 +288,8 @@ public class WarriorImpl implements Warrior {
               // ждали дружественного, а он - враг
               // "В игре %s (id %s)  воин '%s %s' (id %s) не является врагом для воина '%s %s' (id %s) игрока %s %s"
               ? ResultImpl.fail(WARRIOR_ATTACK_TARGET_WARRIOR_IS_NOT_ALIED.getError(
-              gameContext.getGameName()
-              , gameContext.getContextId()
+              getContext().getGameName()
+              , getContext().getContextId()
               , warrior.getWarriorBaseClass().getTitle()
               , warrior.getTitle()
               , warrior.getId()
@@ -280,8 +300,8 @@ public class WarriorImpl implements Warrior {
               , ""))
               // "В игре %s (id %s)  воин '%s %s' (id %s) является враждебным для воина '%s %s' (id %s) игрока %s %s"
               : ResultImpl.fail(WARRIOR_ATTACK_TARGET_WARRIOR_IS_ALIED.getError(
-              gameContext.getGameName()
-              , gameContext.getContextId()
+              getContext().getGameName()
+              , getContext().getContextId()
               , warrior.getWarriorBaseClass().getTitle()
               , warrior.getTitle()
               , warrior.getId()
@@ -295,7 +315,7 @@ public class WarriorImpl implements Warrior {
   }
   //===================================================================================================
 
-  public Result<AttackResult> attackWarrior(Warrior targetWarrior, String weaponId) {
+  public Result<InfluenceResult> attackWarrior(Warrior targetWarrior, String weaponId) {
     // проверим, что это не дружественный воин
     return ifWarriorAlied(targetWarrior, false)
             // Найдем у своего воинаоружие
@@ -306,7 +326,7 @@ public class WarriorImpl implements Warrior {
   //===================================================================================================
 
   @Override
-  public Result<AttackResult> defenceWarrior(AttackResult attackResult) {
+  public Result<InfluenceResult> defenceWarrior(InfluenceResult attackResult) {
     // TODO реализовать рассчет защиты и особенностей воина
 
     return ResultImpl.success(attackResult);
@@ -316,8 +336,8 @@ public class WarriorImpl implements Warrior {
   private GameError generateWeapoNotFoundError(String weaponId) {
     //"В игре %s (id %s) у игрока %s воин '%s %s' (id %s) не имеет оружия с id '%s'"
     return WARRIOR_WEAPON_NOT_FOUND.getError(
-            gameContext.getGameName()
-            , gameContext.getContextId()
+            getContext().getGameName()
+            , getContext().getContextId()
             , getOwner().getId()
             , getWarriorBaseClass().getTitle()
             , getTitle()
@@ -341,7 +361,6 @@ public class WarriorImpl implements Warrior {
    */
   private Result<Warrior> applayInfluences(PlayerPhaseType playerPhaseType) {
     // TODO соберем все влияния, что наложены на воина.
-    // сначала соберем его личные способности
     return ResultImpl.success(this);
 
   }
@@ -353,7 +372,7 @@ public class WarriorImpl implements Warrior {
    */
   private void restoreAttributesAvailableForRestoration(PlayerPhaseType playerPhaseType) {
     attributes.setAbilityActionPoints(attributes.getMaxAbilityActionPoints());
-    attributes.setActionPoints(playerPhaseType == PlayerPhaseType.PLAYER_PHASE_TYPE_ATACK ? attributes.getMaxActionPoints() : attributes.getMaxDefenseActionPoints());
+    attributes.setActionPoints(playerPhaseType == PlayerPhaseType.ATACK_PHASE ? attributes.getMaxActionPoints() : attributes.getMaxDefenseActionPoints());
     attributes.setLuckMeleeAtack(getWarriorBaseClass().getBaseAttributes().getLuckMeleeAtack());
     attributes.setLuckRangeAtack(getWarriorBaseClass().getBaseAttributes().getLuckRangeAtack());
     attributes.setLuckDefense(getWarriorBaseClass().getBaseAttributes().getLuckDefense());
@@ -372,10 +391,29 @@ public class WarriorImpl implements Warrior {
     // обновить спосоности
     warriorBaseClass.getAbilities().values().stream().forEach(ability -> ability.revival());
 
-    // восстановить оружие. На двуручном и более-ручном оружии могут быть кратные срабатывания восстановления. TODO поправить
-    hands.values().stream()
-            .forEach(warriorSHand -> warriorSHand.getWeapons()
-            .stream().forEach(weapon -> weapon.revival()));
+    // восстановить оружие.
+    getWeapons().stream().forEach(weapon -> weapon.revival());
+
+    // применить способности класса воина
+    InfluenceResult influenceResult = new InfluenceResultImpl(this.getOwner(), this, null, this.getOwner(), this, 0);
+    warriorBaseClass.getAbilities().values().stream()
+            .filter(ability -> ability.getOwnerTypeForAbility().equals(OwnerTypeEnum.WARRIOR))
+            .forEach(ability -> ability.buildForTarget(this).stream()
+                    .forEach(influencer -> influencer.applyToWarrior(influenceResult)));
+
+    // применить влияния артефактов с учетом фаза атака/защита
+    artifacts.values().stream()
+            .forEach(artifact -> artifact.applyToOwner(playerPhaseType));
+
+    // применить влияния оружия. Те, которые направлены на воина-владельца оружия
+    getWeapons().stream().forEach(weapon -> weapon.getAbilities().stream()
+            .filter(ability -> ability.getTargetType().equals(TargetTypeEnum.THIS_WARRIOR)
+                    && ability.getActivePhase().contains(playerPhaseType))
+            .forEach(ability -> ability.buildForTarget(this).stream()
+                    .forEach(influencer -> influencer.applyToWarrior(InfluenceResultImpl.forPositive(this))
+                    )
+            )
+    );
   }
   //===================================================================================================
 
@@ -386,23 +424,24 @@ public class WarriorImpl implements Warrior {
    */
   private Result<Warrior> prepareToPhase(PlayerPhaseType playerPhaseType) {
     restoreAttributesAvailableForRestoration(playerPhaseType);
+    warriorPhase = playerPhaseType;
     return applayInfluences(playerPhaseType)
             .peak(warrior -> warrior.getOwner().findContext()
-                    .peak(context -> context.fireGameEvent(null
-                            , playerPhaseType == PlayerPhaseType.PLAYER_PHASE_TYPE_DEFENSE ? WARRIOR_PREPARED_TO_DEFENCE : WARRIOR_PREPARED_TO_ATTACK
+                    .peak(context -> getContext().fireGameEvent(null
+                            , playerPhaseType == PlayerPhaseType.DEFENSE_PHASE ? WARRIOR_PREPARED_TO_DEFENCE : WARRIOR_PREPARED_TO_ATTACK
                             , new EventDataContainer(this), null)));
   }
   //===================================================================================================
 
   @Override
   public Result<Warrior> prepareToDefensePhase() {
-    return prepareToPhase(PlayerPhaseType.PLAYER_PHASE_TYPE_DEFENSE);
+    return prepareToPhase(PlayerPhaseType.DEFENSE_PHASE);
   }
   //===================================================================================================
 
   @Override
   public Result<Warrior> prepareToAttackPhase() {
-    return prepareToPhase(PlayerPhaseType.PLAYER_PHASE_TYPE_ATACK);
+    return prepareToPhase(PlayerPhaseType.ATACK_PHASE);
   }
   //===================================================================================================
 
@@ -410,7 +449,17 @@ public class WarriorImpl implements Warrior {
   public Result<Influencer> addInfluenceToWarrior(Modifier modifier, Owner source, LifeTimeUnit lifeTimeUnit, int lifeTime) {
     Influencer influencer = new InfluencerImpl(this, source, lifeTimeUnit, lifeTime, modifier);
     influencers.put(influencer.getId(), influencer);
-    gameContext.fireGameEvent(null, WARRIOR_INFLUENCER_ADDED
+    getContext().fireGameEvent(null, WARRIOR_INFLUENCER_ADDED
+            , new EventDataContainer(influencer, this), null);
+    return ResultImpl.success(influencer);
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Influencer> addInfluenceToWarrior(Influencer influencer) {
+    influencer.attachToOwner(this);
+    influencers.put(influencer.getId(), influencer);
+    getContext().fireGameEvent(null, WARRIOR_INFLUENCER_ADDED
             , new EventDataContainer(influencer, this), null);
     return ResultImpl.success(influencer);
   }
@@ -431,7 +480,7 @@ public class WarriorImpl implements Warrior {
   void innerRemoveInfluencerFromWarrior(Influencer influencer, boolean silent) {
     influencers.remove(influencer.getId());
     if (!silent) {
-      gameContext.fireGameEvent(null, WARRIOR_INFLUENCER_REMOVED
+      getContext().fireGameEvent(null, WARRIOR_INFLUENCER_REMOVED
               , new EventDataContainer(influencer, this), null);
     }
   }
@@ -506,17 +555,16 @@ public class WarriorImpl implements Warrior {
 
       result = ResultImpl.success(this);
       // уведомление
-      gameContext.fireGameEvent(null
+      getContext().fireGameEvent(null
               , WARRIOR_MOVE_ROLLEDBACK
               , new EventDataContainer(this, result)
               , null);
     } else {
-      Context context = getOwner().findContext().getResult();
       // В игре %s (id %s) игрок %s не может откатить перемещение воина '%s %s' (id %s) так как откат
       // заблокирован последующими действиями
       result = ResultImpl.fail(WARRIOR_CAN_T_ROLLBACK_MOVE.getError(
-              context.getGameName()
-              , context.getContextId()
+              getContext().getGameName()
+              , getContext().getContextId()
               , getOwner().getId()
               , getWarriorBaseClass().getTitle()
               , getTitle()
@@ -559,7 +607,7 @@ public class WarriorImpl implements Warrior {
   //===================================================================================================
 
   @Override
-  public Map<String, Class<? extends Ability>> getUnavailableAbilities() {
+  public Map<String, Class<? extends Ability>> getUnsupportedAbilities() {
     return new HashMap<>(unsupportedAbilities);
   }
   //===================================================================================================

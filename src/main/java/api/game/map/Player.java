@@ -3,15 +3,15 @@ package api.game.map;
 import api.core.Context;
 import api.core.Owner;
 import api.core.Result;
+import api.entity.stuff.Artifact;
 import api.game.ability.Modifier;
-import api.entity.base.BaseEntityHeader;
-import api.game.Influencer;
+import api.game.ability.Influencer;
 import api.entity.warrior.Warrior;
 import api.entity.weapon.Weapon;
 import api.enums.LifeTimeUnit;
 import api.geo.Coords;
 import api.geo.Rectangle;
-import api.game.action.AttackResult;
+import api.game.action.InfluenceResult;
 
 import java.util.List;
 import java.util.Map;
@@ -161,6 +161,14 @@ public interface Player extends Owner {
   Result<Weapon> giveWeaponToWarrior(String warriorId, Class<? extends Weapon> weaponClass);
 
   /**
+   * дать воину артефакт. Если такой артефакт такого типа уже есть, то будет отказ
+   * @param warriorId     код воина, которому дается артефакт
+   * @param artifactClass класс даваемого артефакта
+   * @return
+   */
+  Result<Artifact<Warrior>> giveArtifactToWarrior(String warriorId, Class<? extends Artifact<Warrior>> artifactClass);
+
+  /**
    * Подготовка воина перед ходом игрока. Восстановление различных параметров до нормальных значений
    *
    * @return
@@ -182,14 +190,14 @@ public interface Player extends Owner {
    * @param weaponId
    * @return
    */
-  Result<AttackResult> attackWarrior(String attackerWarriorId, String targetWarriorId, String weaponId);
+  Result<InfluenceResult> attackWarrior(String attackerWarriorId, String targetWarriorId, String weaponId);
 
   /**
    * Метод вызывается после того, как атакующим воином выполнены все расчеты оказываемых на атакуемого воина воздействий
    * тут плеер может добавить что-то еще от себя.
    * @return
    */
-  Result<AttackResult> innerAttachToAttackToWarrior(AttackResult attackResult);
+  Result<InfluenceResult> innerAttachToAttackToWarrior(InfluenceResult attackResult);
 
   /**
    * Этот метод вызывается когда воин игрока атакуется. В этом методе происходит анализ всех нанесенныхз уронов,
@@ -197,7 +205,7 @@ public interface Player extends Owner {
    * @param attackResult
    * @return
    */
-  Result<AttackResult> defenceWarrior(AttackResult attackResult);
+  Result<InfluenceResult> defenceWarrior(InfluenceResult attackResult);
 
   /**
    * добавить влияние юниту

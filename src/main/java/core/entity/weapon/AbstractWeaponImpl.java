@@ -1,19 +1,21 @@
 package core.entity.weapon;
 
-import api.core.Context;
 import api.core.EventDataContainer;
 import api.core.Result;
-import api.game.Influencer;
+import api.enums.ManifestationOfInfluenceEnum;
+import api.enums.OwnerTypeEnum;
+import api.game.ability.Influencer;
 import api.game.ability.Ability;
 import api.game.ability.Modifier;
 import api.entity.warrior.Warrior;
 import api.entity.weapon.Weapon;
 import api.enums.LifeTimeUnit;
 import api.enums.ModifierClass;
-import api.game.action.AttackResult;
-import core.entity.base.BaseModifier;
+import api.game.action.InfluenceResult;
+import core.entity.ability.base.BaseModifier;
+import core.entity.abstracts.AbstractOwnerImpl;
 import core.entity.warrior.base.InfluencerImpl;
-import core.game.action.AttackResultImpl;
+import core.game.action.InfluenceResultImpl;
 import core.system.ResultImpl;
 import core.system.error.GameErrors;
 
@@ -30,11 +32,8 @@ import static core.system.error.GameErrors.*;
 /**
  * Абстрактное оружие. Общие методы
  */
-public abstract class AbstractWeaponImpl implements Weapon {
+public abstract class AbstractWeaponImpl extends AbstractOwnerImpl<Warrior> implements Weapon {
 
-  protected String id = UUID.randomUUID().toString();
-  protected String title;
-  protected String description;
   protected int meleeMinDamage;
   protected int rangedMinDamage;
   protected int meleeMaxDamage;
@@ -54,73 +53,56 @@ public abstract class AbstractWeaponImpl implements Weapon {
   protected int neededHandsCountToTakeWeapon;
   protected String secondWeaponName;
 
-  protected Warrior owner;
-
-  public AbstractWeaponImpl(
-          Warrior owner
-          , String id
-          , String title
-          , String description
-          , int meleeMinDamage
-          , int meleeMaxDamage
-          , int rangedMinDamage
-          , int rangedMaxDamage
-          , int rangedAttackCost
-          , int meleeAttackCost
-          , Map<String, Ability> abilities
-          , boolean unrejectable
-          , int useCountPerRound
-          , int totalRangedUseCount
-          , boolean canDealRangedDamage
-          , int minRangedAttackRange
-          , int maxRangedAttackRange
-          , int meleeAttackRange
-          , int fadeRangeStart
-          , int fadeDamagePercentPerLength
-          , int neededHandsCountToTakeWeapon) {
-    this.owner = owner;
-    this.id = id;
-    this.title = title;
-    this.description = description;
-    this.meleeMinDamage = meleeMinDamage;
-    this.meleeMaxDamage = meleeMaxDamage;
-    this.rangedMinDamage = rangedMinDamage;
-    this.rangedMaxDamage = rangedMaxDamage;
-    this.rangedAttackCost = rangedAttackCost;
-    this.meleeAttackCost = meleeAttackCost;
-    this.abilities.putAll(abilities);
-    this.unrejectable = unrejectable;
-    this.useCountPerRound = useCountPerRound;
-    this.totalRangedUseCount = totalRangedUseCount;
-    this.canDealRangedDamage = canDealRangedDamage;
-    this.minRangedAttackRange = minRangedAttackRange;
-    this.maxRangedAttackRange = maxRangedAttackRange;
-    this.meleeAttackRange = meleeAttackRange;
-    this.fadeRangeStart = fadeRangeStart;
-    this.fadeDamagePercentPerLength = fadeDamagePercentPerLength;
-    this.neededHandsCountToTakeWeapon = neededHandsCountToTakeWeapon;
-  }
+//  public AbstractWeaponImpl(
+//          Warrior owner
+//          , String id
+//          , String title
+//          , String description
+//          , int meleeMinDamage
+//          , int meleeMaxDamage
+//          , int rangedMinDamage
+//          , int rangedMaxDamage
+//          , int rangedAttackCost
+//          , int meleeAttackCost
+//          , Map<String, Ability> abilities
+//          , boolean unrejectable
+//          , int useCountPerRound
+//          , int totalRangedUseCount
+//          , boolean canDealRangedDamage
+//          , int minRangedAttackRange
+//          , int maxRangedAttackRange
+//          , int meleeAttackRange
+//          , int fadeRangeStart
+//          , int fadeDamagePercentPerLength
+//          , int neededHandsCountToTakeWeapon) {
+//    this.owner = owner;
+//    this.id = id;
+//    this.title = title;
+//    this.description = description;
+//    this.meleeMinDamage = meleeMinDamage;
+//    this.meleeMaxDamage = meleeMaxDamage;
+//    this.rangedMinDamage = rangedMinDamage;
+//    this.rangedMaxDamage = rangedMaxDamage;
+//    this.rangedAttackCost = rangedAttackCost;
+//    this.meleeAttackCost = meleeAttackCost;
+//    this.abilities.putAll(abilities);
+//    this.unrejectable = unrejectable;
+//    this.useCountPerRound = useCountPerRound;
+//    this.totalRangedUseCount = totalRangedUseCount;
+//    this.canDealRangedDamage = canDealRangedDamage;
+//    this.minRangedAttackRange = minRangedAttackRange;
+//    this.maxRangedAttackRange = maxRangedAttackRange;
+//    this.meleeAttackRange = meleeAttackRange;
+//    this.fadeRangeStart = fadeRangeStart;
+//    this.fadeDamagePercentPerLength = fadeDamagePercentPerLength;
+//    this.neededHandsCountToTakeWeapon = neededHandsCountToTakeWeapon;
+//  }
+//
 
   protected AbstractWeaponImpl() {
-  }
+    super(null, OwnerTypeEnum.WEAPON, "wep", "", "");
+    }
 
-  @Override
-  public String getId() {
-    return id;
-  }
-  //===================================================================================================
-
-  @Override
-  public String getTitle() {
-    return title;
-  }
-  //===================================================================================================
-
-  @Override
-  public String getDescription() {
-    return description;
-  }
-  //===================================================================================================
 
   @Override
   public int getMeleeMinDamage() {
@@ -236,12 +218,6 @@ public abstract class AbstractWeaponImpl implements Weapon {
   }
   //===================================================================================================
 
-  @Override
-  public Warrior getOwner() {
-    return owner;
-  }
-  //===================================================================================================
-
   private Result generateAttackError(GameErrors gameError, Warrior targetWarrior) {
     return ResultImpl.fail(gameError.getError(
             owner.getContext().getGameName()
@@ -263,6 +239,7 @@ public abstract class AbstractWeaponImpl implements Weapon {
       throw GameErrors.SYSTEM_OBJECT_ALREADY_INITIALIZED.getError("warrior.owner", owner.toString());
     }
     this.owner = owner;
+    setContext(owner.getContext());
     return this;
   }
   //===================================================================================================
@@ -277,9 +254,9 @@ public abstract class AbstractWeaponImpl implements Weapon {
   // TODO Учесть кол-во потраченных единиц действия.
   // TODO разбить единицы действия по 2м (только двум !!!) рукам
   @Override
-  public Result<AttackResult> attack(Warrior targetWarrior) {
+  public Result<InfluenceResult> attack(Warrior targetWarrior) {
 
-    Result<AttackResult> attackResult = null;
+    Result<InfluenceResult> attackResult = null;
 
     // для начала получим свободные очки действия.
     int availableActionPoints = owner.getWarriorSActionPoints(false);
@@ -344,7 +321,7 @@ public abstract class AbstractWeaponImpl implements Weapon {
               minDmg = rangedMinDamage;
             }
             luck = owner.getAttributes().getLuckRangeAtack();
-            attackResult = ResultImpl.success(new AttackResultImpl(owner.getOwner(), owner
+            attackResult = ResultImpl.success(new InfluenceResultImpl(owner.getOwner(), owner
                     , this, targetWarrior.getOwner(), targetWarrior, rangedAttackCost));
             weaponName = title;
           }
@@ -371,7 +348,7 @@ public abstract class AbstractWeaponImpl implements Weapon {
             // проверки пройдены. Можно атаковать
             maxDmg = rangedMaxDamage;
             minDmg = rangedMinDamage;
-            attackResult = ResultImpl.success(new AttackResultImpl(owner.getOwner(), owner
+            attackResult = ResultImpl.success(new InfluenceResultImpl(owner.getOwner(), owner
                     , this, targetWarrior.getOwner(), targetWarrior, meleeAttackCost));
             weaponName = canDealRangedDamage ? secondWeaponName : title;
             luck = owner.getAttributes().getLuckMeleeAtack();
@@ -392,6 +369,7 @@ public abstract class AbstractWeaponImpl implements Weapon {
               , weaponName
               , weaponName
               , ENEMY_WARRIOR
+              , ManifestationOfInfluenceEnum.NEGATIVE
               , ModifierClass.PHYSICAL
               , HEALTH
               , minDmg < 1 ? 1 : minDmg
@@ -420,7 +398,9 @@ public abstract class AbstractWeaponImpl implements Weapon {
         // если попал, то смотрим далее способности
 
         // получим влияния, имеющиеся, возможно, у оружия
-        abilities.values().stream().forEach(ability -> influencer.addChildren(ability.buildForTarget(targetWarrior)));
+        abilities.values().stream()
+                .filter(ability -> ability.getTargetType().equals(ENEMY_WARRIOR))
+                .forEach(ability -> influencer.addChildren(ability.buildForTarget(targetWarrior)));
 
         // отправим своему плееру на возможное добавление влияний
         attackResult = owner.getOwner().innerAttachToAttackToWarrior(attackResult.getResult());
@@ -444,12 +424,6 @@ public abstract class AbstractWeaponImpl implements Weapon {
 
     return attackResult;
 
-  }
-  //===================================================================================================
-
-  @Override
-  public Context getContext() {
-    return owner.getContext();
   }
   //===================================================================================================
 }

@@ -2,7 +2,7 @@ package tests.test.warrior;
 
 import api.core.Result;
 import api.enums.ArmorClassEnum;
-import api.game.action.AttackResult;
+import api.game.action.InfluenceResult;
 import core.entity.warrior.base.AbstractBaseWarriorClass;
 import core.entity.warrior.base.WarriorSBaseAttributesImpl;
 import core.entity.weapon.ShortSword;
@@ -42,7 +42,7 @@ public class TestViking extends AbstractBaseWarriorClass {
   //===================================================================================================
 
   @Override
-  public Result<AttackResult> innerWarriorUnderAttack(AttackResult attackResult) {
+  public Result<InfluenceResult> innerWarriorUnderAttack(InfluenceResult attackResult) {
     return ResultImpl.success(attackResult);
   }
 

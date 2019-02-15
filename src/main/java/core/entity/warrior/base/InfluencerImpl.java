@@ -2,12 +2,12 @@ package core.entity.warrior.base;
 
 import api.core.*;
 import api.game.ability.Modifier;
-import api.game.Influencer;
+import api.game.ability.Influencer;
 import api.entity.warrior.Warrior;
-import api.entity.warrior.WarriorSBaseAttributes;
 import api.enums.EventType;
 import api.enums.LifeTimeUnit;
-import api.game.action.AttackResult;
+import api.game.action.InfluenceResult;
+import core.entity.abstracts.AbstractOwnerImpl;
 import core.system.ResultImpl;
 
 import java.util.ArrayList;
@@ -15,16 +15,32 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-public class InfluencerImpl implements Influencer {
+import static core.system.error.GameErrors.SYSTEM_OBJECT_ALREADY_INITIALIZED;
+
+public class InfluencerImpl extends AbstractOwnerImpl implements Influencer {
   private LifeTimeUnit lifeTimeUnit;
   private int lifeTime;
   private Warrior targetWarrior;
   private final Modifier modifier;
-  private Owner owner;
   private String id = UUID.randomUUID().toString();
   private String consumerId = null;
   private final List<Influencer> children;
   //===================================================================================================
+  //===================================================================================================
+
+  @Override
+  public Influencer attachToOwner(Owner owner){
+    if (this.owner != null && owner != this.owner){
+      SYSTEM_OBJECT_ALREADY_INITIALIZED.getError(getTitle() + "  " + getId(), "owner");
+    }
+    this.owner = owner;
+    if (lifeTimeUnit.getEventType().equals(EventType.ROUND_FULL)
+            || lifeTimeUnit.getEventType().equals(EventType.PLAYER_TAKES_TURN)
+            || lifeTimeUnit.getEventType().equals(EventType.PLAYER_LOOSE_TURN)) {
+      consumerId = getContext().subscribeEvent(this::onTimeEvent, lifeTimeUnit.getEventType());
+    }
+    return this;
+  }
   //===================================================================================================
 
   /**
@@ -35,15 +51,13 @@ public class InfluencerImpl implements Influencer {
    * @param modifier      модификатор влияния
    */
   public InfluencerImpl(Warrior targetWarrior, Owner owner, LifeTimeUnit lifeTimeUnit, int lifeTime, Modifier modifier) {
+    super(owner, null, null, "", "");
     this.modifier = modifier;
     this.lifeTimeUnit = lifeTimeUnit;
     this.lifeTime = lifeTime;
     this.targetWarrior = targetWarrior;
-    this.owner = owner;
     this.children = new ArrayList<>(10);
-    if (!lifeTimeUnit.getEventType().equals(EventType.ALWAYS)) {
-      consumerId = getContext().subscribeEvent(this::onTimeEvent, lifeTimeUnit.getEventType());
-    }
+    attachToOwner(owner);
   }
   //===================================================================================================
 
@@ -72,12 +86,11 @@ public class InfluencerImpl implements Influencer {
   //===================================================================================================
 
   /**
-   * TODO добавить собственно действие по изменению некоторых атрибутов, как здоровье, магия и т.п., если оно есть
    * срабатывает когда наступает событие, по которому измеряется время жизни
    *
    * @param event
    */
-  public void onTimeEvent(Event event) {
+  private void onTimeEvent(Event event) {
     if (owner == event.getSource(owner.getClass())) {
       // событие пришло от нашего источника
       if (--lifeTime <= 0) {
@@ -137,15 +150,15 @@ public class InfluencerImpl implements Influencer {
   //===================================================================================================
 
   @Override
-  public Result<Warrior> applyToWarrior(AttackResult attackResult) {
+  public Result<Warrior> applyToWarrior(InfluenceResult influenceResult) {
     // Уже всерассчитано. Применяем значение, рассчитанное заранее (getLastCalculatedValue())
     Result<Warrior> result;
     if (modifier.isLuckyRollOfDice() || modifier.isHitSuccess()) {
-      result = modifier.apply(attackResult)
+      result = modifier.applyModifier(influenceResult)
               .map(fineModifier -> {
                 children.stream()
-                        .forEach(child -> child.applyToWarrior(attackResult));
-                return ResultImpl.success(fineModifier.getTarget());
+                        .forEach(child -> child.applyToWarrior(influenceResult));
+                return ResultImpl.success(fineModifier.getTargetType());
               });
 
     } else {

@@ -3,12 +3,13 @@ package api.entity.warrior;
 import api.core.Context;
 import api.core.Owner;
 import api.core.Result;
+import api.entity.stuff.Artifact;
 import api.entity.weapon.Weapon;
 import api.enums.LifeTimeUnit;
-import api.game.Influencer;
+import api.game.ability.Influencer;
 import api.game.ability.Ability;
 import api.game.ability.Modifier;
-import api.game.action.AttackResult;
+import api.game.action.InfluenceResult;
 import api.game.map.Player;
 import api.geo.Coords;
 
@@ -46,19 +47,6 @@ public interface Warrior extends Owner, HasCoordinates {
    * @param to
    */
   Result<Warrior> moveWarriorTo(Coords to);
-
-  /**
-   * Получить игрока - владельца юнита
-   *
-   * @return
-   */
-  Player getOwner();
-
-  /**
-   * Получить контекст игры
-   * @return
-   */
-  Context getContext();
 
   /**
    * Взять в руку оружие
@@ -118,7 +106,7 @@ public interface Warrior extends Owner, HasCoordinates {
    * @param weaponId
    * @return
    */
-  Result<AttackResult> attackWarrior(Warrior targetWarrior, String weaponId);
+  Result<InfluenceResult> attackWarrior(Warrior targetWarrior, String weaponId);
 
   /**
    * Этот метод вызывается когда воин игрока атакуется. В этом методе происходит анализ всех нанесенныхз уронов,
@@ -126,7 +114,7 @@ public interface Warrior extends Owner, HasCoordinates {
    * @param attackResult
    * @return
    */
-  Result<AttackResult> defenceWarrior(AttackResult attackResult);
+  Result<InfluenceResult> defenceWarrior(InfluenceResult attackResult);
 
   /**
    * добавить влияние юниту
@@ -137,6 +125,14 @@ public interface Warrior extends Owner, HasCoordinates {
    * @return
    */
   Result<Influencer> addInfluenceToWarrior(Modifier modifier, Owner source, LifeTimeUnit lifeTimeUnit, int lifeTime);
+
+  /**
+   * добавить влияние юниту
+   *
+   * @param influencer
+   * @return
+   */
+  Result<Influencer> addInfluenceToWarrior(Influencer influencer);
 
   /**
    * Получить список оказываемых влияний на юнит
@@ -264,10 +260,37 @@ public interface Warrior extends Owner, HasCoordinates {
   Warrior setTitle(String title);
 
   /**
-   * Получить список не применимых к данному классу юнитов способностей
+   * Получить список способностей, которыми данный класс обладать не может
+   * @return название/класс
+   */
+  Map<String, Class<? extends Ability>> getUnsupportedAbilities();
+
+  /**
+   * Перекрыть метод возврата владельца.
+   * TODO поправить, чтобы работало БЕЗ этого метода
    * @return
    */
-  Map<String, Class<? extends Ability>> getUnavailableAbilities();
+  Player getOwner();
+
+  /**
+   * дать воину артефакт. Если такой артефакт такого типа уже есть, то будет отказ
+   * @param artifactClass класс даваемого артефакта
+   * @return
+   */
+  Result<Artifact<Warrior>> giveArtifactToWarrior(Class<? extends Artifact<Warrior>> artifactClass);
+
+  /**
+   * добавить уже существующий артифакт. Если такой артифакт уже есть, то добавить второй нельзя
+   * @param artifact
+   * @return
+   */
+  Result<Artifact<Warrior>> attachArtifact(Artifact<Warrior> artifact);
+
+  /**
+   * Возвращает список артефактов воина
+   * @return
+   */
+  Result<List<Artifact<Warrior>>> getArtifacts();
 
   void setTreatedActionPointsForMove(int treatedActionPointsForMove);
 

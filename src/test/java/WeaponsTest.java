@@ -4,7 +4,7 @@ import api.core.Result;
 import api.entity.warrior.Warrior;
 import api.entity.weapon.Weapon;
 import api.geo.Coords;
-import api.game.action.AttackResult;
+import api.game.action.InfluenceResult;
 import api.game.wraper.GameWrapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -97,7 +97,7 @@ public class WeaponsTest extends AbstractMapTest {
             , "Расстояние от воина 2 игрока 1 до воина 1 игрока 2 должно быть менее 2-х клеток");
 
     // Пробуем атаковать воином 1 игрока 2 воина 2 игрока 1. Это не должно выйти так как игра не началась
-    Result<AttackResult> attackResult = gameWrapper.attackWarrior(gameContext, player2, warrior1p2, warrior2p1, swordWarrior1p2);
+    Result<InfluenceResult> attackResult = gameWrapper.attackWarrior(gameContext, player2, warrior1p2, warrior2p1, swordWarrior1p2);
     Assert.isTrue(attackResult.isFail(CONTEXT_GAME_NOT_STARTED), "Атака при не начатой игре удалась");
 
     // Игрок 1 готов
@@ -107,7 +107,7 @@ public class WeaponsTest extends AbstractMapTest {
     assertSuccess(gameWrapper.playerReady(player2, true));
 
     // если первым ходитигрок 2, то передаем ход игроку 1
-    gameWrapper.getGetPlayerOwnsTheRound(gameContext)
+    gameWrapper.getPlayerOwnsTheRound(gameContext)
             .peak(player -> {
               if (player.getId().equals(player2)) {
                 assertSuccess(gameWrapper.nextTurn(gameContext, player2));
@@ -171,6 +171,10 @@ public class WeaponsTest extends AbstractMapTest {
     attackResult = gameWrapper.attackWarrior(gameContext, player1, warrior1p1, warrior2p2, bowWarrior1p1);
     assertSuccess(attackResult);
     Assert.isTrue(attackResult.getResult().getInfluencers().get(0).getModifier().isLuckyRollOfDice(), "Удача не сработала");
+
+    // пробуем выполнить перемещение после атаки. Это не должно удаться
+    warriorResult = gameWrapper.moveWarriorTo(gameContext, player1, warrior1p1, new Coords(450, 475));
+    Assert.isTrue(warriorResult.isFail(WARRIOR_CAN_T_MORE_MOVE_ON_THIS_TURN), "Движение после атаки удалось.");
 
 //    // Проверим, что воин 2
 //    Assert.isTrue();

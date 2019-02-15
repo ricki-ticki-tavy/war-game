@@ -2,9 +2,8 @@ import api.core.Context;
 import api.core.Result;
 import api.entity.warrior.Warrior;
 import api.entity.weapon.Weapon;
-import api.game.Influencer;
-import api.game.ability.Modifier;
-import api.game.action.AttackResult;
+import api.game.ability.Influencer;
+import api.game.action.InfluenceResult;
 import api.game.wraper.GameWrapper;
 import api.geo.Coords;
 import org.junit.Test;
@@ -18,10 +17,8 @@ import org.springframework.util.Assert;
 import tests.abstracts.AbstractMapTest;
 import tests.config.TestContextConfiguration;
 import tests.test.weapons.TestBow;
-import tests.test.weapons.TestFireBow;
+import tests.test.weapons.TestFireBowOfRejuvenation;
 import tests.test.weapons.TestSword;
-
-import static core.system.error.GameErrors.*;
 
 /**
  * Проверка подписывания и отписывания от событий.
@@ -45,7 +42,7 @@ public class WeaponsWithAbilitiesTest extends AbstractMapTest {
 
 
     // Дадим воину 1 игрока 1 лук
-    Result<Weapon> weaponResult = gameWrapper.giveWeaponToWarrior(gameContext, player1, warrior1p1, TestFireBow.CLASS_NAME);
+    Result<Weapon> weaponResult = gameWrapper.giveWeaponToWarrior(gameContext, player1, warrior1p1, TestFireBowOfRejuvenation.CLASS_NAME);
     assertSuccess(weaponResult);
     String bowWarrior1p1 = weaponResult.getResult().getId();
 
@@ -86,26 +83,19 @@ public class WeaponsWithAbilitiesTest extends AbstractMapTest {
     Assert.isTrue(warriorResult.getResult().getTranslatedToGameCoords().equals(new Coords(770, 770)), "Неверные координаты перемещения. возможно неверная стоимость перемещения");
     Warrior warriorImpl2p2 = warriorResult.getResult();
 
-//    Assert.isTrue(warriorImpl1p1.calcDistanceTo(warriorImpl1p2.getTranslatedToGameCoords()) >
-//                    context.getGameRules().getWarriorSize() + 2 * context.getLevelMap().getSimpleUnitSize()
-//            , "Расстояние от воина 1 игрока 1 до воина 1 игрока 2 должно быть более 2-х клеток");
-//
-//    Assert.isTrue(warriorImpl1p1.calcDistanceTo(warriorImpl2p1.getTranslatedToGameCoords()) <
-//                    context.getGameRules().getWarriorSize() + 2 * context.getLevelMap().getSimpleUnitSize()
-//            , "Расстояние от воина 1 игрока 1 до воина 2 должно быть менее 2-х клеток");
-//
-//    Assert.isTrue(warriorImpl2p1.calcDistanceTo(warriorImpl1p2.getTranslatedToGameCoords()) <
-//                    context.getGameRules().getWarriorSize() + 2 * context.getLevelMap().getSimpleUnitSize()
-//            , "Расстояние от воина 2 игрока 1 до воина 1 игрока 2 должно быть менее 2-х клеток");
-
     // Игрок 1 готов
     assertSuccess(gameWrapper.playerReady(player1, true));
 
     // Игрок 2 готов
     assertSuccess(gameWrapper.playerReady(player2, true));
 
+    // проверим значение удачи в стрельбу у воина 1 игрока 1. Базовое значение 6. Благодаря способности удачи
+    // оно должно вырасти до 16
+    Assert.isTrue(warriorImpl1p1.getAttributes().getLuckRangeAtack() == 16, "Способность удачливого стрелка 10-го уровня не сработала");
+
+
     // если первым ходитигрок 2, то передаем ход игроку 1
-    gameWrapper.getGetPlayerOwnsTheRound(gameContext)
+    gameWrapper.getPlayerOwnsTheRound(gameContext)
             .peak(player -> {
               if (player.getId().equals(player2)) {
                 assertSuccess(gameWrapper.nextTurn(gameContext, player2));
@@ -115,7 +105,7 @@ public class WeaponsWithAbilitiesTest extends AbstractMapTest {
     // Пробуем атаковать воином 1 игрока 1 воина 1 игрока 2. Это должно выйти. Заодно проверим, что огнем
     // урон нанесен тоже
     int hp = warriorImpl1p2.getAttributes().getHealth();
-    Result<AttackResult> attackResult = gameWrapper.attackWarrior(gameContext, player1, warrior1p1, warrior1p2, bowWarrior1p1);
+    Result<InfluenceResult> attackResult = gameWrapper.attackWarrior(gameContext, player1, warrior1p1, warrior1p2, bowWarrior1p1);
     assertSuccess(attackResult);
     Assert.isTrue(warriorImpl1p1.getAttributes().getActionPoints() == 120, "Не списаны очки за выстрел луком");
     Influencer influencer = attackResult.getResult().getInfluencers().get(0);
@@ -132,6 +122,10 @@ public class WeaponsWithAbilitiesTest extends AbstractMapTest {
     assertSuccess(gameWrapper.nextTurn(gameContext, player1));
     assertSuccess(gameWrapper.nextTurn(gameContext, player2));
 
+    // проверим значение удачи в стрельбу у воина 1 игрока 1. Базовое значение 6. Благодаря способности удачи
+    // оно должно вырасти до 16  НО не более
+    Assert.isTrue(warriorImpl1p1.getAttributes().getLuckRangeAtack() == 16, "Способность удачливого стрелка 10-го уровня не сработала");
+
     Assert.isTrue(warriorImpl1p1.getAttributes().getActionPoints() == 240, "Не восстановились очки действия");
 
     // поднимем удачу до 100% воину 1 игрока 1
@@ -142,6 +136,24 @@ public class WeaponsWithAbilitiesTest extends AbstractMapTest {
     attackResult = gameWrapper.attackWarrior(gameContext, player1, warrior1p1, warrior2p2, bowWarrior1p1);
     assertSuccess(attackResult);
     Assert.isTrue(attackResult.getResult().getInfluencers().get(0).getModifier().isLuckyRollOfDice(), "Удача не сработала");
+
+    // подлечим воина 2 игрока 2. Он нам еще нужен живым
+    warriorImpl2p2.getAttributes().setHealth(20);
+
+    // проверка, что воин 1 игрока 1 лечится от лука по 1 за ход. к проверке несколько следующих действий
+    warriorImpl1p1.getAttributes().setHealth(10);
+
+    // переходы хода к воину 2
+    assertSuccess(gameWrapper.nextTurn(gameContext, player1));
+
+    // должно остаться по прежнему 10 единиц жизни
+    Assert.isTrue(warriorImpl1p1.getAttributes().getHealth() == 10, "воин подлечился от лука в неверное время");
+
+    // переходы хода к воину 1
+    assertSuccess(gameWrapper.nextTurn(gameContext, player2));
+    Assert.isTrue(warriorImpl1p1.getAttributes().getHealth() == 11, "воин не подлечился от лука в нужное время");
+
+
 
     assertSuccess(gameWrapper.getCore().removeGameContext(gameContext));
   }

@@ -5,9 +5,10 @@ import api.entity.base.BaseEntityHeader;
 /**
  * Тип фазы игрока
  */
-public enum PlayerPhaseType implements BaseEntityHeader{
-  PLAYER_PHASE_TYPE_DEFENSE("Режим защиты")
-  , PLAYER_PHASE_TYPE_ATACK("Режим хода (атаки)");
+public enum PlayerPhaseType implements BaseEntityHeader {
+  DEFENSE_PHASE("Режим защиты")
+  , ATACK_PHASE("Режим хода (атаки)")
+  ;
   private String title;
 
 
@@ -26,7 +27,7 @@ public enum PlayerPhaseType implements BaseEntityHeader{
     return getTitle();
   }
 
-  private PlayerPhaseType(String title){
+  private PlayerPhaseType(String title) {
     this.title = title;
   }
 }

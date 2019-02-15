@@ -2,12 +2,11 @@ package core.entity.warrior;
 
 import api.core.Result;
 import api.enums.ArmorClassEnum;
-import api.game.action.AttackResult;
+import api.game.action.InfluenceResult;
 import core.entity.warrior.base.AbstractBaseWarriorClass;
 import core.entity.warrior.base.WarriorSBaseAttributesImpl;
 import core.entity.weapon.Sword;
 import core.entity.weapon.ShortSword;
-import core.game.CoreImpl;
 import core.system.ResultImpl;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -43,7 +42,7 @@ public class Viking extends AbstractBaseWarriorClass {
   //===================================================================================================
 
   @Override
-  public Result<AttackResult> innerWarriorUnderAttack(AttackResult attackResult) {
+  public Result<InfluenceResult> innerWarriorUnderAttack(InfluenceResult attackResult) {
     return ResultImpl.success(attackResult);
   }
 

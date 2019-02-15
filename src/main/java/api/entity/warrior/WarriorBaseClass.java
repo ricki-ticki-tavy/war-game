@@ -2,14 +2,13 @@ package api.entity.warrior;
 
 import api.core.Owner;
 import api.core.Result;
-import api.game.action.AttackResult;
+import api.game.action.InfluenceResult;
 import core.entity.warrior.base.WarriorSBaseAttributesImpl;
 import api.core.Context;
 import api.entity.weapon.Weapon;
 import api.core.Event;
 import api.game.ability.Ability;
 import api.entity.base.BaseEntityHeader;
-import api.enums.EventType;
 
 import java.util.List;
 import java.util.Map;
@@ -17,7 +16,7 @@ import java.util.Map;
 /**
  * Базовый класс воина
  */
-public interface WarriorBaseClass extends BaseEntityHeader {
+public interface WarriorBaseClass extends Owner {
   /**
    * Возвращает значение параметроввоина
    * @return
@@ -87,7 +86,7 @@ public interface WarriorBaseClass extends BaseEntityHeader {
    * @param attackResult
    * @return
    */
-  Result<AttackResult> innerWarriorUnderAttack(AttackResult attackResult);
+  Result<InfluenceResult> innerWarriorUnderAttack(InfluenceResult attackResult);
 
   /**
    * Возвращает количество рук воина
@@ -100,5 +99,12 @@ public interface WarriorBaseClass extends BaseEntityHeader {
    * @return
    */
   boolean isSummonable();
+
+  /**
+   * задать юнита, созданного с этого базового класса
+   * @param owner
+   * @return
+   */
+  WarriorBaseClass attachToWarrior(Warrior owner);
 
 }

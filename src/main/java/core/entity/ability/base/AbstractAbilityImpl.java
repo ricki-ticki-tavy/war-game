@@ -1,14 +1,16 @@
-package core.game.ability;
+package core.entity.ability.base;
 
 import api.core.Context;
 import api.core.Owner;
 import api.entity.warrior.Warrior;
 import api.entity.warrior.WarriorBaseClass;
-import api.enums.ActorTypeEnum;
+import api.enums.OwnerTypeEnum;
 import api.enums.EventType;
+import api.enums.PlayerPhaseType;
 import api.enums.TargetTypeEnum;
-import api.game.Influencer;
+import api.game.ability.Influencer;
 import api.game.ability.Ability;
+import core.entity.abstracts.AbstractOwnerImpl;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,17 +21,14 @@ import static core.system.error.GameErrors.SYSTEM_NOT_REALIZED;
 /**
  * Абстрактный класс способности. Общий для всех
  */
-public abstract class AbstractAbilityImpl implements Ability {
-  protected String id;
-  protected String title;
-  protected String description;
-  protected ActorTypeEnum actorType;
+public abstract class AbstractAbilityImpl extends AbstractOwnerImpl implements Ability {
+  protected OwnerTypeEnum ownerTypeForAbility;
   protected TargetTypeEnum targetType;
   protected final Map<String, Class<? extends WarriorBaseClass>> unsupportedWarriorBaseClasses = new ConcurrentHashMap<>(10);
   protected AtomicInteger useCount = new AtomicInteger(0);
   protected final int useCountPerRound;
   private AtomicInteger currentUseCountPerPeriod = new AtomicInteger(0);
-  protected Owner owner;
+  protected final Set<PlayerPhaseType> activePhases = new HashSet<>(2);
 
   /**
    * @param useCountPerRound максимальное кол-во использований за ход
@@ -38,10 +37,7 @@ public abstract class AbstractAbilityImpl implements Ability {
    * @param description
    */
   protected AbstractAbilityImpl(Owner owner, int useCountPerRound, String idPrefix, String title, String description) {
-    this.id = idPrefix + UUID.randomUUID().toString();
-    this.title = title;
-    this.description = description;
-    this.owner = owner;
+    super(owner, null, idPrefix, title, description);
 
     this.useCountPerRound = useCountPerRound;
     currentUseCountPerPeriod.set(useCountPerRound);
@@ -61,26 +57,8 @@ public abstract class AbstractAbilityImpl implements Ability {
   //===================================================================================================
 
   @Override
-  public String getId() {
-    return id;
-  }
-  //===================================================================================================
-
-  @Override
-  public String getTitle() {
-    return title;
-  }
-  //===================================================================================================
-
-  @Override
-  public String getDescription() {
-    return description;
-  }
-  //===================================================================================================
-
-  @Override
-  public ActorTypeEnum getActorType() {
-    return actorType;
+  public OwnerTypeEnum getOwnerTypeForAbility() {
+    return ownerTypeForAbility;
   }
   //===================================================================================================
 
@@ -151,17 +129,17 @@ public abstract class AbstractAbilityImpl implements Ability {
   //===================================================================================================
 
   @Override
-  public Context getContext() {
-    return owner.getContext();
-  }
-  //===================================================================================================
-
-  @Override
   public Ability revival() {
     if (useCountPerRound > 0) {
       currentUseCountPerPeriod.set(useCountPerRound);
     }
     return this;
+  }
+  //===================================================================================================
+
+  @Override
+  public Set<PlayerPhaseType> getActivePhase() {
+    return new HashSet<>(activePhases);
   }
   //===================================================================================================
 
