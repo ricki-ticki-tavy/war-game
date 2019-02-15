@@ -55,6 +55,8 @@ public class WarriorImpl extends AbstractOwnerImpl<Player> implements Warrior {
   protected volatile int treatedActionPointsForMove;
   protected final Map<String, Artifact<Warrior>> artifacts = new ConcurrentHashMap<>(10);
 
+  protected PlayerPhaseType warriorPhase = null;
+
   protected final Map<String, Class<? extends Ability>> unsupportedAbilities = new ConcurrentHashMap<>(20);
 
 
@@ -112,7 +114,7 @@ public class WarriorImpl extends AbstractOwnerImpl<Player> implements Warrior {
       artifact.attachToOwner(this);
       artifacts.put(artifact.getTitle(), artifact);
       // применить сразу действие артефакта
-      artifact.applyToOwner();
+      artifact.applyToOwner(warriorPhase);
 
       result = ResultImpl.success(artifact);
     }
@@ -359,7 +361,6 @@ public class WarriorImpl extends AbstractOwnerImpl<Player> implements Warrior {
    */
   private Result<Warrior> applayInfluences(PlayerPhaseType playerPhaseType) {
     // TODO соберем все влияния, что наложены на воина.
-    // сначала соберем его личные способности
     return ResultImpl.success(this);
 
   }
@@ -390,10 +391,8 @@ public class WarriorImpl extends AbstractOwnerImpl<Player> implements Warrior {
     // обновить спосоности
     warriorBaseClass.getAbilities().values().stream().forEach(ability -> ability.revival());
 
-    // восстановить оружие. На двуручном и более-ручном оружии могут быть кратные срабатывания восстановления. TODO поправить
-    hands.values().stream()
-            .forEach(warriorSHand -> warriorSHand.getWeapons()
-                    .stream().forEach(weapon -> weapon.revival()));
+    // восстановить оружие.
+    getWeapons().stream().forEach(weapon -> weapon.revival());
 
     // применить способности класса воина
     InfluenceResult influenceResult = new InfluenceResultImpl(this.getOwner(), this, null, this.getOwner(), this, 0);
@@ -402,9 +401,19 @@ public class WarriorImpl extends AbstractOwnerImpl<Player> implements Warrior {
             .forEach(ability -> ability.buildForTarget(this).stream()
                     .forEach(influencer -> influencer.applyToWarrior(influenceResult)));
 
-    // применить влияния артефактов
+    // применить влияния артефактов с учетом фаза атака/защита
     artifacts.values().stream()
-            .forEach(artifact -> artifact.applyToOwner());
+            .forEach(artifact -> artifact.applyToOwner(playerPhaseType));
+
+    // применить влияния оружия. Те, которые направлены на воина-владельца оружия
+    getWeapons().stream().forEach(weapon -> weapon.getAbilities().stream()
+            .filter(ability -> ability.getTargetType().equals(TargetTypeEnum.THIS_WARRIOR)
+                    && ability.getActivePhase().contains(playerPhaseType))
+            .forEach(ability -> ability.buildForTarget(this).stream()
+                    .forEach(influencer -> influencer.applyToWarrior(InfluenceResultImpl.forPositive(this))
+                    )
+            )
+    );
   }
   //===================================================================================================
 
@@ -415,6 +424,7 @@ public class WarriorImpl extends AbstractOwnerImpl<Player> implements Warrior {
    */
   private Result<Warrior> prepareToPhase(PlayerPhaseType playerPhaseType) {
     restoreAttributesAvailableForRestoration(playerPhaseType);
+    warriorPhase = playerPhaseType;
     return applayInfluences(playerPhaseType)
             .peak(warrior -> warrior.getOwner().findContext()
                     .peak(context -> getContext().fireGameEvent(null

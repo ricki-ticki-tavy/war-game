@@ -1,6 +1,7 @@
 package tests.test.weapons;
 
 import api.game.ability.Ability;
+import core.entity.ability.AbilityWarriorsHealthRejuvenationForWeapon;
 import core.entity.weapon.AbstractWeaponImpl;
 import core.entity.ability.AbilityFireArrowForWeapon;
 import org.springframework.beans.factory.BeanFactory;
@@ -13,11 +14,11 @@ import javax.annotation.PostConstruct;
 import java.util.UUID;
 
 /**
- * Обычный меч
+ * Тестовый лук с огненными стрелами и восстановлением жизни
  */
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class TestFireBow extends AbstractWeaponImpl {
+public class TestFireBowOfRejuvenation extends AbstractWeaponImpl {
 
   @Autowired
   BeanFactory beanFactory;
@@ -30,9 +31,11 @@ public class TestFireBow extends AbstractWeaponImpl {
   private void initAbilities(){
     Ability fireArrowAbility = beanFactory.getBean(AbilityFireArrowForWeapon.class, this, 1, -1, -1);
     this.abilities.put("Огненная стрела", fireArrowAbility);
+    Ability rejuvenationAbility = beanFactory.getBean(AbilityWarriorsHealthRejuvenationForWeapon.class, this, 1, -1, -1);
+    this.abilities.put(rejuvenationAbility.getTitle(), rejuvenationAbility);
   }
 
-  public TestFireBow() {
+  public TestFireBowOfRejuvenation() {
     super();
     this.id = OUID;
     this.title = CLASS_NAME;

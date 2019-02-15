@@ -17,7 +17,7 @@ import org.springframework.util.Assert;
 import tests.abstracts.AbstractMapTest;
 import tests.config.TestContextConfiguration;
 import tests.test.weapons.TestBow;
-import tests.test.weapons.TestFireBow;
+import tests.test.weapons.TestFireBowOfRejuvenation;
 import tests.test.weapons.TestSword;
 
 /**
@@ -42,7 +42,7 @@ public class WeaponsWithAbilitiesTest extends AbstractMapTest {
 
 
     // Дадим воину 1 игрока 1 лук
-    Result<Weapon> weaponResult = gameWrapper.giveWeaponToWarrior(gameContext, player1, warrior1p1, TestFireBow.CLASS_NAME);
+    Result<Weapon> weaponResult = gameWrapper.giveWeaponToWarrior(gameContext, player1, warrior1p1, TestFireBowOfRejuvenation.CLASS_NAME);
     assertSuccess(weaponResult);
     String bowWarrior1p1 = weaponResult.getResult().getId();
 
@@ -139,6 +139,21 @@ public class WeaponsWithAbilitiesTest extends AbstractMapTest {
 
     // подлечим воина 2 игрока 2. Он нам еще нужен живым
     warriorImpl2p2.getAttributes().setHealth(20);
+
+    // проверка, что воин 1 игрока 1 лечится от лука по 1 за ход. к проверке несколько следующих действий
+    warriorImpl1p1.getAttributes().setHealth(10);
+
+    // переходы хода к воину 2
+    assertSuccess(gameWrapper.nextTurn(gameContext, player1));
+
+    // должно остаться по прежнему 10 единиц жизни
+    Assert.isTrue(warriorImpl1p1.getAttributes().getHealth() == 10, "воин подлечился от лука в неверное время");
+
+    // переходы хода к воину 1
+    assertSuccess(gameWrapper.nextTurn(gameContext, player2));
+    Assert.isTrue(warriorImpl1p1.getAttributes().getHealth() == 11, "воин не подлечился от лука в нужное время");
+
+
 
     assertSuccess(gameWrapper.getCore().removeGameContext(gameContext));
   }

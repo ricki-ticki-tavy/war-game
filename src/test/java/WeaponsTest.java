@@ -172,6 +172,10 @@ public class WeaponsTest extends AbstractMapTest {
     assertSuccess(attackResult);
     Assert.isTrue(attackResult.getResult().getInfluencers().get(0).getModifier().isLuckyRollOfDice(), "Удача не сработала");
 
+    // пробуем выполнить перемещение после атаки. Это не должно удаться
+    warriorResult = gameWrapper.moveWarriorTo(gameContext, player1, warrior1p1, new Coords(450, 475));
+    Assert.isTrue(warriorResult.isFail(WARRIOR_CAN_T_MORE_MOVE_ON_THIS_TURN), "Движение после атаки удалось.");
+
 //    // Проверим, что воин 2
 //    Assert.isTrue();
     assertSuccess(gameWrapper.getCore().removeGameContext(gameContext));

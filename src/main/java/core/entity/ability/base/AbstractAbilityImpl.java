@@ -28,7 +28,7 @@ public abstract class AbstractAbilityImpl extends AbstractOwnerImpl implements A
   protected AtomicInteger useCount = new AtomicInteger(0);
   protected final int useCountPerRound;
   private AtomicInteger currentUseCountPerPeriod = new AtomicInteger(0);
-  protected Set<PlayerPhaseType> activePhases = new HashSet<>(2);
+  protected final Set<PlayerPhaseType> activePhases = new HashSet<>(2);
 
   /**
    * @param useCountPerRound максимальное кол-во использований за ход
@@ -139,7 +139,7 @@ public abstract class AbstractAbilityImpl extends AbstractOwnerImpl implements A
 
   @Override
   public Set<PlayerPhaseType> getActivePhase() {
-    return null;
+    return new HashSet<>(activePhases);
   }
   //===================================================================================================
 

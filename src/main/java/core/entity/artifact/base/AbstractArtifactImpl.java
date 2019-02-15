@@ -4,6 +4,7 @@ import api.core.Owner;
 import api.entity.stuff.Artifact;
 import api.entity.warrior.Warrior;
 import api.enums.OwnerTypeEnum;
+import api.enums.PlayerPhaseType;
 import api.enums.TargetTypeEnum;
 import api.game.ability.Ability;
 import core.entity.abstracts.AbstractOwnerImpl;
@@ -26,12 +27,12 @@ public abstract class AbstractArtifactImpl<T extends Owner> extends AbstractOwne
   protected OwnerTypeEnum ownerTypeForArtifact;
 
   /**
-   * @param owner                 - владелец артифакта
-   * @param ownerTypeForArtifact  - кто может владеть артефактом
-   * @param idPrefix              - Префикс кода. Может быть пустой или null строкой
-   * @param title                 - название артефакта
-   * @param description           - описание
-   * @param abilities             - способности артефакта
+   * @param owner                - владелец артифакта
+   * @param ownerTypeForArtifact - кто может владеть артефактом
+   * @param idPrefix             - Префикс кода. Может быть пустой или null строкой
+   * @param title                - название артефакта
+   * @param description          - описание
+   * @param abilities            - способности артефакта
    */
   public AbstractArtifactImpl(T owner, OwnerTypeEnum ownerTypeForArtifact, String idPrefix, String title, String description, Ability... abilities) {
     super(owner, OwnerTypeEnum.ARTIFACT, StringUtils.isEmpty(idPrefix) ? "art" : idPrefix, title, description);
@@ -72,21 +73,24 @@ public abstract class AbstractArtifactImpl<T extends Owner> extends AbstractOwne
 
   @Override
   public Artifact attachToOwner(Owner owner) {
-    this.owner = (T)owner;
+    this.owner = (T) owner;
     return this;
   }
   //===================================================================================================
 
-  public Artifact<T> applyToOwner(){
-    switch (ownerTypeForArtifact){
+  public Artifact<T> applyToOwner(PlayerPhaseType phase) {
+    switch (ownerTypeForArtifact) {
       case WARRIOR:
         abilities.values().stream()
                 // только те берем, что применимы к владельцу
-                .filter(ability -> ability.getTargetType().equals(TargetTypeEnum.THIS_WARRIOR))
+                .filter(ability -> ability.getTargetType().equals(TargetTypeEnum.THIS_WARRIOR)
+                        // так же фаза юнита (атака / защита) должна быть соответствующей, либо не указана, как
+                        // в случае расстановки войск
+                        && (phase == null || ability.getActivePhase().contains(phase)))
                 // строим влияния по способности
                 .forEach(ability -> ability.buildForTarget((Warrior) owner).stream()
                         // Применяем влияния
-                        .forEach(influencer -> influencer.applyToWarrior(InfluenceResultImpl.forPositive((Warrior)owner))));
+                        .forEach(influencer -> influencer.applyToWarrior(InfluenceResultImpl.forPositive((Warrior) owner))));
         break;
     }
     return this;

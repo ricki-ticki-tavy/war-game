@@ -54,7 +54,6 @@ public class ArtifactTest extends AbstractMapTest {
     artifactResult = gameWrapper.giveArtifactToWarrior(gameContext, player1, warrior1p1, ArtifactRainbowArrowForWarrior.CLASS_NAME);
     Assert.isTrue(artifactResult.isFail(ARTIFACT_ALREADY_EXISTS), "Удалось дать воину 2 одинаковых артефакта");
 
-
     // Игрок 1 готов
     assertSuccess(gameWrapper.playerReady(player1, true));
 

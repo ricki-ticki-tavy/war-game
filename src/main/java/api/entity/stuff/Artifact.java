@@ -2,6 +2,7 @@ package api.entity.stuff;
 
 import api.core.Owner;
 import api.enums.OwnerTypeEnum;
+import api.enums.PlayerPhaseType;
 import api.game.ability.Ability;
 
 import java.util.List;
@@ -44,5 +45,5 @@ public interface Artifact<T extends Owner> extends Owner<T> {
    *
    * @return
    */
-  Artifact<T> applyToOwner();
+  Artifact<T> applyToOwner(PlayerPhaseType phase);
 }

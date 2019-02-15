@@ -398,7 +398,9 @@ public abstract class AbstractWeaponImpl extends AbstractOwnerImpl<Warrior> impl
         // если попал, то смотрим далее способности
 
         // получим влияния, имеющиеся, возможно, у оружия
-        abilities.values().stream().forEach(ability -> influencer.addChildren(ability.buildForTarget(targetWarrior)));
+        abilities.values().stream()
+                .filter(ability -> ability.getTargetType().equals(ENEMY_WARRIOR))
+                .forEach(ability -> influencer.addChildren(ability.buildForTarget(targetWarrior)));
 
         // отправим своему плееру на возможное добавление влияний
         attackResult = owner.getOwner().innerAttachToAttackToWarrior(attackResult.getResult());

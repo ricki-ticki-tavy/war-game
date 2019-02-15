@@ -173,7 +173,7 @@ public class BaseModifier implements Modifier {
     WarriorSBaseAttributes attributes = target.getAttributes();
     switch (getAttribute()) {
       case HEALTH:
-        attributes.addHealth(-calculatedValue);
+        attributes.addHealth(manifestationOfInfluence.equals(POSITIVE) ? calculatedValue : - calculatedValue);
         break;
       case RANGED_ATTACK_LUCK:
         attributes.setLuckRangeAtack(attributes.getLuckRangeAtack()

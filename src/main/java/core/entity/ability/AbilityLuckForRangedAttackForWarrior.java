@@ -39,6 +39,8 @@ public class AbilityLuckForRangedAttackForWarrior extends AbstractAbilityImpl {
 
     ownerTypeForAbility = OwnerTypeEnum.WARRIOR;
     targetType = TargetTypeEnum.THIS_WARRIOR;
+    activePhases.add(PlayerPhaseType.DEFENSE_PHASE);
+    activePhases.add(PlayerPhaseType.ATACK_PHASE);
     this.useCount.set(useCount);
   }
   //===================================================================================================
