@@ -246,6 +246,24 @@ public interface Context {
    */
   Result<Artifact<Warrior>> giveArtifactToWarrior(String userName, String warriorId, Class<? extends Artifact<Warrior>> artifactClass);
 
+  /** выбросить артефакт воина
+   *
+   * @param userName
+   * @param artifactInstanceId
+   * @param warriorId
+   * @return
+   */
+  Result<Artifact<Warrior>> dropArtifactByWarrior(String userName, String warriorId, String artifactInstanceId);
+
+  /**
+   * Бросить оружие
+   * @param userName
+   * @param warriorId
+   * @param weaponId
+   * @return
+   */
+  Result<Weapon> dropWeaponByWarrior(String userName, String warriorId, String weaponId);
+
   /**
    * Найти оружие по его id
    * @param userName

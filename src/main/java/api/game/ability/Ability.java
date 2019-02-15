@@ -32,20 +32,11 @@ public interface Ability extends Owner {
   boolean rollback(Context context);
 
   /**
-   * Доступна ли способность в данном собитии
-   *
-   * @param triggerType
-   * @return
-   */
-  boolean isValidForEvent(EventType triggerType);
-
-  /**
-   * Вернуть все события на которые способность оказывает влияние
+   * Получить события, при которых действует артифакт
    *
    * @return
    */
-  @Deprecated
-  List<EventType> getAllTriggerTypes();
+  List<EventType> getEventsWhenActive();
 
   /**
    * Допустимое кол-во применений за ход. 0 - бесконечность

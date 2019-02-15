@@ -16,6 +16,7 @@ import api.geo.Rectangle;
 import api.game.action.InfluenceResult;
 import api.game.map.Player;
 import core.entity.abstracts.AbstractOwnerImpl;
+import core.entity.warrior.base.WarriorImpl;
 import core.system.ResultImpl;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +63,7 @@ public class PlayerImpl extends AbstractOwnerImpl implements Player {
                               , beanFactory.getBean(aClass), "", coords, false);
                       // поместим в массив
                       warriors.put(warrior.getId(), warrior);
+                      ((WarriorImpl)warrior).restoreAttributesAvailableForRestoration(null);
                       Result result = ResultImpl.success(warrior);
                       getContext().fireGameEvent(null, WARRIOR_ADDED, new EventDataContainer(warrior, result), Collections.EMPTY_MAP);
                       return result;
@@ -244,7 +246,7 @@ public class PlayerImpl extends AbstractOwnerImpl implements Player {
   @Override
   public Result<Weapon> giveWeaponToWarrior(String warriorId, Class<? extends Weapon> weaponClass) {
     return findWarriorById(warriorId)
-            .map(foundWarrior -> foundWarrior.takeWeapon(weaponClass));
+            .map(foundWarrior -> foundWarrior.giveWeaponToWarrior(weaponClass));
   }
   //===================================================================================================
 
@@ -252,6 +254,20 @@ public class PlayerImpl extends AbstractOwnerImpl implements Player {
   public Result<Artifact<Warrior>> giveArtifactToWarrior(String warriorId, Class<? extends Artifact<Warrior>> artifactClass) {
     return findWarriorById(warriorId)
             .map(foundWarrior -> foundWarrior.giveArtifactToWarrior(artifactClass));
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Weapon> dropWeaponByWarrior(String warriorId, String weaponId) {
+    return findWarriorById(warriorId)
+            .map(warrior -> warrior.dropWeapon(weaponId));
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Artifact<Warrior>> dropArtifactByWarrior(String warriorId, String artifactId) {
+    return findWarriorById(warriorId)
+            .map(foundWarrior -> foundWarrior.dropArtifact(artifactId));
   }
   //===================================================================================================
 

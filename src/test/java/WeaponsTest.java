@@ -21,6 +21,8 @@ import tests.test.weapons.TestSword;
 
 import static core.system.error.GameErrors.*;
 
+// TODO тест на дальность стрельбы
+// TODO тест на кол-во боеприпасов для стрельбы
 /**
  * Проверка подписывания и отписывания от событий.
  */

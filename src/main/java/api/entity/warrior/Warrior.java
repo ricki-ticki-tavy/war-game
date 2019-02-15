@@ -54,7 +54,7 @@ public interface Warrior extends Owner, HasCoordinates {
    * @param weaponClass
    * @return
    */
-  Result<Weapon> takeWeapon(Class<? extends Weapon> weaponClass);
+  Result<Weapon> giveWeaponToWarrior(Class<? extends Weapon> weaponClass);
 
   /**
    * Бросить оружие. Передается id экземпляра оружия, которое надо бросить
@@ -77,6 +77,13 @@ public interface Warrior extends Owner, HasCoordinates {
    * @return
    */
   Result<Weapon> findWeaponById(String weaponId);
+
+  /**
+   * Найти артифакт по его id
+   * @param artifactId
+   * @return
+   */
+  Result<Artifact<Warrior>> findArtifactById(String artifactId);
 
   /**
    * Получить значения атрибутов этого юнита
@@ -285,6 +292,13 @@ public interface Warrior extends Owner, HasCoordinates {
    * @return
    */
   Result<Artifact<Warrior>> attachArtifact(Artifact<Warrior> artifact);
+
+  /** выбросить артефакт
+   *
+   * @param artifactInstanceId
+   * @return
+   */
+  Result<Artifact<Warrior>> dropArtifact(String artifactInstanceId);
 
   /**
    * Возвращает список артефактов воина

@@ -117,15 +117,25 @@ public interface GameWrapper {
    */
   Result<Artifact<Warrior>> giveArtifactToWarrior(String contextId, String userName, String warriorId, String artifactName);
 
-  // TODO переделать с кодом контекста в параметр
+  /** выбросить артефакт воина
+   *
+   * @param contextId
+   * @param userName
+   * @param artifactInstanceId
+   * @param warriorId
+   * @return
+   */
+  Result<Artifact<Warrior>> dropArtifactByWarrior(String contextId, String userName, String warriorId, String artifactInstanceId);
+
   /**
-   * Забрать предмет у воина
+   * Бросить оружие
+   * @param contextId
    * @param userName
    * @param warriorId
    * @param weaponId
    * @return
    */
-  Result<Weapon> takeWeaponFromWarrior(String userName, String warriorId, String weaponId);
+  Result<Weapon> dropWeaponByWarrior(String contextId, String userName, String warriorId, String weaponId);
 
   /**
    * Найти юнит по его коду независимо от того, какому игроку он принадлежит
