@@ -125,6 +125,13 @@ public interface Core {
   Result<Class<? extends Artifact<Warrior>>> findArtifactForWarrior(String artifactName);
 
   /**
+   * Ищет базовый класс артефакта для игрока по его названию
+   * @param artifactName
+   * @return
+   */
+  Result<Class<? extends Artifact<Player>>> findArtifactForPlayer(String artifactName);
+
+  /**
    * Ищет базовый класс артефакта для воина по его названию
    * @param artifactName
    * @return

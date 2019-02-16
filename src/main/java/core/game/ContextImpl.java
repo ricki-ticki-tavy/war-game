@@ -15,7 +15,7 @@ import api.game.action.InfluenceResult;
 import api.game.map.LevelMap;
 import api.game.map.Player;
 import api.game.map.metadata.GameRules;
-import api.game.map.metadata.LevelMapMetaDataXml;
+import api.game.map.metadata.xml.LevelMapMetaDataXml;
 import core.system.ResultImpl;
 import core.system.error.GameError;
 import core.system.event.EventImpl;
@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -61,8 +62,9 @@ public class ContextImpl implements Context {
   private GameRules gameRules;
   private String gameName;
   private boolean hidden;
-  private AtomicBoolean gameRan = new AtomicBoolean(false);
-  protected AtomicBoolean deleting = new AtomicBoolean(false);
+  private final AtomicBoolean gameRan = new AtomicBoolean(false);
+  protected final AtomicBoolean deleting = new AtomicBoolean(false);
+  protected final AtomicInteger roundsCount = new AtomicInteger(0);
 
   //===================================================================================================
   //===================================================================================================
@@ -264,12 +266,29 @@ public class ContextImpl implements Context {
   //===================================================================================================
 
   @PostConstruct
-  public void firstCry() {
+  public void init() {
     // Подписаться на события изменения состава истатуса игроков
     subscribeEvent(this::checkForStartGame, PLAYER_CHANGED_ITS_READY_TO_PLAY_STATUS, PLAYER_CONNECTED
             , PLAYER_DISCONNECTED, PLAYER_RECONNECTED, GAME_CONTEXT_REMOVED);
 
+    // попишемся на событие прохода хода игроков по кругу
+    subscribeEvent(this::incFullRoundsCounter, ROUND_FULL);
+
+    // сообщение кинем, что контекст создался
     fireGameEvent(null, GAME_CONTEXT_CREATED, new EventDataContainer(ResultImpl.success(this), getContextCreator()), null);
+  }
+  //===================================================================================================
+
+  private void incFullRoundsCounter(Event event){
+    roundsCount.incrementAndGet();
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Integer> getRoundsCount() {
+    return ifGameDeleting(false)
+            .map(context -> context.ifGameRan(true)
+                    .map(fineContext -> ResultImpl.success(roundsCount.get())));
   }
   //===================================================================================================
 
@@ -395,6 +414,15 @@ public class ContextImpl implements Context {
             .map(fineContext -> findUserByName(userName))
             .map(player -> ifGameRan(false)
                     .map(context -> context.getLevelMap().giveArtifactToWarrior(player, warriorId, artifactClass)));
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Artifact<Player>> giveArtifactToPlayer(String userName, Class<? extends Artifact<Player>> artifactClass) {
+    return ifGameDeleting(false)
+            .map(fineContext -> findUserByName(userName))
+            .map(player -> ifGameRan(false)
+                    .map(context -> context.getLevelMap().giveArtifactToPlayer(player, artifactClass)));
   }
   //===================================================================================================
 

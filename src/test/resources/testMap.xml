@@ -28,4 +28,9 @@
             </bottomRightConner>
         </startZone>
     </playerStartZones>
+    <artifactRules>
+        <maxStartCount>1</maxStartCount>
+        <maxStartCost>300</maxStartCost>
+        <additionalArtifactRoundNumbers>2,4,6</additionalArtifactRoundNumbers>
+    </artifactRules>
 </map>

@@ -108,6 +108,16 @@ public interface GameWrapper {
   Result<Weapon> giveWeaponToWarrior(String contextId, String userName, String warriorId, String weaponName);
 
   /**
+   * Бросить оружие
+   * @param contextId
+   * @param userName
+   * @param warriorId
+   * @param weaponId
+   * @return
+   */
+  Result<Weapon> dropWeaponByWarrior(String contextId, String userName, String warriorId, String weaponId);
+
+  /**
    * дать воину артефакт. Если такой артефакт такого типа уже есть, то будет отказ. Доступно только на этапе
    * расстановки войска
    * @param userName      код игрока, которому принадлежит воин
@@ -128,14 +138,13 @@ public interface GameWrapper {
   Result<Artifact<Warrior>> dropArtifactByWarrior(String contextId, String userName, String warriorId, String artifactInstanceId);
 
   /**
-   * Бросить оружие
+   * Дать игроку артефакт
    * @param contextId
    * @param userName
-   * @param warriorId
-   * @param weaponId
+   * @param artifactName
    * @return
    */
-  Result<Weapon> dropWeaponByWarrior(String contextId, String userName, String warriorId, String weaponId);
+  Result<Artifact<Player>> giveArtifactToPlayer(String contextId, String userName, String artifactName);
 
   /**
    * Найти юнит по его коду независимо от того, какому игроку он принадлежит
@@ -212,6 +221,11 @@ public interface GameWrapper {
    */
   Result<List<Influencer>> getWarriorSInfluencers(String contextId, String userName, String warriorId);
 
+  /**
+   * Вернуть кол-во кругов игры. Сколько раз по кругу сходили все игроки
+   * @return
+   */
+  Result<Integer> getRoundsCount(String contextId);
 
   Core getCore();
 }

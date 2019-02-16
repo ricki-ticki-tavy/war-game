@@ -4,7 +4,6 @@ import api.entity.stuff.Artifact;
 import api.entity.warrior.Warrior;
 import api.game.wraper.GameWrapper;
 import core.entity.artifact.ArtifactRainbowArrowForWarrior;
-import core.system.ResultImpl;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,9 +15,9 @@ import org.springframework.util.Assert;
 import tests.abstracts.AbstractMapTest;
 import tests.config.TestContextConfiguration;
 
-import static core.system.error.GameErrors.ARTIFACT_ALREADY_EXISTS;
-import static core.system.error.GameErrors.PLAYER_IS_NOT_OWENER_OF_THIS_ROUND;
+import static core.system.error.GameErrors.ARTIFACT_WARRIOR_ALREADY_HAS_IT;
 
+// TODO тест на то, чтобы давать не свой тип артефакта
 /**
  * Проверка подписывания и отписывания от событий.
  */
@@ -52,7 +51,7 @@ public class ArtifactTest extends AbstractMapTest {
     Assert.isTrue(warriorImpl1p1.getAttributes().getLuckRangeAtack() == 36, "Добавленный артефакт не подействовал");
     String artifact1w1p1 = artifactResult.getResult().getId();
 
-    // выбросим артефакт и посмотрим что будет
+    // выбросим артефакт. Удача должна вернуться на прежние базовые + способность воина
     assertSuccess(artifactResult = gameWrapper.dropArtifactByWarrior(gameContext, player1, warrior1p1, artifact1w1p1));
     Assert.isTrue(warriorImpl1p1.getArtifacts().getResult().size() == 0, "У воина не удалился артефакт");
     Assert.isTrue(warriorImpl1p1.getAttributes().getLuckRangeAtack() == 16, "Удаленный артефакт не откатил свое влияние");
@@ -63,9 +62,11 @@ public class ArtifactTest extends AbstractMapTest {
     Assert.isTrue(warriorImpl1p1.getAttributes().getLuckRangeAtack() == 36, "Добавленный артефакт не подействовал");
     artifact1w1p1 = artifactResult.getResult().getId();
 
-    // выдать артефакт удачи при стрельбе +20% ЕЩЕ раз тому жевоину. Так как повтор, то должен быть отказ
+    // выдать артефакт удачи при стрельбе +20% ЕЩЕ раз тому же воину. Так как повтор, то должен быть отказ
     artifactResult = gameWrapper.giveArtifactToWarrior(gameContext, player1, warrior1p1, ArtifactRainbowArrowForWarrior.CLASS_NAME);
-    Assert.isTrue(artifactResult.isFail(ARTIFACT_ALREADY_EXISTS), "Удалось дать воину 2 одинаковых артефакта");
+    Assert.isTrue(artifactResult.isFail(ARTIFACT_WARRIOR_ALREADY_HAS_IT), "Удалось дать воину 2 одинаковых артефакта");
+
+
 
     // Игрок 1 готов
     assertSuccess(gameWrapper.playerReady(player1, true));

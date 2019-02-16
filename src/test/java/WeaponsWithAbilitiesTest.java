@@ -20,6 +20,8 @@ import tests.test.weapons.TestBow;
 import tests.test.weapons.TestFireBowOfRejuvenation;
 import tests.test.weapons.TestSword;
 
+// TODO тест на кол-во использований способнойстей оружия за ход
+// TODO тест на общее кол-во использования способности
 /**
  * Проверка подписывания и отписывания от событий.
  */

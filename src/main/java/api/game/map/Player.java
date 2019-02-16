@@ -247,5 +247,22 @@ public interface Player extends Owner {
    */
   Result<Weapon> findWeaponById(String warriorId, String weaponId);
 
+  /**
+   * Возвращает признак был ли в этом игровом круге взят или брошен артифакт игроком
+   * @return
+   */
+  boolean isArtifactWasDroppedOrTakenAtThisRound();
 
+  /**
+   * Дать игроку артефакт
+   * @param artifactClass
+   * @return
+   */
+  Result<Artifact<Player>> takeArtifact(Class<? extends Artifact<Player>> artifactClass);
+
+  /**
+   * Вернуть все артифакты игрока
+   * @return
+   */
+  Result<List<Artifact<Player>>> getArtifacts();
 }

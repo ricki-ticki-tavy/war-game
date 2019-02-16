@@ -99,10 +99,20 @@ public class WarriorImpl extends AbstractOwnerImpl<Player> implements Warrior {
   @Override
   public Result<Artifact<Warrior>> attachArtifact(Artifact<Warrior> artifact) {
     Result<Artifact<Warrior>> result;
+    if (!artifact.getOwnerTypeForArtifact().equals(OwnerTypeEnum.WARRIOR)) {
+      // "В игре %s воин '%s %s' игрока %s не может взять артефакт '%s'. Артефактом может владеть %s
+      ResultImpl.fail(ARTIFACT_WRONG_TYPE_FOR_WARRIOR.getError(
+              getContext().getGameName()
+              , warriorBaseClass.getTitle()
+              , title
+              , getOwner().getId()
+              , artifact.getTitle()
+              , artifact.getOwnerTypeForArtifact().getTitle()));
+    }
     if (artifacts.get(artifact.getTitle()) != null) {
       // уже есть такой артефакт. даем ошибку
       // "В игре %s. воин '%s %s' игрока '%s' уже владеет артефактом '%s'."
-      result = ResultImpl.fail(ARTIFACT_ALREADY_EXISTS.getError(
+      result = ResultImpl.fail(ARTIFACT_WARRIOR_ALREADY_HAS_IT.getError(
               getContext().getGameName()
               , warriorBaseClass.getTitle()
               , title

@@ -1,9 +1,9 @@
-package api.game.map.metadata;
+package api.game.map.metadata.xml;
 
 import javax.xml.bind.annotation.*;
 import java.util.List;
 
-@XmlType(propOrder = {"name", "description", "simpleUnitSize", "width", "height", "maxPlayersCount", "playerStartZones"})
+@XmlType(propOrder = {"name", "description", "simpleUnitSize", "width", "height", "maxPlayersCount", "playerStartZones", "artifactRules"})
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "map")
 public class LevelMapMetaDataXml {
@@ -29,5 +29,9 @@ public class LevelMapMetaDataXml {
   @XmlElementWrapper(name = "playerStartZones")
   @XmlElement(name = "startZone", required = true)
   public List<RectangleXml> playerStartZones;
+
+//  @XmlElementWrapper(name = "artifactRules")
+  @XmlElement(name = "artifactRules", required = true)
+  public ArtifactRulesXml artifactRules;
 
 }

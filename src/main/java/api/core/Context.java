@@ -238,6 +238,15 @@ public interface Context {
   Result<Weapon> giveWeaponToWarrior(String userName, String warriorId, Class<? extends Weapon> weaponClass);
 
   /**
+   * Бросить оружие
+   * @param userName
+   * @param warriorId
+   * @param weaponId
+   * @return
+   */
+  Result<Weapon> dropWeaponByWarrior(String userName, String warriorId, String weaponId);
+
+  /**
    * дать воину артефакт. Если такой артефакт такого типа уже есть, то будет отказ
    * @param userName      код игрока, которому принадлежит воин
    * @param warriorId     код воина, которому дается артефакт
@@ -256,13 +265,12 @@ public interface Context {
   Result<Artifact<Warrior>> dropArtifactByWarrior(String userName, String warriorId, String artifactInstanceId);
 
   /**
-   * Бросить оружие
+   * Дать игроку артефакт
    * @param userName
-   * @param warriorId
-   * @param weaponId
+   * @param artifactClass
    * @return
    */
-  Result<Weapon> dropWeaponByWarrior(String userName, String warriorId, String weaponId);
+  Result<Artifact<Player>> giveArtifactToPlayer(String userName, Class<? extends Artifact<Player>> artifactClass);
 
   /**
    * Найти оружие по его id
@@ -338,6 +346,11 @@ public interface Context {
    */
   int calcDistanceTo(Coords from, Coords to);
 
+  /**
+   * Вернуть кол-во кругов игры. Сколько раз по кругу сходили все игроки
+   * @return
+   */
+  Result<Integer> getRoundsCount();
 
 
 }

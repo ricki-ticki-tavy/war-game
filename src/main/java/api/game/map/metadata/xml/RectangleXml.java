@@ -1,4 +1,6 @@
-package api.game.map.metadata;
+package api.game.map.metadata.xml;
+
+import api.game.map.metadata.xml.CoordsXml;
 
 import javax.xml.bind.annotation.*;
 

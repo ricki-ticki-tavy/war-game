@@ -146,6 +146,15 @@ public class GameWrapperImpl implements GameWrapper {
 //===================================================================================================
 
   @Override
+  public Result<Artifact<Player>> giveArtifactToPlayer(String contextId, String userName, String artifactName) {
+    return core.findGameContextByUID(contextId)
+            .mapSafe(fineContext -> core.findArtifactForPlayer(artifactName)
+                    .map(artifactClass -> fineContext.giveArtifactToPlayer(userName, artifactClass)))
+            .logIfError(logger);
+  }
+//===================================================================================================
+
+  @Override
   public Result<Artifact<Warrior>> dropArtifactByWarrior(String contextId, String userName, String warriorId, String artifactInstanceId) {
     return core.findGameContextByUID(contextId)
             .mapSafe(fineContext -> fineContext.dropArtifactByWarrior(userName, warriorId, artifactInstanceId))
@@ -247,6 +256,13 @@ public class GameWrapperImpl implements GameWrapper {
             .mapSafe(context -> context.ifGameDeleting(false))
             .mapSafe(context -> context.getWarriorSInfluencers(userName, warriorId))
             .logIfError(logger);
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Integer> getRoundsCount(String contextId) {
+    return core.findGameContextByUID(contextId)
+            .mapSafe(context -> context.getRoundsCount());
   }
   //===================================================================================================
 

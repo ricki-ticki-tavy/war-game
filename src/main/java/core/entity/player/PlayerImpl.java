@@ -5,11 +5,13 @@ import api.core.Owner;
 import api.core.Result;
 import api.entity.stuff.Artifact;
 import api.enums.OwnerTypeEnum;
+import api.enums.TargetTypeEnum;
 import api.game.ability.Modifier;
 import api.game.ability.Influencer;
 import api.entity.warrior.Warrior;
 import api.entity.weapon.Weapon;
 import api.enums.LifeTimeUnit;
+import api.game.map.LevelMap;
 import api.geo.Coords;
 import api.core.EventDataContainer;
 import api.geo.Rectangle;
@@ -17,6 +19,7 @@ import api.game.action.InfluenceResult;
 import api.game.map.Player;
 import core.entity.abstracts.AbstractOwnerImpl;
 import core.entity.warrior.base.WarriorImpl;
+import core.game.action.InfluenceResultImpl;
 import core.system.ResultImpl;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static api.enums.EventType.*;
+import static api.enums.OwnerTypeEnum.PLAYER;
 import static core.system.error.GameErrors.*;
 
 @Component
@@ -39,11 +43,13 @@ public class PlayerImpl extends AbstractOwnerImpl implements Player {
   BeanFactory beanFactory;
   private String userName;
   private Rectangle startZone;
-  private Map<String, Warrior> warriors = new ConcurrentHashMap();
+  private final Map<String, Warrior> warriors = new ConcurrentHashMap();
+  private final Map<String, Artifact<Player>> artifacts = new ConcurrentHashMap<>(10);
   private volatile boolean readyToPlay;
+  private boolean artifactWasDroppedOrTakenAtThisRound = false;
 
   public PlayerImpl(String userName) {
-    super(null, OwnerTypeEnum.PLAYER, "ply", userName, "Игрок '" + userName + "'");
+    super(null, PLAYER, "ply", userName, "Игрок '" + userName + "'");
     this.userName = userName;
     this.readyToPlay = false;
   }
@@ -63,7 +69,7 @@ public class PlayerImpl extends AbstractOwnerImpl implements Player {
                               , beanFactory.getBean(aClass), "", coords, false);
                       // поместим в массив
                       warriors.put(warrior.getId(), warrior);
-                      ((WarriorImpl)warrior).restoreAttributesAvailableForRestoration(null);
+                      ((WarriorImpl) warrior).restoreAttributesAvailableForRestoration(null);
                       Result result = ResultImpl.success(warrior);
                       getContext().fireGameEvent(null, WARRIOR_ADDED, new EventDataContainer(warrior, result), Collections.EMPTY_MAP);
                       return result;
@@ -335,17 +341,25 @@ public class PlayerImpl extends AbstractOwnerImpl implements Player {
   public Result<Player> prepareToAttackPhase() {
     Result<Warrior> warriorResult;
     // восстановим значения воинов. свои влияния воин собирает сам
-    for (Warrior warrior : warriors.values())
+    for (Warrior warrior : warriors.values()) {
       if ((warriorResult = warrior.prepareToAttackPhase()).isFail()) {
         return (Result<Player>) ResultImpl.fail(warriorResult.getError());
       }
+    }
 
-    // TODO применить артефакты и способности игрока
+    // сбросить признак, что в этом круге был взят артефакт
+    artifactWasDroppedOrTakenAtThisRound = false;
 
     // Отправим сообщение о завершении хода
     getContext().fireGameEvent(null, PLAYER_TAKES_TURN, new EventDataContainer(this), null);
 
     return ResultImpl.success(true);
+  }
+  //===================================================================================================
+
+  @Override
+  public boolean isArtifactWasDroppedOrTakenAtThisRound() {
+    return artifactWasDroppedOrTakenAtThisRound;
   }
   //===================================================================================================
 
@@ -365,6 +379,60 @@ public class PlayerImpl extends AbstractOwnerImpl implements Player {
             .stream()
             .filter(warrior -> warrior.isTouchedAtThisTurn())
             .collect(Collectors.toList()));
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Artifact<Player>> takeArtifact(Class<? extends Artifact<Player>> artifactClass) {
+    Result<Artifact<Player>> result;
+    // проверим, что в этот круг игрок не брал артифакт
+    if (artifactWasDroppedOrTakenAtThisRound) {
+      //"В игре %s игрок %s не может в этом ходу взять артефакт '%s'. Надо дождаться следующего хода"
+      result = ResultImpl.fail(ARTIFACT_CAN_NOT_TAKE_AT_THIS_TURN.getError(
+              getContext().getGameName()
+              , title
+              , artifactClass.toString()));
+    } else {
+      Artifact<Player> artifact = beanFactory.getBean(artifactClass, this);
+      if (artifacts.get(artifact.getTitle()) != null) {
+        // дубликат артифакта.
+        // "В игре %s. игрока '%s' уже владеет артефактом '%s'."
+        result = ResultImpl.fail(ARTIFACT_PLAYER_ALREADY_HAS_IT.getError(getContext().getGameName(), title, artifact.getTitle()));
+      } else if (!artifact.getOwnerTypeForArtifact().equals(OwnerTypeEnum.WARRIOR)) {
+        // "В игре %s игрок %s не может взять артефакт '%s'. Артефактом может владеть %s
+        result = ResultImpl.fail(ARTIFACT_WRONG_TYPE_FOR_WARRIOR.getError(
+                getContext().getGameName()
+                , getOwner().getId()
+                , artifact.getTitle()
+                , artifact.getOwnerTypeForArtifact().getTitle()));
+      } else {
+        // добавим артефакт
+        artifacts.put(artifact.getTitle(), artifact);
+
+        // применим
+        artifact.getAbilities().stream()
+                // направленные на свои юниты
+                .filter(ability -> ability.getTargetType().equals(TargetTypeEnum.ALLIED_WARRIOR))
+                // собрать всех своих воинов
+                .forEach(fineAbility -> warriors.values().stream()
+                        // собрать все влияния для очередного юнита
+                        .forEach(warrior -> fineAbility.buildForTarget(warrior).stream()
+                                // применить каждое из влияний
+                                .forEach(influencer -> influencer.applyToWarrior(InfluenceResultImpl.forPositive(warrior)))));
+
+        // кинуть сообщение
+        getContext().fireGameEvent(null, ARTIFACT_TAKEN_BY_PLAYER, new EventDataContainer(artifact, this), null);
+
+        result = ResultImpl.success(artifact);
+      }
+    }
+    return result;
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<List<Artifact<Player>>> getArtifacts() {
+    return ResultImpl.success(new ArrayList(artifacts.values()));
   }
   //===================================================================================================
 

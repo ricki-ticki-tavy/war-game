@@ -13,7 +13,7 @@ import api.enums.TargetTypeEnum;
 import api.geo.Coords;
 import api.geo.Rectangle;
 import api.game.action.InfluenceResult;
-import api.game.map.metadata.LevelMapMetaDataXml;
+import api.game.map.metadata.xml.LevelMapMetaDataXml;
 import core.game.GameProcessData;
 
 import java.util.List;
@@ -130,6 +130,15 @@ public interface LevelMap {
   Result<Weapon> giveWeaponToWarrior(Player player, String warriorId, Class<? extends Weapon> weaponClass);
 
   /**
+   * Бросить оружие
+   * @param player
+   * @param warriorId
+   * @param weaponId
+   * @return
+   */
+  Result<Weapon> dropWeaponByWarrior(Player player, String warriorId, String weaponId);
+
+  /**
    * дать воину артефакт. Если такой артефакт такого типа уже есть, то будет отказ
    * @param player        игрок, которому принадлежит воин
    * @param warriorId     код воина, которому дается артефакт
@@ -148,13 +157,11 @@ public interface LevelMap {
   Result<Artifact<Warrior>> dropArtifactByWarrior(Player player, String warriorId, String artifactInstanceId);
 
   /**
-   * Бросить оружие
-   * @param player
-   * @param warriorId
-   * @param weaponId
+   * Дать игроку артефакт
+   * @param artifactClass
    * @return
    */
-  Result<Weapon> dropWeaponByWarrior(Player player, String warriorId, String weaponId);
+  Result<Artifact<Player>> giveArtifactToPlayer(Player player, Class<? extends Artifact<Player>> artifactClass);
 
   /**
    * Найти оружие по его id

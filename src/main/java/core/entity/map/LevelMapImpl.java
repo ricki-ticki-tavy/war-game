@@ -16,7 +16,7 @@ import api.geo.Rectangle;
 import api.game.action.InfluenceResult;
 import api.game.map.LevelMap;
 import api.game.map.Player;
-import api.game.map.metadata.LevelMapMetaDataXml;
+import api.game.map.metadata.xml.LevelMapMetaDataXml;
 import core.game.GameProcessData;
 import core.system.ResultImpl;
 import core.system.error.GameErrors;
@@ -58,6 +58,9 @@ public class LevelMapImpl implements LevelMap {
   private Context context;
   private boolean loaded = false;
   private Rectangle mapBorder;
+  private int maxArtifactsCountPerPlayer;
+  private int maxStartArtifactsCostPerPlayer;
+  private List<Integer> gameRoundNumbersWhenNewArtifactForPlayerAvailable = new ArrayList<>(10);
 
   private GameProcessData gameProcessData;
 
@@ -118,6 +121,10 @@ public class LevelMapImpl implements LevelMap {
     this.width = levelMapMetaData.width * simpleUnitSize;
     this.height = levelMapMetaData.height * simpleUnitSize;
     this.maxPlayersCount = levelMapMetaData.maxPlayersCount;
+    this.maxArtifactsCountPerPlayer = levelMapMetaData.artifactRules.maxStartCount;
+    this.maxStartArtifactsCostPerPlayer = levelMapMetaData.artifactRules.maxStartCost;
+    Arrays.stream(levelMapMetaData.artifactRules.additionalArtifactRoundNumbers.split(","))
+            .forEach(s -> this.gameRoundNumbersWhenNewArtifactForPlayerAvailable.add(Integer.valueOf(s)));
     playerStartZones = new LinkedList();
 
     levelMapMetaData.playerStartZones.stream().forEach(rectangle ->
@@ -308,6 +315,24 @@ public class LevelMapImpl implements LevelMap {
   public Result<Artifact<Warrior>> dropArtifactByWarrior(Player player, String warriorId, String artifactInstanceId) {
     return context.ifGameRan(false)
             .map(fineContext -> player.dropArtifactByWarrior(warriorId, artifactInstanceId));
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Artifact<Player>> giveArtifactToPlayer(Player player, Class<? extends Artifact<Player>> artifactClass) {
+    Result<Artifact<Player>> result;
+    if (player.getArtifacts().getResult().size() >= maxArtifactsCountPerPlayer) {
+      // предел по количеству артефактов
+      // "В игре %s игрок %s не может взять артефакт '%s'. Лимит %s артефактов"
+      result = ResultImpl.fail(ARTIFACT_ARTIFACT_QUANTITY_HAS_BEEN_EXCEEDED.getError(
+              context.getGameName()
+              , player.getTitle()
+              , artifactClass.toString()
+              , String.valueOf(maxArtifactsCountPerPlayer)));
+    } else {
+      result = player.takeArtifact(artifactClass);
+    }
+    return result;
   }
   //===================================================================================================
 

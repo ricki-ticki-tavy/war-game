@@ -50,6 +50,7 @@ public class CoreImpl implements Core {
   private final Map<String, Class<? extends WarriorBaseClass>> registeredWarriorBaseClasses = new ConcurrentHashMap<>(100);
   private final Map<String, Class<? extends Weapon>> registeredWeaponClasses = new ConcurrentHashMap<>(100);
   private final Map<String, Class<? extends Artifact>> registeredArtifactForWarriorClasses = new ConcurrentHashMap<>(100);
+  private final Map<String, Class<? extends Artifact>> registeredArtifactForPlayerClasses = new ConcurrentHashMap<>(100);
 
   private Map<String, Context> contextMap = new ConcurrentHashMap<>(10);
   private Map<String, Player> players = new ConcurrentHashMap<>(1000);
@@ -100,6 +101,17 @@ public class CoreImpl implements Core {
    */
   public void registerArtifactForWarriorClass(String className, Class<? extends Artifact> artifactClass) {
     registeredArtifactForWarriorClasses.put(className, artifactClass);
+  }
+  //===================================================================================================
+
+  /**
+   * Зарегистрировать базовый класс артефакта для игрока
+   *
+   * @param className
+   * @param artifactClass
+   */
+  public void registerArtifactForPlayerClass(String className, Class<? extends Artifact> artifactClass) {
+    registeredArtifactForPlayerClasses.put(className, artifactClass);
   }
   //===================================================================================================
 
@@ -305,6 +317,14 @@ public class CoreImpl implements Core {
     return Optional.ofNullable(registeredArtifactForWarriorClasses.get(artifactName))
             .map(clazz -> ResultImpl.success(clazz))
             .orElse(ResultImpl.fail(ARTIFACT_BASE_CLASS_ARTIFACT_OF_WARRIOR_NOT_FOUND_BY_NAME.getError(artifactName)));
+  }
+  //===================================================================================================
+
+  @Override
+  public Result<Class<? extends Artifact<Player>>> findArtifactForPlayer(String artifactName) {
+    return Optional.ofNullable(registeredArtifactForPlayerClasses.get(artifactName))
+            .map(clazz -> ResultImpl.success(clazz))
+            .orElse(ResultImpl.fail(ARTIFACT_BASE_CLASS_ARTIFACT_OF_PLAYER_NOT_FOUND_BY_NAME.getError(artifactName)));
   }
   //===================================================================================================
 }

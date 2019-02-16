@@ -142,6 +142,9 @@ public class StartGameWith2PlayersAndMovesTest extends AbstractMapTest {
     warriorResult = gameWrapper.moveWarriorTo(gameContext, player1, warrior1p2, new Coords(220, 610));
     Assert.isTrue(warriorResult.isFail(WARRIOR_NOT_FOUND_AT_PLAYER_BY_NAME), "Перемещение не мвоего юнита игроком 1 удалось");
 
+    Result<Integer> integerResult = gameWrapper.getRoundsCount(gameContext);
+    assertSuccess(integerResult);
+    int roundsCount = integerResult.getResult();
 
     // Передача хода следующему игроку. Пытается выполнить игрок 2. Должна быть ошибка так как ходит игрок 1
     playerResult = gameWrapper.nextTurn(gameContext, player2);
@@ -150,6 +153,10 @@ public class StartGameWith2PlayersAndMovesTest extends AbstractMapTest {
     // Передача хода следующему игроку. Пытается выполнить игрок 1. Должен быть успех
     playerResult = gameWrapper.nextTurn(gameContext, player1);
     assertSuccess(playerResult);
+
+    integerResult = gameWrapper.getRoundsCount(gameContext);
+    assertSuccess(integerResult);
+    Assert.isTrue(roundsCount + 1 == integerResult.getResult(), "счетчик кругов игры не работает");
 
     // двигаем юнит 1 игрока 1.Должен быть отказ
     warriorResult = gameWrapper.moveWarriorTo(gameContext, player1, warrior1p1, new Coords(220, 610));

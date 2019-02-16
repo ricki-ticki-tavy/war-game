@@ -33,9 +33,17 @@ public enum GameErrors {
   , WEAPON_BASE_CLASS_NOT_FOUND_BY_NAME("WP-1", "Класс оружия с именем %s не существует")
 
   , ARTIFACT_WRONG_ABILITY("AR-1", "Игра %s. артефакт '%s' не может использовать способность '%s'. Эту способность может использовать только %s")
-  , ARTIFACT_ALREADY_EXISTS("AR-2", "В игре %s. воин '%s %s' игрока '%s' уже владеет артефактом '%s'.")
-  , ARTIFACT_BASE_CLASS_ARTIFACT_OF_WARRIOR_NOT_FOUND_BY_NAME("AR-3", "Класс воинского артефакта  с именем %s не существует")
-  , ARTIFACT_NOT_FOUND_BY_WARRIOR("AR-4", "В игре %s (id %s) у игрока %s воин '%s %s' (id %s) не имеет артефакта с id '%s'")
+  , ARTIFACT_WARRIOR_ALREADY_HAS_IT("AR-2", "В игре %s. воин '%s %s' игрока '%s' уже владеет артефактом '%s'.")
+  , ARTIFACT_PLAYER_ALREADY_HAS_IT("AR-3", "В игре %s. игрока '%s' уже владеет артефактом '%s'.")
+  , ARTIFACT_BASE_CLASS_ARTIFACT_OF_WARRIOR_NOT_FOUND_BY_NAME("AR-4", "Класс воинского артефакта  с именем %s не существует")
+  , ARTIFACT_BASE_CLASS_ARTIFACT_OF_PLAYER_NOT_FOUND_BY_NAME("AR-5", "Класс артефакта для игрока с именем %s не существует")
+  , ARTIFACT_NOT_FOUND_BY_WARRIOR("AR-6", "В игре %s (id %s) у игрока %s воин '%s %s' (id %s) не имеет артефакта с id '%s'")
+  , ARTIFACT_CAN_NOT_TAKE_AT_THIS_TURN("AR-7", "В игре %s игрок %s не может в этом ходу взять артефакт '%s'. Надо дождаться следующего хода")
+  , ARTIFACT_ARTIFACT_QUANTITY_HAS_BEEN_EXCEEDED("AR-8", "В игре %s игрок %s не может взять артефакт '%s'. Лимит %s артефактов")
+//  , ARTIFACT_WRONG_TYPE_FOR_WEAPON("AR-9", "В игре %s воин '%s %s' игрока %s не может взять артефакт '%s'. Артифактом может владеть %s")
+  , ARTIFACT_WRONG_TYPE_FOR_WARRIOR("AR-10", "В игре %s воин '%s %s' игрока %s не может взять артефакт '%s'. Артефактом может владеть %s")
+  , ARTIFACT_WRONG_TYPE_FOR_PLAYER("AR-11", "В игре %s игрок %s не может взять артефакт '%s'. Артефактом может владеть %s")
+
 
   , MAP_LOAD_ERROR("M-1", "Ошибка загрузки карты: %s")
   , MAP_IS_NOT_LOADED("M-2", "Карта не загружена")
