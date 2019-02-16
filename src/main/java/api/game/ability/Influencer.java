@@ -3,6 +3,7 @@ package api.game.ability;
 import api.core.Owner;
 import api.core.Result;
 import api.entity.warrior.Warrior;
+import api.enums.LifeTimeUnit;
 import api.game.action.InfluenceResult;
 
 import java.util.Collection;
@@ -65,4 +66,10 @@ public interface Influencer extends Owner {
    * @return
    */
   Result<Warrior> applyToWarrior(InfluenceResult influenceResult);
+
+  /**
+   * возвращает тип времени жизни влияния
+   * @return
+   */
+  LifeTimeUnit getLifeTimeUnit();
 }

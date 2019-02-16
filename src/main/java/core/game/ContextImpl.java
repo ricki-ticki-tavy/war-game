@@ -279,7 +279,7 @@ public class ContextImpl implements Context {
   }
   //===================================================================================================
 
-  private void incFullRoundsCounter(Event event){
+  private void incFullRoundsCounter(Event event) {
     roundsCount.incrementAndGet();
   }
   //===================================================================================================
@@ -420,9 +420,8 @@ public class ContextImpl implements Context {
   @Override
   public Result<Artifact<Player>> giveArtifactToPlayer(String userName, Class<? extends Artifact<Player>> artifactClass) {
     return ifGameDeleting(false)
-            .map(fineContext -> findUserByName(userName))
-            .map(player -> ifGameRan(false)
-                    .map(context -> context.getLevelMap().giveArtifactToPlayer(player, artifactClass)));
+            .map(fineContext -> findUserByName(userName)
+                    .map(player -> fineContext.getLevelMap().giveArtifactToPlayer(player, artifactClass)));
   }
   //===================================================================================================
 

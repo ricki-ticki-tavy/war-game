@@ -44,13 +44,13 @@ public class CreateWarriorsWeaponsUsersTest {
 
   public void innerDoTest(){
 
-    ((CoreImpl)gameWrapper.getCore()).registerWarriorBaseClass(TestSkeleton.CLASS_NAME, TestSkeleton.class);
-    ((CoreImpl)gameWrapper.getCore()).registerWarriorBaseClass(TestViking.CLASS_NAME, TestViking.class);
-    ((CoreImpl)gameWrapper.getCore()).registerWarriorBaseClass(TestVityaz.CLASS_NAME, TestVityaz.class);
+    gameWrapper.getCore().registerWarriorBaseClass(TestSkeleton.CLASS_NAME, TestSkeleton.class);
+    gameWrapper.getCore().registerWarriorBaseClass(TestViking.CLASS_NAME, TestViking.class);
+    gameWrapper.getCore().registerWarriorBaseClass(TestVityaz.CLASS_NAME, TestVityaz.class);
 
-    ((CoreImpl)gameWrapper.getCore()).registerWeaponClass(TestBow.CLASS_NAME, TestBow.class);
-    ((CoreImpl)gameWrapper.getCore()).registerWeaponClass(TestShortSword.CLASS_NAME, TestShortSword.class);
-    ((CoreImpl)gameWrapper.getCore()).registerWeaponClass(TestSword.CLASS_NAME, TestSword.class);
+    gameWrapper.getCore().registerWeaponClass(TestBow.CLASS_NAME, TestBow.class);
+    gameWrapper.getCore().registerWeaponClass(TestShortSword.CLASS_NAME, TestShortSword.class);
+    gameWrapper.getCore().registerWeaponClass(TestSword.CLASS_NAME, TestSword.class);
 
 
     int step = 1;

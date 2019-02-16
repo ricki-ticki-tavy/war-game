@@ -168,4 +168,10 @@ public class InfluencerImpl extends AbstractOwnerImpl implements Influencer {
   }
   //===================================================================================================
 
+  @Override
+  public LifeTimeUnit getLifeTimeUnit() {
+    return lifeTimeUnit;
+  }
+  //===================================================================================================
+
 }

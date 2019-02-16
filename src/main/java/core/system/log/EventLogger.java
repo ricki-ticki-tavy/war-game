@@ -223,6 +223,15 @@ public class EventLogger {
                 , event.getSource(Artifact.class).getTitle()));
         break;
       }
+      case ARTIFACT_TAKEN_BY_PLAYER:
+      case ARTIFACT_DROPPED_BY_PLAYER: {
+        // "В игре '%s' игрок '%s'  взял/выбросил артефакт %s"
+        logger.info(event.getEventType().getFormattedMessage(
+                event.getSourceContext().getGameName()
+                , event.getSource(Player.class).getId()
+                , event.getSource(Artifact.class).getTitle()));
+        break;
+      }
       case GAME_CONTEXT_CREATED: {
         //   "Создание контекста '%s'. %s"
         logger.info(event.getEventType().getFormattedMessage(event.getSourceContext().getContextId()

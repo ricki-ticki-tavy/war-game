@@ -1,10 +1,10 @@
-package core.entity.artifact;
+package tests.test.artifact;
 
-import api.entity.warrior.Warrior;
 import api.enums.OwnerTypeEnum;
 import api.game.ability.Ability;
+import api.game.map.Player;
+import core.entity.ability.healing.AbilityWarriorsHealthRejuvenationForArtifact;
 import core.entity.artifact.base.AbstractArtifactImpl;
-import core.entity.ability.AbilityLuckForRangedAttackForWarrior;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -14,12 +14,12 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 
 /**
- * Артефакт золотой стрелы, увеличивающий удачу в стрельбе
+ * Артефакт лечения воинов. Для игрока
  */
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class ArtifactRainbowArrowForWarrior extends AbstractArtifactImpl<Warrior>{
-  public static final String CLASS_NAME = "Золотая стрела удачи 2 ур";
+public class TestArtifactHealinFialForPlayer extends AbstractArtifactImpl<Player>{
+  public static final String CLASS_NAME = "Фиал жизни";
   private int level;
 
   @Autowired
@@ -27,17 +27,17 @@ public class ArtifactRainbowArrowForWarrior extends AbstractArtifactImpl<Warrior
 
   @PostConstruct
   public void initAbilities(){
-    Ability luckForRangedAttackForWarrior = beanFactory.getBean(AbilityLuckForRangedAttackForWarrior.class, this, level, -1, -1);
+    Ability luckForRangedAttackForWarrior = beanFactory.getBean(AbilityWarriorsHealthRejuvenationForArtifact.class, this, level, -1, -1);
     this.abilities.put(luckForRangedAttackForWarrior.getTitle(), luckForRangedAttackForWarrior);
 
   }
 
-  public ArtifactRainbowArrowForWarrior(Warrior owner){
+  public TestArtifactHealinFialForPlayer(Player owner){
     super(owner
-            , OwnerTypeEnum.WARRIOR
+            , OwnerTypeEnum.PLAYER
             , "Art_WRA"
             , CLASS_NAME
             , CLASS_NAME);
-    level = 20;
+    level = 1;
   }
 }

@@ -8,7 +8,7 @@ import core.entity.warrior.base.AbstractBaseWarriorClass;
 import core.entity.warrior.base.WarriorSBaseAttributesImpl;
 import core.entity.weapon.ShortSword;
 import core.entity.weapon.Sword;
-import core.entity.ability.AbilityLuckForRangedAttackForWarrior;
+import core.entity.ability.luck.AbilityLuckForRangedAttackForWarrior;
 import core.system.ResultImpl;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;

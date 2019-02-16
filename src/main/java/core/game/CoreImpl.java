@@ -12,13 +12,6 @@ import api.core.Event;
 import api.core.EventDataContainer;
 import api.game.map.Player;
 import api.game.map.metadata.GameRules;
-import core.entity.artifact.ArtifactRainbowArrowForWarrior;
-import core.entity.warrior.Skeleton;
-import core.entity.warrior.Viking;
-import core.entity.warrior.Vityaz;
-import core.entity.weapon.Bow;
-import core.entity.weapon.ShortSword;
-import core.entity.weapon.Sword;
 import core.system.ResultImpl;
 import core.system.log.EventLogger;
 import core.system.event.EventImpl;
@@ -71,45 +64,21 @@ public class CoreImpl implements Core {
   //===================================================================================================
   //===================================================================================================
 
-  /**
-   * Зарегистрировать базовый класс воина
-   *
-   * @param className
-   * @param warriorBaseClass
-   */
   public void registerWarriorBaseClass(String className, Class<? extends WarriorBaseClass> warriorBaseClass) {
     registeredWarriorBaseClasses.put(className, warriorBaseClass);
   }
   //===================================================================================================
 
-  /**
-   * Зарегистрировать базовый класс оружия
-   *
-   * @param className
-   * @param weaponClass
-   */
   public void registerWeaponClass(String className, Class<? extends Weapon> weaponClass) {
     registeredWeaponClasses.put(className, weaponClass);
   }
   //===================================================================================================
 
-  /**
-   * Зарегистрировать базовый класс артефакта для юнита (воина)
-   *
-   * @param className
-   * @param artifactClass
-   */
   public void registerArtifactForWarriorClass(String className, Class<? extends Artifact> artifactClass) {
     registeredArtifactForWarriorClasses.put(className, artifactClass);
   }
   //===================================================================================================
 
-  /**
-   * Зарегистрировать базовый класс артефакта для игрока
-   *
-   * @param className
-   * @param artifactClass
-   */
   public void registerArtifactForPlayerClass(String className, Class<? extends Artifact> artifactClass) {
     registeredArtifactForPlayerClasses.put(className, artifactClass);
   }
@@ -169,16 +138,6 @@ public class CoreImpl implements Core {
   public void init() {
     // подпишем логер на все события. Пусть пишет по ним инфу
     subscribeEvent(null, this::eventLogger, EventType.values());
-
-    registerWarriorBaseClass(Skeleton.CLASS_NAME, Skeleton.class);
-    registerWarriorBaseClass(Viking.CLASS_NAME, Viking.class);
-    registerWarriorBaseClass(Vityaz.CLASS_NAME, Vityaz.class);
-
-    registerWeaponClass(Bow.CLASS_NAME, Bow.class);
-    registerWeaponClass(ShortSword.CLASS_NAME, ShortSword.class);
-    registerWeaponClass(Sword.CLASS_NAME, Sword.class);
-
-    registerArtifactForWarriorClass(ArtifactRainbowArrowForWarrior.CLASS_NAME, ArtifactRainbowArrowForWarrior.class);
   }
   //===================================================================================================
 

@@ -1,4 +1,4 @@
-package core.entity.ability;
+package core.entity.ability.luck;
 
 import api.core.Owner;
 import api.entity.warrior.Warrior;
@@ -15,11 +15,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Способность повышать удачу дистанционной атаки для применения в артефакте
+ * Способность повышать удачу дистанционной атаки
  */
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class AbilityLuckForRangedAttackForArtifact extends AbstractAbilityImpl {
+public class AbilityLuckForRangedAttackForWarrior extends AbstractAbilityImpl {
 
   private int level;
   //===================================================================================================
@@ -32,12 +32,12 @@ public class AbilityLuckForRangedAttackForArtifact extends AbstractAbilityImpl {
    * @param useCountPerRound кол-во использований заход. -1 без ограничений
    *
    */
-  public AbilityLuckForRangedAttackForArtifact(Owner owner, int level, int useCount, int useCountPerRound) {
+  public AbilityLuckForRangedAttackForWarrior(Owner owner, int level, int useCount, int useCountPerRound) {
     super(owner, useCountPerRound, "AblLuckR_", "Удачливый стрелок", "Удача в стрельбе"); // бесконечно
 
     this.level = level;
 
-    ownerTypeForAbility = OwnerTypeEnum.ARTIFACT;
+    ownerTypeForAbility = OwnerTypeEnum.WARRIOR;
     targetType = TargetTypeEnum.THIS_WARRIOR;
     activePhases.add(PlayerPhaseType.DEFENSE_PHASE);
     activePhases.add(PlayerPhaseType.ATACK_PHASE);

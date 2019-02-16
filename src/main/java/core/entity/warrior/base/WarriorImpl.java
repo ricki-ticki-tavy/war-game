@@ -462,6 +462,22 @@ public class WarriorImpl extends AbstractOwnerImpl<Player> implements Warrior {
                     )
             )
     );
+
+    //Применения артефактов игрока
+    getOwner().getArtifacts()
+            // переберем все артефакты
+            .peak(playerArtifacts -> playerArtifacts.stream()
+                    // все способности артефакта
+                    .forEach(playerArtifact -> playerArtifact.getAbilities().stream()
+                            // направленные на свои юниты
+                            .filter(ability -> ability.getTargetType().equals(TargetTypeEnum.ALLIED_WARRIOR)
+                                    // фильтр по фазе
+                                    && ability.getActivePhase().contains(playerPhaseType))
+                            // сформировать влияния для воина
+                            .forEach(fineAbility -> fineAbility.buildForTarget(this).stream()
+                                    // применить каждое из влияний
+                                    .forEach(influencer -> influencer.applyToWarrior(InfluenceResultImpl.forPositive(this)))))
+            );
   }
   //===================================================================================================
 

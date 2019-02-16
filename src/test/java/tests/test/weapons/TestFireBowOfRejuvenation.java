@@ -1,7 +1,7 @@
 package tests.test.weapons;
 
 import api.game.ability.Ability;
-import core.entity.ability.AbilityWarriorsHealthRejuvenationForWeapon;
+import core.entity.ability.healing.AbilityWarriorsHealthRejuvenationForWeapon;
 import core.entity.weapon.AbstractWeaponImpl;
 import core.entity.ability.AbilityFireArrowForWeapon;
 import org.springframework.beans.factory.BeanFactory;

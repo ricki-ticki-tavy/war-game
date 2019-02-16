@@ -10,6 +10,8 @@ import api.game.wraper.GameWrapper;
 import core.entity.map.GameRulesImpl;
 import core.game.CoreImpl;
 import org.springframework.util.Assert;
+import tests.test.artifact.TestArtifactHealinFialForPlayer;
+import tests.test.artifact.TestArtifactRainbowArrowForWarrior;
 import tests.test.warrior.TestSkeleton;
 import tests.test.warrior.TestViking;
 import tests.test.warrior.TestVityaz;
@@ -42,14 +44,17 @@ public abstract class AbstractMapTest {
 
   public void initMap(GameWrapper gameWrapper, String player1Name, String player2Name) {
 
-    ((CoreImpl)gameWrapper.getCore()).registerWarriorBaseClass(TestSkeleton.CLASS_NAME, TestSkeleton.class);
-    ((CoreImpl)gameWrapper.getCore()).registerWarriorBaseClass(TestViking.CLASS_NAME, TestViking.class);
-    ((CoreImpl)gameWrapper.getCore()).registerWarriorBaseClass(TestVityaz.CLASS_NAME, TestVityaz.class);
+    gameWrapper.getCore().registerWarriorBaseClass(TestSkeleton.CLASS_NAME, TestSkeleton.class);
+    gameWrapper.getCore().registerWarriorBaseClass(TestViking.CLASS_NAME, TestViking.class);
+    gameWrapper.getCore().registerWarriorBaseClass(TestVityaz.CLASS_NAME, TestVityaz.class);
 
-    ((CoreImpl)gameWrapper.getCore()).registerWeaponClass(TestBow.CLASS_NAME, TestBow.class);
-    ((CoreImpl)gameWrapper.getCore()).registerWeaponClass(TestShortSword.CLASS_NAME, TestShortSword.class);
-    ((CoreImpl)gameWrapper.getCore()).registerWeaponClass(TestFireBowOfRejuvenation.CLASS_NAME, TestFireBowOfRejuvenation.class);
-    ((CoreImpl)gameWrapper.getCore()).registerWeaponClass(TestSword.CLASS_NAME, TestSword.class);
+    gameWrapper.getCore().registerWeaponClass(TestBow.CLASS_NAME, TestBow.class);
+    gameWrapper.getCore().registerWeaponClass(TestShortSword.CLASS_NAME, TestShortSword.class);
+    gameWrapper.getCore().registerWeaponClass(TestFireBowOfRejuvenation.CLASS_NAME, TestFireBowOfRejuvenation.class);
+    gameWrapper.getCore().registerWeaponClass(TestSword.CLASS_NAME, TestSword.class);
+
+    gameWrapper.getCore().registerArtifactForWarriorClass(TestArtifactRainbowArrowForWarrior.CLASS_NAME, TestArtifactRainbowArrowForWarrior.class);
+    gameWrapper.getCore().registerArtifactForPlayerClass(TestArtifactHealinFialForPlayer.CLASS_NAME, TestArtifactHealinFialForPlayer.class);
 
     Result<Player> playerResult = gameWrapper.login(player1Name);
     assertSuccess(playerResult);

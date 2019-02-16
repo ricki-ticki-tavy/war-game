@@ -398,11 +398,11 @@ public class PlayerImpl extends AbstractOwnerImpl implements Player {
         // дубликат артифакта.
         // "В игре %s. игрока '%s' уже владеет артефактом '%s'."
         result = ResultImpl.fail(ARTIFACT_PLAYER_ALREADY_HAS_IT.getError(getContext().getGameName(), title, artifact.getTitle()));
-      } else if (!artifact.getOwnerTypeForArtifact().equals(OwnerTypeEnum.WARRIOR)) {
+      } else if (!artifact.getOwnerTypeForArtifact().equals(OwnerTypeEnum.PLAYER)) {
         // "В игре %s игрок %s не может взять артефакт '%s'. Артефактом может владеть %s
-        result = ResultImpl.fail(ARTIFACT_WRONG_TYPE_FOR_WARRIOR.getError(
+        result = ResultImpl.fail(ARTIFACT_WRONG_TYPE_FOR_PLAYER.getError(
                 getContext().getGameName()
-                , getOwner().getId()
+                , title
                 , artifact.getTitle()
                 , artifact.getOwnerTypeForArtifact().getTitle()));
       } else {
@@ -410,15 +410,19 @@ public class PlayerImpl extends AbstractOwnerImpl implements Player {
         artifacts.put(artifact.getTitle(), artifact);
 
         // применим
-        artifact.getAbilities().stream()
-                // направленные на свои юниты
-                .filter(ability -> ability.getTargetType().equals(TargetTypeEnum.ALLIED_WARRIOR))
-                // собрать всех своих воинов
-                .forEach(fineAbility -> warriors.values().stream()
-                        // собрать все влияния для очередного юнита
-                        .forEach(warrior -> fineAbility.buildForTarget(warrior).stream()
-                                // применить каждое из влияний
-                                .forEach(influencer -> influencer.applyToWarrior(InfluenceResultImpl.forPositive(warrior)))));
+//        artifact.getAbilities().stream()
+//                // направленные на свои юниты
+//                .filter(ability -> ability.getTargetType().equals(TargetTypeEnum.ALLIED_WARRIOR))
+//                // собрать всех своих воинов
+//                .forEach(fineAbility -> warriors.values().stream()
+//                        // собрать все влияния для очередного юнита
+//                        .forEach(warrior -> fineAbility.buildForTarget(warrior).stream()
+//
+//                                .filter(influencer -> !influencer.getLifeTimeUnit().equals(LifeTimeUnit.JUST_NOW))
+//                                // применить каждое из влияний
+//                                .forEach(influencer -> influencer.applyToWarrior(InfluenceResultImpl.forPositive(warrior)))));
+
+        artifactWasDroppedOrTakenAtThisRound = true;
 
         // кинуть сообщение
         getContext().fireGameEvent(null, ARTIFACT_TAKEN_BY_PLAYER, new EventDataContainer(artifact, this), null);

@@ -132,9 +132,35 @@ public interface Core {
   Result<Class<? extends Artifact<Player>>> findArtifactForPlayer(String artifactName);
 
   /**
-   * Ищет базовый класс артефакта для воина по его названию
-   * @param artifactName
-   * @return
+   * Зарегистрировать базовый класс воина
+   *
+   * @param className
+   * @param warriorBaseClass
    */
-//  Result<Class<? extends Artifact<Weapon>>> findArtifactForWarrior(String artifactName);
+  void registerWarriorBaseClass(String className, Class<? extends WarriorBaseClass> warriorBaseClass);
+
+  /**
+   * Зарегистрировать базовый класс оружия
+   *
+   * @param className
+   * @param weaponClass
+   */
+  void registerWeaponClass(String className, Class<? extends Weapon> weaponClass);
+
+  /**
+   * Зарегистрировать базовый класс артефакта для юнита (воина)
+   *
+   * @param className
+   * @param artifactClass
+   */
+  void registerArtifactForWarriorClass(String className, Class<? extends Artifact> artifactClass);
+
+  /**
+   * Зарегистрировать базовый класс артефакта для игрока
+   *
+   * @param className
+   * @param artifactClass
+   */
+  void registerArtifactForPlayerClass(String className, Class<? extends Artifact> artifactClass);
+
 }

@@ -2,19 +2,25 @@ package core.game.wraper;
 
 import api.core.Context;
 import api.core.Core;
+import api.core.EventDataContainer;
 import api.core.Result;
 import api.entity.stuff.Artifact;
-import api.game.ability.Influencer;
 import api.entity.warrior.Warrior;
 import api.entity.weapon.Weapon;
 import api.enums.EventType;
-import api.geo.Coords;
-import api.core.EventDataContainer;
+import api.game.ability.Influencer;
 import api.game.action.InfluenceResult;
 import api.game.map.Player;
 import api.game.map.metadata.GameRules;
 import api.game.wraper.GameWrapper;
+import api.geo.Coords;
 import core.entity.map.GameRulesImpl;
+import core.entity.warrior.Skeleton;
+import core.entity.warrior.Viking;
+import core.entity.warrior.Vityaz;
+import core.entity.weapon.Bow;
+import core.entity.weapon.ShortSword;
+import core.entity.weapon.Sword;
 import core.system.ResultImpl;
 import core.system.event.EventImpl;
 import org.slf4j.Logger;
@@ -36,7 +42,18 @@ public class GameWrapperImpl implements GameWrapper {
   //===================================================================================================
 
   @PostConstruct
-  public void testGame() {
+  public void init() {
+    core.registerWarriorBaseClass(Skeleton.CLASS_NAME, Skeleton.class);
+    core.registerWarriorBaseClass(Viking.CLASS_NAME, Viking.class);
+    core.registerWarriorBaseClass(Vityaz.CLASS_NAME, Vityaz.class);
+
+    core.registerWeaponClass(Bow.CLASS_NAME, Bow.class);
+    core.registerWeaponClass(ShortSword.CLASS_NAME, ShortSword.class);
+    core.registerWeaponClass(Sword.CLASS_NAME, Sword.class);
+
+//    core.registerArtifactForWarriorClass(TestArtifactRainbowArrowForWarrior.CLASS_NAME, TestArtifactRainbowArrowForWarrior.class);
+//
+//    core.registerArtifactForPlayerClass(TestArtifactHealinFialForPlayer.CLASS_NAME, TestArtifactHealinFialForPlayer.class);
   }
   //===================================================================================================
 

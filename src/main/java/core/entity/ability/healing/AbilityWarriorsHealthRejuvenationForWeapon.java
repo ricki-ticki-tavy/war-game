@@ -1,4 +1,4 @@
-package core.entity.ability;
+package core.entity.ability.healing;
 
 import api.core.Owner;
 import api.entity.warrior.Warrior;
